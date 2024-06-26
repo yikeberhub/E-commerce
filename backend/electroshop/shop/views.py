@@ -12,8 +12,10 @@ from . serializer import UserSerialezer,ProductSerializer,CategorySerializer
 def index(request):
     
     products = Product.objects.filter(product_status ='published',featured = True)
+    print('produccts',products)
     
     serializer = ProductSerializer(instance=products,many=True)
+    
     return Response(serializer.data)
 
 @api_view( ['GET'])

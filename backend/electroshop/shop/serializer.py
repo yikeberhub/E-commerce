@@ -6,13 +6,14 @@ class UserSerialezer(ModelSerializer):
         model =User
         fields = '__all__'
         
-
 class CategorySerializer(ModelSerializer):
     class Meta:
         model = Category
         fields = '__all__'
+
 class ProductSerializer(ModelSerializer):
+    category = CategorySerializer(read_only=True)
+
     class Meta:
         model = Product
         fields = '__all__'
-        include = ['category']
