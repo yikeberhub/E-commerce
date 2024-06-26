@@ -16,6 +16,7 @@ import PageRoutes from "./Routes/PageRoutes";
 const initialProducts = [
   {
     id: 1,
+    category: "Mobile",
     name: "Samsung galaxy S10 pro",
     rating: "⭐⭐⭐⭐",
     image: Mobile,
@@ -30,6 +31,7 @@ const initialProducts = [
   },
   {
     id: 2,
+    category: "Earphone",
     name: "Xles earphone",
     rating: "⭐⭐⭐⭐",
     image: Earphone,
@@ -43,7 +45,8 @@ const initialProducts = [
     Catagory: "Earphone",
   },
   {
-    id: 2,
+    id: 3,
+    category: "Camera",
     name: "clipx  camera",
     rating: "⭐⭐⭐⭐",
     image: Camera,
@@ -57,7 +60,8 @@ const initialProducts = [
     Catagory: "camera",
   },
   {
-    id: 2,
+    id: 4,
+    category: "Mobile",
     name: "Samsung note 9",
     rating: "⭐⭐⭐⭐",
     image: Mobile,
@@ -71,7 +75,8 @@ const initialProducts = [
     Catagory: "Mobile",
   },
   {
-    id: 2,
+    id: 5,
+    category: "Earphone",
     name: "Earpode ",
     rating: "⭐⭐⭐⭐",
     image: Earphone,
@@ -85,7 +90,8 @@ const initialProducts = [
     Catagory: "Earphone",
   },
   {
-    id: 2,
+    id: 6,
+    category: "Camera",
     name: "clipx  camera",
     rating: "⭐⭐⭐⭐",
     image: Camera,
@@ -99,7 +105,8 @@ const initialProducts = [
     Catagory: "camera",
   },
   {
-    id: 2,
+    id: 7,
+    category: "Mobile",
     name: "infinix hot pro",
     rating: "⭐⭐⭐⭐",
     image: Mobile,
@@ -113,7 +120,8 @@ const initialProducts = [
     Catagory: "camera",
   },
   {
-    id: 2,
+    id: 8,
+    category: "Mobile",
     name: "Iphone promax",
     rating: "⭐⭐⭐⭐",
     image: Mobile2,
@@ -166,7 +174,7 @@ function App() {
     setShowWishlists((state) => !state);
     setShowSearchedProducts((state) => (state ? !state : state));
   };
-
+  const handleSetProduct = (products) => setProduct(products);
   // console.log(Wishlists);
 
   return (
@@ -188,6 +196,7 @@ function App() {
         {showProductLists && (
           <ProductLists
             products={products}
+            onSetProducts={handleSetProduct}
             onAddToCart={handleAddToCart}
             onAddToWishlist={handleAddToWishlist}
           />

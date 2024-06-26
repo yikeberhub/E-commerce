@@ -1,6 +1,6 @@
 from django.db import models
 from django.utils.html import mark_safe
-from django.contrib.auth.models import AbstractBaseUser
+from django.contrib.auth.models import User
 
 
 STATUS_CHOICE= (
@@ -31,22 +31,22 @@ def user_directory_path(instance,filename):
     return'user_{0}/{1}'.format(instance.user.id,filename)
 
 # Customize user model.
-class User(AbstractBaseUser):
-    username = models.CharField(max_length=100)
-    email = models.EmailField(max_length=500,unique=True)
-    password = models.CharField(max_length=50)
-   # avatar = models.ImageField(null=True,default='images/avatar.svg',upload_to='images/profile_images')
-    REQUIRED_FIELDS = ['username','email','password']
-    USERNAME_FIELD = 'email'
+# class User(AbstractBaseUser):
+#     username = models.CharField(max_length=100)
+#     email = models.EmailField(max_length=500,unique=True)
+#     password = models.CharField(max_length=50)
+#    # avatar = models.ImageField(null=True,default='images/avatar.svg',upload_to='images/profile_images')
+#     REQUIRED_FIELDS = ['username','email','password']
+#     USERNAME_FIELD = 'email'
     
-    def __str__(self):
-        self.username
+#     def __str__(self):
+#         self.username
 
 
 
 class Category(models.Model):
     title = models.CharField(max_length=100,default='Electronics')
-    image = models.ImageField(upload_to='category',default='category.jpg')
+    image = models.ImageField(upload_to='category',default='category/category.jpg')
     
     class Meta:
         verbose_name_plural = 'Categories'

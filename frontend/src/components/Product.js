@@ -11,7 +11,7 @@ const Product = ({ product, onAddToCart, onAddToWishlist }) => {
     <div className="sm:col-span-2 flex flex-col items-center px-0 border  border-green-300 rounded pt-2 shadow-md w-full">
       <div className="px-2 py-2 border rounded shadow-md border-gray-200">
         <span className="bg-gray-300 px-2 rounded shadow-md">
-          {`${product.discount} off!`}
+          {`-${product.discount} off!`}
         </span>
         <img
           src={product.image}
@@ -19,10 +19,11 @@ const Product = ({ product, onAddToCart, onAddToWishlist }) => {
           alt="logo"
         />
         <Link to={`product/${product.id}`}>
+          <p className="text-[#3e3e3f] text-lg">{product.category}</p>
           <p className="text-[#4d2d96] text-sm">{product.name}</p>
           <p className="text-[#4d2d96] text-sm">{product.description}</p>
         </Link>
-        <p className="text-[#bb7cc0e9] text-sm">Rating {product.rating}</p>
+        <p className="text-[#bb7cc0e9] text-sm">Rating {product.rating}(4.0)</p>
         <p className="text-[#313432]">{product.manufacturer}</p>
         <div>
           <div className="flex flex-row justify-between items center  border border-gray-200 px-2 py-2 my-2 rounded shaddow-md font-bold ">

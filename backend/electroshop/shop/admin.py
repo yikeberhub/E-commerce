@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import User,Product,Vendor,Category,CartOrder,CartOrderItems,Wishlist,ProductImages,ProductReviews,Address
+from .models import Product,Vendor,Category,CartOrder,CartOrderItems,Wishlist,ProductImages,ProductReviews,Address
 
 
 
