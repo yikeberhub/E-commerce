@@ -3,6 +3,8 @@ import { Link } from "react-router-dom";
 import ProductLists from "../components/ProductList";
 import CategoryLists from "../components/CategoryLists";
 import FilterType from "../components/FilterType";
+import ProductBanner from "../components/ProductBanner";
+import HomeNavLink from "../components/HomeNavLink";
 import { ProductContext } from "../contexts/ProductContext";
 import SummaryApi from "../common";
 
@@ -84,8 +86,11 @@ function Home() {
           <FilterType />
           <FilterType />
         </div>
-
-        <ProductLists products={products} />
+        <div className="col-span-5   items-center justify-center px-2  border border-gray-200 shadow-md ">
+          <ProductBanner />
+          <HomeNavLink />
+          <ProductLists products={products} />
+        </div>
       </div>
     </div>
   );
