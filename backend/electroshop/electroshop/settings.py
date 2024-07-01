@@ -25,12 +25,13 @@ SECRET_KEY = 'django-insecure-*2398^nddavoi5dv%bi9vz))y(yd(@9c!25c%ex++_-r(x-n+e
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
 
 INSTALLED_APPS = [
+    'jazzmin',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -125,9 +126,9 @@ USE_TZ = True
 STATIC_URL = 'static/'
 MEDIA_URL = '/media/'
 
-STATICFILES_DIRS = [
-  os.path.join(BASE_DIR,'static')
-]
+# STATICFILES_DIRS = [
+#   os.path.join(BASE_DIR,'static')
+#
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
@@ -137,6 +138,8 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CORS_ALLOW_ALL_ORIGINS  = True
+
+APPEND_SLASH=False
 
 ADMIN_SETTINGS={
     'site_header':'YiKE Shop',
