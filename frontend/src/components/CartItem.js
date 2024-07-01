@@ -1,13 +1,15 @@
 import React from "react";
 
-const CartItem = ({ Product }) => {
+const CartItem = ({ product }) => {
   return (
-    <tr>
-      <td>Samsung galaxy</td>
-      <td>Samsung note 10 pro</td>
-      <td>$9000</td>
+    <tr className="py-2  my-1 w-full text-center border border-gray-200">
+      <td className="pl-4">
+        <img src={product.image} alt="prod-img" className="w-12 h-12 rounded" />
+      </td>
+      <td>{product.title}</td>
+      <td>${product.price}</td>
       <td>9</td>
-      <td>20000</td>
+      <td>20000 fhtht thehtt </td>
       <td>refresh</td>
       <td>remove</td>
     </tr>

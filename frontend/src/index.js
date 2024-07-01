@@ -1,9 +1,8 @@
-import React from "react";
 import ReactDOM from "react-dom/client";
-import PageRoutes from "./Routes/PageRoutes";
-const root = ReactDOM.createRoot(document.getElementById("root"));
-root.render(
-  <React.StrictMode>
-    <PageRoutes />
-  </React.StrictMode>
+import "./index.css";
+import router from "./Routes/PageRoutes";
+import { RouterProvider } from "react-router-dom";
+
+ReactDOM.createRoot(document.getElementById("root")).render(
+  <RouterProvider router={router} fallbackElement={<p>Loading...</p>} />
 );

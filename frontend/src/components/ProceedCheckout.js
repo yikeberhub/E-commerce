@@ -3,13 +3,13 @@ import { Link } from "react-router-dom";
 
 const ProceedCheckout = () => {
   return (
-    <div className="pt-2  border shadow-lg">
-      <div className="bg-gray-200 h-64 px-2 mt-2 pt-2">
-        <div className="border border-gray-300 rounded-t shadow-lg py-2 px-4 flex flex-row justify-between">
+    <div className="container-sm mx-auto pt-2 ">
+      <div className="rounded-md border border-gray-100 h-auto px-10 mx-5 my-3 py-5 pt-3 font-snas font-semibold">
+        <div className="border border-gray-300 rounded-t  py-2 px-4 flex flex-row justify-between">
           <span className="">Subtotal</span>
           <span>$900</span>
         </div>
-        <div className="border border-gray-300  shadow-lg py-2 px-4 flex flex-row justify-between">
+        <div className="border border-gray-300   py-2 px-4 flex flex-row justify-between">
           <span className="">Shiping</span>
           <span>free</span>
         </div>
