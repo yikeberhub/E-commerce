@@ -9,6 +9,7 @@ import Login from "../pages/Login";
 import SignUp from "../pages/SignUp";
 import ForgotPassword from "../pages/ForgotPassword";
 import ProductDetail from "../pages/ProductDetail";
+import Products from "../pages/Products";
 import ProductCategory from "../pages/ProductCategory";
 import Checkout from "../pages/Checkout";
 import SearchProduct from "../pages/SearchProduct";
@@ -16,16 +17,19 @@ import Cart from "../pages/Cart";
 import About from "../pages/About";
 import ContactUs from "../pages/ContactUs";
 import PageNotFound from "../pages/PageNotFound";
+import Wishlist from "../pages/Wishlist";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
     <Route path="/" element={<App />}>
       <Route element={<Home />} index />
       <Route path="login/" element={<Login />} />
-      <Route path="signup/" element={SignUp} />
+      <Route path="signup/" element={<SignUp />} />
       <Route path="forgot-password/" element={<ForgotPassword />} />
       <Route path="product-category/" element={<ProductCategory />} />
       <Route path="cart/" element={<Cart />} />
+      <Route path="wishlist/" element={<Wishlist />} />
+      <Route path="products/" element={<Products />} />
       <Route path="product/:id" element={<ProductDetail />} />
       <Route path="checkout/:id/checkout" element={<Checkout />} />
       <Route

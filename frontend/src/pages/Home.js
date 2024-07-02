@@ -34,9 +34,7 @@ function Home() {
       <div className="px-2 pt-2 border border-gray-200 shadow-md rounded">
         <ul className="flex flex-row justify-between items-center mx-2 py-2 ">
           <select className=" bg-green-500 hover:bg-blue-400 outline-none shadow-sm border-yellow-200 px-2 py-2 rounded text-xg text-white font-bold">
-            <option value="opt1" selected>
-              📱 Browse All Categories
-            </option>
+            <option value="opt1">📱 Browse All Categories</option>
             <option value="opt1"> Browse All 2</option>
           </select>
 
@@ -51,9 +49,11 @@ function Home() {
               <option value="cat1">Category</option>
             </select>
           </li>
-          <li className="text-lg hover:text-xl hover:cursor-pointer hover:border-b hover:border-b-yellow-400 hover:rounded-b-sm font-semibold px-2 py-2 hover:pb-1 text-slate-500 hover:text-green-400">
-            Shop
-          </li>
+          <Link to={`products/`}>
+            <li className="text-lg hover:text-xl hover:cursor-pointer hover:border-b hover:border-b-yellow-400 hover:rounded-b-sm font-semibold px-2 py-2 hover:pb-1 text-slate-500 hover:text-green-400">
+              Shop
+            </li>
+          </Link>
           <li className="text-lg hover:text-xl hover:cursor-pointer hover:border-b hover:border-b-yellow-400 hover:rounded-b-sm font-semibold px-2 py-2 hover:pb-1 text-slate-500 hover:text-green-400">
             Vendors
           </li>

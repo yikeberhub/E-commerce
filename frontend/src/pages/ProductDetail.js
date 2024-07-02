@@ -60,6 +60,7 @@ const ProductDetail = () => {
                   <div className=" w-24 py-2 px-2 ">
                     <input
                       type="number"
+                      placeholder="0"
                       min={0}
                       className="w-20 py-2 px-2 border outline-none border-gray-300 rounded-md"
                     />

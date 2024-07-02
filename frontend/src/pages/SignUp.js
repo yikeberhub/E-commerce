@@ -172,7 +172,7 @@ const SignUp = () => {
           </form>
 
           <p className="my-5">
-            Already have account ?{" "}
+            Already have account ?
             <Link
               to={"/login/"}
               className=" text-red-600 hover:text-red-700 hover:underline"
