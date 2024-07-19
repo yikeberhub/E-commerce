@@ -16,8 +16,6 @@ const Header = () => {
     handleSearch();
   }, [searchedValue]);
 
-  console.log("searched value:", searchedValue);
-
   const handleSearch = () => {
     const lowercaseSearchedValue = searchedValue.toLowerCase();
     if (lowercaseSearchedValue !== "") {
@@ -25,7 +23,6 @@ const Header = () => {
         product.title.toLowerCase().includes(lowercaseSearchedValue)
       );
 
-      console.log("filtered products", filteredProducts);
       onFilterProducts(filteredProducts);
       navigate(`search-product/?ld=${isLoading}`);
     } else {

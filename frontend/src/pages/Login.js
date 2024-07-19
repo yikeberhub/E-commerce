@@ -1,21 +1,23 @@
-import React, { useRef, useState } from "react";
+import React, { useContext, useRef, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import loginIcons from "../assets/icons/images/signin.gif";
 import SummaryApi from "../common";
-// import { toast } from "react-toastify";
-
+// import { useAuth } from "../contexts/AuthContext";
+import { CsrfContext } from "../contexts/CsrfContext";
+import { AuthContext } from "../contexts/AuthContext";
 const Login = () => {
+  // const { user, login } = useAuth();
+  const { csrfToken } = useContext(CsrfContext);
+  const { user, login } = useContext(AuthContext);
   const [showPassword, setShowPassword] = useState(false);
   const [data, setData] = useState({
     email: "",
     password: "",
   });
   const navigate = useNavigate();
-  const { form } = useRef("form");
 
   const handleOnChange = (e) => {
     const { name, value } = e.target;
-
     setData((preve) => {
       return {
         ...preve,
@@ -23,36 +25,37 @@ const Login = () => {
       };
     });
   };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log("token:", csrfToken);
+    console.log("testing...1");
 
     const dataResponse = await fetch(SummaryApi.signIn.url, {
-      method: "get",
-      credentials: "include",
+      method: "post",
+      // credentials: "include",
       headers: {
         "content-type": "application/json",
+        // "X-CSRFToken": csrfToken,
       },
-      // body: JSON.stringify(data),
+      body: JSON.stringify(data),
     });
-    console.log("data responses", dataResponse);
-    const dataApi = await dataResponse.json();
+    if (dataResponse.ok) {
+      console.log("data responses", dataResponse);
+      const dataApi = await dataResponse.json();
 
-    if (dataApi.success) {
-      // toast.success(dataApi.message);
-      console.log(dataApi.message);
-      navigate("/");
-      // fetchUserDetails();
-      // fetchUserAddToCart();
-    }
+      if (dataApi.success) {
+        localStorage.setItem("userId", dataApi.user.id);
+        console.log("user datas:", dataApi.user);
+        // return dataApi.user;
+      }
 
-    if (dataApi.error) {
-      // toast.error(dataApi.message);
-      console.log(dataApi.message);
+      if (dataApi.error) {
+        console.log(dataApi.message);
+      }
+    } else {
+      console.log("the error is from server");
     }
   };
-
-  console.log("data login", data);
 
   return (
     <section id="login">
@@ -62,11 +65,7 @@ const Login = () => {
             <img src={loginIcons} alt="login icons" />
           </div>
 
-          <form
-            ref={form}
-            className="pt-6 flex flex-col gap-2"
-            onSubmit={handleSubmit}
-          >
+          <form className="pt-6 flex flex-col gap-2" onSubmit={handleSubmit}>
             <div className="grid">
               <label>Email : </label>
               <div className="bg-slate-100 p-2">

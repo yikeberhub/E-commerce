@@ -4,6 +4,10 @@ const SummaryApi = {
   home: {
     url: `${backendDomin}/shop/`,
   },
+  getUser: {
+    url: `${backendDomin}/shop/getUser/`,
+    method: "post",
+  },
   signUP: {
     url: `${backendDomin}/shop/signup/`,
     method: "post",

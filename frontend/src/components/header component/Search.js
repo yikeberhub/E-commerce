@@ -1,7 +1,6 @@
 import React from "react";
 
 function Search({ searchedValue, onSearch }) {
-  console.log("value:", searchedValue);
   return (
     <form className="flex flex-row items-center  w-1/3">
       <input

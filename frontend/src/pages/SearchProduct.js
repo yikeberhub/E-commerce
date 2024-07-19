@@ -7,7 +7,6 @@ import Loader from "../common/Loader";
 function SearchProduct() {
   const { searchedProducts } = useContext(ProductContext);
   const isLoading = useLoaderData();
-  console.log("state", isLoading);
 
   return (
     <div>

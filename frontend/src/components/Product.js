@@ -4,7 +4,6 @@ import { ProductContext } from "../contexts/ProductContext";
 
 const Product = ({ product }) => {
   const { onAddToCart, onAddWishlist } = useContext(ProductContext);
-  console.log("product", product);
 
   product = { ...product, get_percentage: 20 };
   return (

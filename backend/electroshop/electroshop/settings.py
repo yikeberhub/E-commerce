@@ -25,7 +25,6 @@ SECRET_KEY = 'django-insecure-*2398^nddavoi5dv%bi9vz))y(yd(@9c!25c%ex++_-r(x-n+e
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -40,9 +39,25 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'shop',
     'rest_framework',
-     'corsheaders',
+    'rest_framework_simplejwt',
+    'corsheaders',
     
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES':(
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+}
+from datetime import timedelta
+SIMPLE_JWT ={
+    'ACCESS_TOKEN_LIFETIME':timedelta(minutes=5),
+    'REFRESH_TOKEN_LIFETIME':timedelta(days=1),
+    'ROTATE_REFRESH_TOKENS':False,
+    'BACKLIST_AFTER_ROTATION':True,
+    # 'AUTH_HEADER_TYPE':('Bearer',),
+    'AUTH_TOKEN_CLASSES':('rest_framework_simplejwt.tokens.AccessToken',),
+}
 
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
@@ -137,9 +152,29 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-CORS_ALLOW_ALL_ORIGINS  = True
 
 APPEND_SLASH=False
+
+# CORS_ALLOWED_ORIGINS = [
+#     'http://localhost:3000',
+    
+# ]
+# CSRF_TRUSTED_ORIGINS = [
+#     'http://localhost:3000',
+# ]
+CORS_ALLOW_HEADERS = (
+    "accept",
+    "authorization",
+    "content-type",
+    "user-agent",
+    "x-csrftoken",
+    "x-requested-with",
+)
+
+CORS_ALLOW_ALL_ORIGINS =True
+
+
+CORS_ALLOW_CREDENTIALS = True
 
 ADMIN_SETTINGS={
     'site_header':'YiKE Shop',

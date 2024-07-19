@@ -1,4 +1,4 @@
-import { React, useContext, useEffect } from "react";
+import { React, useContext, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import ProductLists from "../components/ProductList";
 import CategoryLists from "../components/CategoryLists";
@@ -7,22 +7,51 @@ import ProductBanner from "../components/ProductBanner";
 import HomeNavLink from "../components/HomeNavLink";
 import { ProductContext } from "../contexts/ProductContext";
 import SummaryApi from "../common";
+import { UserContext } from "../contexts/UserContext";
+import { CsrfContext } from "../contexts/CsrfContext";
 
 function Home() {
   const { products, onSetProduct } = useContext(ProductContext);
+  const { csrfToken, onSetToken } = useContext(CsrfContext);
 
   useEffect(() => {
     getProducts();
+    // getUser();
   }, []);
+
+  // const getUser = async () => {
+  //   try {
+  //     const dataResponse = await fetch(SummaryApi.getUser.url, {
+  //       method: "POST",
+  //       credentials: "include",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //         "X-CSRFToken": csrfToken,
+  //       },
+  //       body: JSON.stringify({ email: "yike@example.com" }), // Adjust the email accordingly
+  //     });
+
+  //     const dataApi = await dataResponse.json();
+
+  //     if (dataApi.success) {
+  //       onSetUser(dataApi.user);
+  //     } else if (dataApi.error) {
+  //       console.log(dataApi.message);
+  //     }
+  //   } catch (error) {
+  //     console.error("Error fetching user:", error);
+  //   }
+  // };
 
   const getProducts = async () => {
     const dataResponse = await fetch(SummaryApi.home.url);
-    const products = await dataResponse.json();
-    console.log("status", dataResponse);
-    console.log(products);
+    const data = await dataResponse.json();
+    const products = data.products;
+    const csrf_token = data.csrf_token;
 
     if (dataResponse.status === 200 && dataResponse.ok) {
       onSetProduct(products);
+      onSetToken(csrf_token);
     }
 
     if (products.error) {

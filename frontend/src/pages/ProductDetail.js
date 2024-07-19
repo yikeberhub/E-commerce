@@ -8,11 +8,8 @@ const ProductDetail = () => {
   const { id } = useParams();
 
   const { products, onAddToCart, onSetWishlist } = useContext(ProductContext);
-  console.log("id", id);
-  console.log("products:", products);
 
   const product = products.find((product) => (product.id = id));
-  console.log("product:", product);
 
   return (
     <div className="grid grid-cols-7 gap-4 mt-4 border border-gray-200 p-6 px-20 mx-4 ">
