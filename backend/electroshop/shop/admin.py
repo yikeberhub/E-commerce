@@ -1,7 +1,11 @@
 from django.contrib import admin
-from .models import Product,Vendor,Category,CartOrder,CartOrderItems,Wishlist,ProductImages,ProductReviews,Address
+from django.contrib.auth.admin import UserAdmin
+from .models import User,Profile,Product,Vendor,Category,CartOrder,CartOrderItems,Wishlist,ProductImages,ProductReviews,Address
 
-
+class CustomUserAdmin(UserAdmin):
+    model = User
+    list_display = ('name','email','is_staff','is_active')
+    ordering = ('email',)
 
 class ProductImagesAdmin(admin.TabularInline):
    model=ProductImages
@@ -33,6 +37,8 @@ class AddressAdmin(admin.ModelAdmin):
     
 
 # Register your models here.
+admin.site.register(User,CustomUserAdmin)
+admin.site.register(Profile)
 admin.site.register(Product,ProductAdmin)
 admin.site.register(Category,CategoryAdmin)
 admin.site.register(CartOrderItems,CartOrderItemsAdmin)

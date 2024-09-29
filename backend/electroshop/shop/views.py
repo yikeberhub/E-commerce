@@ -1,10 +1,15 @@
 import json
 from django.shortcuts import redirect, render
+from django.views.decorators.csrf import csrf_exempt
 from rest_framework.response import Response
+from rest_framework.permissions import AllowAny
+
+from rest_framework.authtoken.models import Token
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import api_view,permission_classes
 from rest_framework import status
+from django.contrib.auth.models import User
 
 # from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from django.contrib.auth import authenticate,login,logout
@@ -12,36 +17,27 @@ from django.contrib.auth.decorators import login_required
 from django.middleware.csrf import get_token
 
 
+from . models import User,Product,Category,Profile
 
-from . models import User,Product,Category
+from . serializer import UserSerializer,ProductSerializer,CategorySerializer,ProfileSerializer
 
-from . serializer import UserSerialezer,ProductSerializer,CategorySerializer
 
-# Create your views here.
+from rest_framework_simplejwt.views import TokenObtainPairView
+from .serializer import CustomTokenObtainPairSerializer
+
+class CustomTokenObtainPairView(TokenObtainPairView):
+    serializer_class = CustomTokenObtainPairSerializer
+
+
+
 @api_view(['GET'])
-def getToken(request):
-     csrf_token = get_token(request)
-     token = {
-        'csrf_token': csrf_token
-        }
-     print('token:',token)
-     return Response(token)
-
-    
-@api_view(['POST'])
-# @permission_classes([IsAuthenticated])
-def getUser(request):
-    if request.method =='POST':
-         data = json.loads(request.body)
-         user_id = str(data)
-         user = User.objects.get(id=user_id)
-         user_serializer = UserSerialezer(instance=user,many =False)
-         user_data = user_serializer.data
-         data = {'success': True,'user':user_data, 'message': 'Login successful'}
-         return Response(data, status=status.HTTP_200_OK)
-    else:
-        return Response({'success':False,'message':'Invalid request'},status=status.HTTP_405_METHOD_NOT_ALLOWED)
-         
+@permission_classes([IsAuthenticated])
+def user_profile(request):
+    user = request.user
+    profile = Profile.objects.get(user =request.user)
+    serializer = ProfileSerializer(profile)
+    return Response(serializer.data)
+ 
 @api_view(['GET'])
 def getProducts(request):
     products = Product.objects.all()
@@ -50,6 +46,8 @@ def getProducts(request):
     return Response(serializer.data)
 
 @api_view(['GET'])
+@permission_classes([AllowAny])
+
 def index(request):
     products = Product.objects.all()
     serializer = ProductSerializer(instance=products, many=True)
@@ -59,53 +57,30 @@ def index(request):
         'products': products_data,
         'csrf_token': csrf_token
     }
-    print('token:',csrf_token)
     return Response(data)
 
 
-@api_view(['POST'])
-def signIn(request):
-    if request.method =='POST':
-        data = json.loads(request.body)
-        email = data['email']
-        password = data['password']
-        user = authenticate(username='yike',password='yike123')
-        print('username:', 'yike', 'password', password)
-        if user is not None:
-            login(request,user=user )
-            refresh = RefreshToken.for_user(user)
-            token = str(refresh.access_token)
-            print('refresh token is :',str(refresh.access_token))
-            user_serializer = UserSerialezer(instance=user,many=False)
-            user_data = user_serializer.data
-            print('user data is :',user_data)
-            data = {'success': True,'user':user_data,'token':token,'refresh':str(refresh), 'message': 'Login successful'}
-            return Response(data, status=status.HTTP_200_OK)
-            # return redirect('/')
-        else:
-            
-            print('user not found')
-            return Response({'success':False,'message':'login failed'},status=status.HTTP_203_NON_AUTHORITATIVE_INFORMATION)
-            
-        
-        
 
-    # Perform your login logic here
-    # ...
-
-    # Return a JSON response
-        
-    
-
+@api_view( ['POST'])
 def signup(request):
-    products = Product.objects.all()
-    print('produccts',products)
+    serializer = UserSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        print('data:',serializer.data)
+        return Response(serializer.data)
+                        
+    return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+
     
-    serializer = ProductSerializer(instance=products,many=True)
-    
-    
-    return Response(serializer.data)
-    
+@api_view(['POST'])
+def logout(request):
+    if request.user.is_authenticated:
+        request.user.auth_token.delete()
+        return Response(status=status.HTTP_200_OK)
+    return Response({'error':'Not authenticated'
+        },status=status.HTTP_400_BAD_REQUEST)
+
+
 
 @api_view( ['PUT'])
 def product_list(request):

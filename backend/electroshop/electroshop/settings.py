@@ -30,34 +30,49 @@ DEBUG = True
 # Application definition
 
 INSTALLED_APPS = [
-    'jazzmin',
+    # 'jazzmin',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'shop',
     'rest_framework',
     'rest_framework_simplejwt',
     'corsheaders',
+    #my apps
+    'users',
+    'vendors',
+    'products',
+    'orders',
+    'payments',
+    'reviews',
+    'promotions',
+    'analytics',
+    'notifications',
+    'cart',
+    'wishlists',
     
 ]
 
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES':(
+    'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-    ),
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.AllowAny',
+    ],
 }
+
 from datetime import timedelta
-SIMPLE_JWT ={
-    'ACCESS_TOKEN_LIFETIME':timedelta(minutes=5),
-    'REFRESH_TOKEN_LIFETIME':timedelta(days=1),
-    'ROTATE_REFRESH_TOKENS':False,
-    'BACKLIST_AFTER_ROTATION':True,
-    # 'AUTH_HEADER_TYPE':('Bearer',),
-    'AUTH_TOKEN_CLASSES':('rest_framework_simplejwt.tokens.AccessToken',),
-}
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=30),
+    'UPDATE_LAST_LOGIN':False,
+    'AUTH_HEADER_TYPES':('Bearer'),
+    'AUTH_HEADER_NAME':'HTTP_AUTHORIZATION',
+  }
+
 
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
@@ -103,8 +118,7 @@ DATABASES = {
 }
 
 
-# Password validation
-# https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
+
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -138,45 +152,36 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
 
-STATIC_URL = 'static/'
+
+# Media files (uploads here)
 MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR,'media')
 
-# STATICFILES_DIRS = [
-#   os.path.join(BASE_DIR,'static')
-#
-
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, '/static/')
+STATICFILES_DIRS = [os.path.join(BASE_DIR,'static'),]
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
-APPEND_SLASH=False
+# APPEND_SLASH=False
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+]
 
-# CORS_ALLOWED_ORIGINS = [
-#     'http://localhost:3000',
+
+AUTH_USER_MODEL = 'users.CustomUser'
+
+CORS_ALLOW_ALL_ORIGINS = True
+
+# DJANGO_ADMIN_SETTINGS = {
+#     'site_header':'Yike shop',
+#     'site_brand':'You order, We deliver',
+#     'site_logo':'static/assets/img.png',
+#     'site_copyright':'The copy right is reserved.',
     
-# ]
-# CSRF_TRUSTED_ORIGINS = [
-#     'http://localhost:3000',
-# ]
-CORS_ALLOW_HEADERS = (
-    "accept",
-    "authorization",
-    "content-type",
-    "user-agent",
-    "x-csrftoken",
-    "x-requested-with",
-)
+    
+# }
 
-CORS_ALLOW_ALL_ORIGINS =True
-
-
-CORS_ALLOW_CREDENTIALS = True
-
-ADMIN_SETTINGS={
-    'site_header':'YiKE Shop',
-    'site_brand':'You order we deliver',
-}
