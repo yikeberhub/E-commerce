@@ -3,21 +3,21 @@ import Footer from "./components/Footer";
 import "./index.css";
 import { Outlet } from "react-router-dom";
 import { ProductProvider } from "./contexts/ProductContext";
-import { CsrfProvider } from "./contexts/CsrfContext";
 import { AuthProvider } from "./contexts/AuthContext";
+import { CartProvider } from "./contexts/cartContext";
 
 function App() {
   return (
     <div className="h-auto">
-      <CsrfProvider>
+      <AuthProvider>
         <ProductProvider>
-          <AuthProvider>
+          <CartProvider>
             <Navigation />
             <Outlet />
             <Footer />
-          </AuthProvider>
+          </CartProvider>
         </ProductProvider>
-      </CsrfProvider>
+      </AuthProvider>
     </div>
   );
 }

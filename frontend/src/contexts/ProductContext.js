@@ -1,5 +1,4 @@
 import { createContext, useEffect, useState } from "react";
-import initialProducts from "../data";
 
 const ProductContext = createContext(null);
 

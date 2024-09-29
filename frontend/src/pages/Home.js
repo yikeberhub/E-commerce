@@ -7,57 +7,44 @@ import ProductBanner from "../components/ProductBanner";
 import HomeNavLink from "../components/HomeNavLink";
 import { ProductContext } from "../contexts/ProductContext";
 import SummaryApi from "../common";
-import { UserContext } from "../contexts/UserContext";
-import { CsrfContext } from "../contexts/CsrfContext";
+import { useAuth } from "../contexts/AuthContext";
 
 function Home() {
   const { products, onSetProduct } = useContext(ProductContext);
-  const { csrfToken, onSetToken } = useContext(CsrfContext);
+  const { authTokens, fetchUserInfo } = useAuth();
 
   useEffect(() => {
     getProducts();
-    // getUser();
   }, []);
 
-  // const getUser = async () => {
-  //   try {
-  //     const dataResponse = await fetch(SummaryApi.getUser.url, {
-  //       method: "POST",
-  //       credentials: "include",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //         "X-CSRFToken": csrfToken,
-  //       },
-  //       body: JSON.stringify({ email: "yike@example.com" }), // Adjust the email accordingly
-  //     });
-
-  //     const dataApi = await dataResponse.json();
-
-  //     if (dataApi.success) {
-  //       onSetUser(dataApi.user);
-  //     } else if (dataApi.error) {
-  //       console.log(dataApi.message);
-  //     }
-  //   } catch (error) {
-  //     console.error("Error fetching user:", error);
-  //   }
-  // };
+  useEffect(() => {
+    if (authTokens.access) {
+      fetchUserInfo();
+    }
+  }, [authTokens]);
 
   const getProducts = async () => {
-    const dataResponse = await fetch(SummaryApi.home.url);
-    const data = await dataResponse.json();
-    const products = data.products;
-    const csrf_token = data.csrf_token;
+    try {
+      const response = await fetch(SummaryApi.allProduct.url, {
+        method: "GET",
+        headers: {
+          "content-type": "application/json",
+        },
+      });
 
-    if (dataResponse.status === 200 && dataResponse.ok) {
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log("products:", data);
+      const products = data || []; // Default to an empty array if products is undefined
       onSetProduct(products);
-      onSetToken(csrf_token);
-    }
-
-    if (products.error) {
-      console.log(products.message);
+    } catch (error) {
+      console.error("Error hello yike man", error);
     }
   };
+
   return (
     <div className="container-lg px-2  w-auto h-auto">
       <div className="px-2 pt-2 border border-gray-200 shadow-md rounded">
@@ -119,6 +106,7 @@ function Home() {
           <ProductBanner />
           <HomeNavLink />
           <ProductLists products={products} />
+          {console.log("products in home page:", products)}
         </div>
       </div>
     </div>

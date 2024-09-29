@@ -2,86 +2,91 @@ const backendDomin = "http://localhost:8000";
 
 const SummaryApi = {
   home: {
-    url: `${backendDomin}/shop/`,
+    url: `${backendDomin}/products/`,
   },
   getUser: {
-    url: `${backendDomin}/shop/getUser/`,
+    url: `${backendDomin}/users/get-user/`,
     method: "post",
   },
-  signUP: {
-    url: `${backendDomin}/shop/signup/`,
+
+  signUp: {
+    url: `${backendDomin}/users/register/`,
     method: "post",
   },
   signIn: {
-    url: `${backendDomin}/shop/signin/`,
+    url: `${backendDomin}/users/token/`,
     method: "post",
   },
   current_user: {
-    url: `${backendDomin}/shop/user-details`,
+    url: `${backendDomin}/users/user-details`,
     method: "get",
   },
   logout_user: {
-    url: `${backendDomin}/shop/userLogout`,
+    url: `${backendDomin}/users/userLogout`,
     method: "get",
   },
   allUser: {
-    url: `${backendDomin}/shop/all-user`,
+    url: `${backendDomin}/users/all-user`,
     method: "get",
   },
   updateUser: {
-    url: `${backendDomin}/shop/update-user`,
+    url: `${backendDomin}/users/update-user`,
     method: "post",
   },
   uploadProduct: {
-    url: `${backendDomin}/shop/upload-product`,
+    url: `${backendDomin}/products/upload-product`,
     method: "post",
   },
   allProduct: {
-    url: `${backendDomin}/shop/get-product`,
+    url: `${backendDomin}/products/`,
     method: "get",
   },
   updateProduct: {
-    url: `${backendDomin}/shop/update-product`,
+    url: `${backendDomin}/products/update-product`,
     method: "post",
   },
   categoryProduct: {
-    url: `${backendDomin}/shop/get-categoryProduct`,
+    url: `${backendDomin}/products/get-categoryProduct`,
     method: "get",
   },
   categoryWiseProduct: {
-    url: `${backendDomin}/shop/category-product`,
+    url: `${backendDomin}/products/category-product`,
     method: "post",
   },
-  productDetails: {
-    url: `${backendDomin}/shop/product-details`,
-    method: "post",
+  productDetail: {
+    url: `${backendDomin}/products`,
+    method: "get",
+  },
+  fetchCart: {
+    url: `${backendDomin}/cart/`,
+    method: "get",
   },
   addToCartProduct: {
-    url: `${backendDomin}/shop/addtocart`,
+    url: `${backendDomin}/cart/addtocart`,
     method: "post",
   },
   addToCartProductCount: {
-    url: `${backendDomin}/shop/countAddToCartProduct`,
+    url: `${backendDomin}/cart/countAddToCartProduct`,
     method: "get",
   },
   addToCartProductView: {
-    url: `${backendDomin}/shop/view-card-product`,
+    url: `${backendDomin}/cart/view-card-product`,
     method: "get",
   },
   updateCartProduct: {
-    url: `${backendDomin}/shop/update-cart-product`,
+    url: `${backendDomin}/cart/update-cart-product`,
     method: "post",
   },
   deleteCartProduct: {
-    url: `${backendDomin}/shop/delete-cart-product`,
+    url: `${backendDomin}/cart/delete-cart-product`,
     method: "post",
   },
   searchProduct: {
-    url: `${backendDomin}/shop/search`,
+    url: `${backendDomin}/products/search`,
     method: "get",
   },
   filterProduct: {
-    url: `${backendDomin}/shop/filter-product`,
+    url: `${backendDomin}/products/filter-product`,
     method: "post",
   },
 };

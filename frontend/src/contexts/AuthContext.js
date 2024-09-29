@@ -1,60 +1,113 @@
-import React, {
-  useContext,
-  createContext,
-  useState,
-  useEffect,
-  Children,
-} from "react";
+import React, { createContext, useState, useContext, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
+// Create AuthContext
 const AuthContext = createContext();
 
-// export const useAuth = () => {
-//   return useContext(AuthContext);
-// };
-
-const AuthProvider = ({ children }) => {
+// Provider component
+export const AuthProvider = ({ children }) => {
+  const [authTokens, setAuthTokens] = useState({
+    access: localStorage.getItem("access"),
+    refresh: localStorage.getItem("refresh"),
+  });
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const { navigate } = useNavigate();
 
-  useEffect(() => {
-    const userId = localStorage.getItem("userId");
-    if (userId) {
-      fethUserFromToken(1);
-    }
-  }, []);
+  // Function to set tokens and user information
+  const setTokens = async (tokens, callback) => {
+    setAuthTokens(tokens);
+    localStorage.setItem("access", tokens.access);
+    localStorage.setItem("refresh", tokens.refresh);
 
-  const fethUserFromToken = async (id) => {
-    const response = await fetch("/shop/get-user/", {
-      method: "post",
-      headers: {
-        // authorization: `Bearer${id}`,
-        "content-type": "application/json",
-      },
-      body: JSON.stringify(id),
-    });
-    if (response.ok) {
-      const userData = await response.json();
-      setUser(userData.user);
-    } else {
-      console.log("error fetching");
+    await fetchUserInfo();
+
+    if (callback) {
+      callback();
     }
   };
 
-  const login = async (Credentials) => {
-    const user = await login(Credentials);
-    setUser(user);
+  // Function to clear tokens and user information
+  const clearTokens = () => {
+    setAuthTokens({});
+    setUser(null);
+    localStorage.removeItem("access");
+    localStorage.removeItem("refresh");
+  };
+
+  const fetchUserInfo = async () => {
+    if (!authTokens.access) {
+      setUser(null);
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const response = await fetch("http://localhost:8000/users/", {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${authTokens.access}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setUser(data);
+      } else if (response.status === 401) {
+        // Attempt to refresh tokens if access token is expired
+        await refreshTokens();
+      }
+    } catch (error) {
+      console.error("Failed to fetch user info:", error);
+      clearTokens();
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const refreshTokens = async () => {
+    try {
+      const response = await fetch(
+        "http://localhost:8000/users/token/refresh/",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ refresh: authTokens.refresh }),
+        }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        setTokens(data); // Update tokens
+        await fetchUserInfo(); // Refetch user info with new tokens
+      } else {
+        clearTokens(); // Clear tokens if refresh fails
+        navigate("login/");
+      }
+    } catch (error) {
+      console.error("Failed to refresh tokens:", error);
+      clearTokens(); // Clear tokens if there is an error
+    }
   };
 
   const logout = () => {
-    localStorage.removeItem("token");
-    setUser(null);
+    clearTokens();
+    // setUser(null);
   };
 
   return (
     <AuthContext.Provider
       value={{
+        authTokens,
         user,
-        login,
+        loading,
+        setTokens,
+        clearTokens,
         logout,
+        fetchUserInfo,
       }}
     >
       {children}
@@ -62,4 +115,5 @@ const AuthProvider = ({ children }) => {
   );
 };
 
-export { AuthProvider, AuthContext };
+// Custom hook to use auth context
+export const useAuth = () => useContext(AuthContext);

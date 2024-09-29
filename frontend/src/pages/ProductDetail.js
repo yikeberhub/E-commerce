@@ -1,15 +1,52 @@
-import { React, useContext } from "react";
+import { React, useContext, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { ProductContext } from "../contexts/ProductContext";
 import CategoryLists from "../components/CategoryLists";
 import ProductLists from "../components/ProductList";
+import { useCart } from "../contexts/cartContext";
+
+import SummaryApi from "../common";
 
 const ProductDetail = () => {
   const { id } = useParams();
+  const { products, onAddToCart, onAddWishlist } = useContext(ProductContext);
+  const [product, setProduct] = useState(() => {
+    return products.find((product) => (product.id = id));
+  });
 
-  const { products, onAddToCart, onSetWishlist } = useContext(ProductContext);
+  const {
+    cartItems,
+    loading,
+    error,
+    fetchCart,
+    updateCartItem,
+    removeCartItem,
+    clearCart,
+  } = useCart();
 
-  const product = products.find((product) => (product.id = id));
+  useEffect(() => {
+    getProductDetail();
+  }, [id]);
+
+  const getProductDetail = async () => {
+    try {
+      const response = await fetch(`${SummaryApi.productDetail.url}/${id} `, {
+        method: SummaryApi.method,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      const fetchedproduct = data || []; // Default to an empty array if products is undefined
+      setProduct(fetchedproduct);
+    } catch (error) {
+      console.error("error", error);
+    }
+  };
 
   return (
     <div className="grid grid-cols-7 gap-4 mt-4 border border-gray-200 p-6 px-20 mx-4 ">
@@ -18,40 +55,53 @@ const ProductDetail = () => {
           <div className=" shadow-lg border-gray-300 rounded w-2/5">
             <div className="shadow-md rounded-md py-2 my-2">
               <img
-                src={product.image}
+                key={product?.id}
+                src={product?.image}
                 className="w-auto h-60"
                 alt="product.title"
               />
             </div>
-            <div className="flex flex-row justify-between px-2 my-2 mx-2 rounded shadow-sm ">
-              <img src={product.image} className="h-24 " alt="product.title" />
-              <img src={product.image} className=" h-24" alt="product.title" />
-              <img src={product.image} className=" h-24" alt="product.title" />
-            </div>
+            {
+              <div className="flex flex-row justify-between px-2 my-2 mx-2 rounded shadow-sm ">
+                {product?.images?.map((image) => (
+                  <div>
+                    <img
+                      key={image?.id}
+                      src={image?.image}
+                      className="h-28"
+                      alt="product_img"
+                    />
+                    <span className="mx-2"></span>
+                  </div>
+                ))}
+              </div>
+            }
           </div>
 
           <div className="w-3/5 shadow-md  rounded-md ">
             <div className="py-2 px-4">
               <p className="text-lg font-semibold">-20% off</p>
               <h1 className="font-semibold text-3xl">
-                {product.category.title}
+                {product?.category?.title}
               </h1>
               <p className="text-[#bb7cc0e9] text-sm">
-                ⭐⭐⭐(3) {product.rating} (286) Reviewed
+                ⭐⭐⭐(3) {product?.rating} (286) Reviewed
               </p>
 
-              <p className="text-[#4d2d96] text-lg my-1">{product.title}</p>
-              <p className="text-[#4d2d96] text-lg">{product.specifications}</p>
+              <p className="text-[#4d2d96] text-lg my-1">{product?.title}</p>
+              <p className="text-[#4d2d96] text-lg">
+                {product?.specifications}
+              </p>
               <p className="text-[#313432] text-lg py-2">by Samsung</p>
               <div className="h-auto">
                 <div className=" font-bold ">
                   <p className="inline text-3xl text-green-600 font-semibold mr-2 ">
-                    ${product.price}
+                    ${product?.price}
                   </p>
                   <p className="text-2xl text-slate-400   px-2 inline-block">
                     <p className="text-sm">-20% off</p>
                     <span className="line-through font-semibold">
-                      ${product.old_price}
+                      ${product?.old_price}
                     </span>
                   </p>
                   <div className=" w-24 py-2 px-2 ">
@@ -72,7 +122,7 @@ const ProductDetail = () => {
 
                     <p
                       className=" text-white border rounded-md px-2 py-1 hover:cursor-pointer"
-                      onClick={(e) => onSetWishlist(product)}
+                      onClick={(e) => onAddWishlist(product)}
                     >
                       ❤️
                     </p>
@@ -145,7 +195,7 @@ const ProductDetail = () => {
           </h1>
           <div>
             <img
-              src={product.image}
+              src={product?.image}
               className="w-24 h-24 rounded-full inline"
               alt="vendor-img"
             />

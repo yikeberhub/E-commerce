@@ -1,10 +1,14 @@
 import React, { useContext } from "react";
 import { Link } from "react-router-dom";
 import AccountIcon from "../../assets/icons/user.svg";
-import { ProductContext } from "../../contexts/ProductContext";
+import { useAuth } from "../../contexts/AuthContext";
+import { useCart } from "../../contexts/cartContext";
+import LogButton from "../../common/LogButton";
 
 function RightContent() {
-  const { cartItems, wishlists } = useContext(ProductContext);
+  const { cart } = useCart();
+  const { user } = useAuth();
+
   return (
     <div className="flex flex-row sm:gap-4 gap-2 items-center  ">
       <div className="border border-gray-300 sm:px-2 rounded  py-1 shadow-md">
@@ -14,27 +18,27 @@ function RightContent() {
       </div>
       <div className="border border-gray-300 px-2 rounded py-2  shadow-md  relative">
         <small className="bottom-5 left-6 absolute text-xs px-1 rounded-full border bg-green-500">
-          {cartItems?.length}
+          {cart?.items?.length}
         </small>
         <Link to={`cart/`}>
           <p>🛒cart</p>
         </Link>
       </div>
       <div className="border border-gray-300 px-2 rounded py-2  shadow-md  relative">
-        <small className="bottom-5 left-6 absolute text-xs px-1 rounded-full border bg-green-500">
-          {wishlists?.length}
-        </small>
+        <small className="bottom-5 left-6 absolute text-xs px-1 rounded-full border bg-green-500"></small>
         <Link to={`wishlist/`}>
           <p>💟wishlist</p>
         </Link>
       </div>
       <div className="border border-gray-300 sm:px-2 rounded  py-1 shadow-md flex flex-row items-center gap-2">
-        <img src={AccountIcon} alt="accountIcon" className="w-6 h-6 " />
-        <p>Account</p>
+        <img
+          src={user ? user.profile_image : AccountIcon}
+          alt="accountIcon"
+          className="w-6 h-6 rounded-md"
+        />
+        <p>{user ? user.username : "Account"}</p>
       </div>
-      <Link to={`login/`}>
-        <div>Login</div>
-      </Link>
+      <LogButton />
     </div>
   );
 }
