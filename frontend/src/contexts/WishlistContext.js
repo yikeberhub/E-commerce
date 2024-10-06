@@ -1,28 +1,32 @@
 import React, { createContext, useState, useContext, useEffect } from "react";
-import SummaryApi from "../common";
 import { useNavigate } from "react-router-dom";
 
-// Create CartContext
-const CartContext = createContext();
+const WishlistContext = createContext();
 
 // Provider component
-export const CartProvider = ({ children }) => {
-  const [cart, setCart] = useState([]);
+export const WishlistProvider = ({ children }) => {
+  const [wishlist, setWishlist] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [message, setMessage] = useState(null);
-  const [newItem, setNewItem] = useState({ product_id: "", quantity: 1 });
+  const [message, setMessage] = useState("");
+  const [newWishlistItem, setNewWishlistItem] = useState({
+    product_id: "",
+    quantity: 1,
+  });
+
+  const [addedToWishlist, setAddedToWishlist] = useState(false);
   const navigate = useNavigate();
+
   const token = localStorage.getItem("access");
 
   useEffect(() => {
-    fetchCart();
+    fetchWishlist();
   }, []);
 
-  const checkItemInCart = (product_id) => {
+  const checkItemInWishlist = (product_id) => {
     let result = { isAdded: false, item: null };
-    if (cart?.items?.length) {
-      cart.items.map((item) => {
+    if (wishlist?.items?.length) {
+      wishlist.items.map((item) => {
         if (item.product.id === product_id) {
           result["item"] = item;
           result["isAdded"] = true;
@@ -37,33 +41,33 @@ export const CartProvider = ({ children }) => {
     return result;
   };
 
-  const fetchCart = async () => {
+  const fetchWishlist = async () => {
     try {
-      const response = await fetch(SummaryApi.fetchCart.url, {
-        method: SummaryApi.fetchCart.method,
+      const response = await fetch("http://localhost:8000/wishlist/", {
+        method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
       });
       if (!response.ok) {
-        setMessage("Please login first");
+        setMessage("please Login first!");
         navigate("/");
-        throw new Error("failed to fetch cart");
+        throw new Error("failed to fetch wishlist");
       }
       const data = await response.json();
-      setCart(data);
+      setWishlist(data);
       setMessage("");
     } catch (err) {
-      setError(err.message);
+      setError(err.errors);
     } finally {
       setLoading(false);
     }
   };
 
-  const addCartItem = async (itemId, quantity) => {
+  const addWishlistItem = async (itemId, quantity) => {
     try {
-      const response = await fetch("http://localhost:8000/cart/add/", {
+      const response = await fetch("http://localhost:8000/wishlist/add/", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -73,22 +77,24 @@ export const CartProvider = ({ children }) => {
       });
 
       if (!response.ok) {
-        const errorResponse = await response.json(); // Get JSON error response
-        setMessage("please login first!");
-        console.error("Error adding item to cart:", errorResponse);
-        throw new Error("Failed to add item to cart.");
+        const errorResponse = await response.json();
+        setMessage("Please login first!");
+        navigate("/");
+        throw new Error("Failed to add item to Wishlist.", errorResponse);
       }
-      fetchCart();
+      const data = await response.json();
+      console.log("data:", data);
       setMessage("");
+      fetchWishlist();
     } catch (err) {
       setError(err.message);
     }
   };
 
-  const updateCartItem = async (itemId, newQunatity) => {
+  const updateWishlistItem = async (itemId, newQunatity) => {
     try {
       const response = await fetch(
-        `http://localhost:8000/cart/update/${itemId}/`,
+        `http://localhost:8000/wishlist/update/${itemId}/`,
         {
           method: "PUT",
           headers: {
@@ -99,18 +105,18 @@ export const CartProvider = ({ children }) => {
         }
       );
       if (!response.ok) {
-        throw new Error("failed to update cart item.");
+        throw new Error("failed to update wishlist item.");
       }
-      fetchCart();
+      fetchWishlist();
     } catch (err) {
       setError(err.message);
     }
   };
 
-  const removeCartItem = async (itemId) => {
+  const removeWishlistItem = async (itemId) => {
     try {
       const response = await fetch(
-        `http://localhost:8000/cart/remove/${itemId}/`,
+        `http://localhost:8000/wishlist/remove/${itemId}/`,
         {
           method: "DELETE",
           headers: {
@@ -121,53 +127,53 @@ export const CartProvider = ({ children }) => {
       );
       if (response) {
         const data = await response.json();
-        console.log(data);
-        fetchCart();
+        fetchWishlist();
       }
     } catch (err) {
       setError(err.error);
     }
   };
 
-  const clearCart = async () => {
+  const clearWishlist = async () => {
     try {
-      const response = await fetch("http://localhost:8000/cart/clear/", {
+      const response = await fetch("http://localhost:8000/wishlist/clear/", {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
       });
-      if (response) {
-        console.log("cart items:", cart.items);
-        fetchCart();
-      }
+
+      fetchWishlist();
     } catch (err) {
       setError(err.message);
     }
   };
 
   return (
-    <CartContext.Provider
+    <WishlistContext.Provider
       value={{
-        cart,
+        wishlist,
         error,
         message,
         loading,
-        newItem,
-        checkItemInCart,
-        setNewItem,
-        fetchCart,
-        addCartItem,
-        updateCartItem,
-        removeCartItem,
-        clearCart,
+        newWishlistItem,
+        addedToWishlist,
+        setAddedToWishlist,
+        checkItemInWishlist,
+        setMessage,
+        setNewWishlistItem,
+        fetchWishlist,
+        addWishlistItem,
+        updateWishlistItem,
+        removeWishlistItem,
+        clearWishlist,
       }}
     >
       {children}
-    </CartContext.Provider>
+    </WishlistContext.Provider>
   );
 };
 
 // Custom hook to use auth context
-export const useCart = () => useContext(CartContext);
+export const useWishlist = () => useContext(WishlistContext);

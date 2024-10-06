@@ -5,6 +5,7 @@ import { Outlet } from "react-router-dom";
 import { ProductProvider } from "./contexts/ProductContext";
 import { AuthProvider } from "./contexts/AuthContext";
 import { CartProvider } from "./contexts/cartContext";
+import { WishlistProvider } from "./contexts/WishlistContext";
 
 function App() {
   return (
@@ -12,9 +13,11 @@ function App() {
       <AuthProvider>
         <ProductProvider>
           <CartProvider>
-            <Navigation />
-            <Outlet />
-            <Footer />
+            <WishlistProvider>
+              <Navigation />
+              <Outlet />
+              <Footer />
+            </WishlistProvider>
           </CartProvider>
         </ProductProvider>
       </AuthProvider>

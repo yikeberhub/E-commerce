@@ -1,9 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import loginIcons from "../assets/icons/images/signin.gif";
-import SummaryApi from "../common";
 import Loader from "../common/Loader";
-import ErrorMessage from "../common/ErrorMessage";
 import { useAuth } from "../contexts/AuthContext";
 
 const Login = () => {

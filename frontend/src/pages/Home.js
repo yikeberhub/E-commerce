@@ -8,6 +8,10 @@ import HomeNavLink from "../components/HomeNavLink";
 import { ProductContext } from "../contexts/ProductContext";
 import SummaryApi from "../common";
 import { useAuth } from "../contexts/AuthContext";
+import FilterByPrice from "../components/filters/FilterByPrice";
+import FilterByVendor from "../components/filters/FilterByVendor";
+import FilterByCategory from "../components/filters/FilterByCategory";
+import FilterByTags from "../components/filters/FilterByTags";
 
 function Home() {
   const { products, onSetProduct } = useContext(ProductContext);
@@ -37,8 +41,7 @@ function Home() {
       }
 
       const data = await response.json();
-      console.log("products:", data);
-      const products = data || []; // Default to an empty array if products is undefined
+      const products = data || [];
       onSetProduct(products);
     } catch (error) {
       console.error("Error hello yike man", error);
@@ -98,15 +101,15 @@ function Home() {
       <div className="grid grid-cols-6 ">
         <div className="col-span-1 sticky">
           <CategoryLists />
-          <FilterType />
-          <FilterType />
-          <FilterType />
+          <FilterByPrice />
+          <FilterByVendor />
+          <FilterByCategory />
+          <FilterByTags />
         </div>
         <div className="col-span-5   items-center justify-center px-2  border border-gray-200 shadow-md ">
           <ProductBanner />
           <HomeNavLink />
           <ProductLists products={products} />
-          {console.log("products in home page:", products)}
         </div>
       </div>
     </div>

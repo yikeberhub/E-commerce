@@ -4,7 +4,7 @@ import Mobile from "../assets/products/earphones/boAt Rockerz 518 1.webp";
 function ProductBanner() {
   return (
     <div className="container-md py-2 my-2 w-full px-auto h-auto">
-      <div className=" flex flex-row  bg-gradient-to-r from-yellow-300 to-blue-500 w-full px-10 py-2 h-full shadow-md rounded-md">
+      <div className=" flex flex-row  bg-gradient-to-r from-yellow-200 to-blue-300 w-full px-10 py-2 h-full shadow-md rounded-md">
         <div>
           <h1 className="text-6xl text-black font-semibold py-2 my-5 px-2 text-wrap ">
             Don't Miss Amazing Electronic Devices

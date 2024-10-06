@@ -1,37 +1,38 @@
-import { React, useContext, useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { React, useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import CartItem from "../components/CartItem";
 import ProceedCheckout from "../components/ProceedCheckout";
-import { ProductContext } from "../contexts/ProductContext";
 import { useCart } from "../contexts/cartContext";
+import { useAuth } from "../contexts/AuthContext";
 
 const CartLists = () => {
-  const { cart, loading, error, fetchCart, clearCart } = useCart();
+  const { cart, loading, message, fetchCart, clearCart } = useCart();
   const [itemsTotalPrice, setItemsTotalPrice] = useState(0);
   const [shipingPrice, setShipingPrice] = useState(0);
-
-  useEffect(() => {
-    calculateItemPrice();
-  }, [fetchCart]);
+  const { user } = useAuth();
 
   useEffect(() => {
     fetchCart();
   }, []);
 
-  const totalPrice = itemsTotalPrice + shipingPrice;
+  useEffect(() => {
+    calculateItemPrice();
+  }, [fetchCart]);
 
   const calculateItemPrice = () => {
-    const itemsTotalPrice = cart.items.reduce(
-      (acc, item) => acc + item.quantity * item.product.price,
-      0
-    );
-    setItemsTotalPrice(itemsTotalPrice);
+    if (cart?.items?.length) {
+      const itemsTotalPrice = cart.items.reduce(
+        (acc, item) => acc + item.quantity * item.product.price,
+        0
+      );
+      setItemsTotalPrice(itemsTotalPrice);
+    } else {
+      setItemsTotalPrice(0);
+    }
   };
 
-  console.log("total price is", itemsTotalPrice);
-
   if (loading) return <div>Loading...</div>;
-  if (error) return <div>Error:{error}</div>;
+  if (!user) return alert(message);
 
   return (
     <div className="col-span-5 grid grid-cols-6 border border-gray-200 shadow-sm  pb-10">
@@ -39,7 +40,7 @@ const CartLists = () => {
         <h1 className="text-3xl mx-2 py-2">Your Cart</h1>
         <p>
           You have{" "}
-          {cart.items.length
+          {cart?.items?.length
             ? `${cart.items.length} Item in the cart`
             : "no Item in the cart"}{" "}
           .
@@ -59,7 +60,9 @@ const CartLists = () => {
             </thead>
             <tbody>
               {cart.length === 0 ? (
-                <div>your cart is empty</div>
+                <tr>
+                  <td>Empty cart</td>
+                </tr>
               ) : (
                 cart.items.map((cartItem) => (
                   <CartItem
@@ -77,7 +80,7 @@ const CartLists = () => {
                 Continue shoping
               </button>
             </Link>
-            {cart.items.length ? (
+            {cart?.items?.length ? (
               <button
                 className="bg-green-500 mt-1  py-2 px-2 rounded text-white"
                 onClick={(e) => clearCart()}
@@ -92,8 +95,8 @@ const CartLists = () => {
       </div>
       <div className="col-span-2  mb-2 shadow-md">
         <ProceedCheckout
+          cart={cart}
           itemsTotalPrice={itemsTotalPrice}
-          totalPrice={totalPrice}
           shipingPrice={shipingPrice}
         />
       </div>

@@ -1,15 +1,14 @@
-import React, { useContext, useEffect, useState } from "react";
-import { ProductContext } from "../contexts/ProductContext";
+import React, { useEffect, useState } from "react";
 import { useCart } from "../contexts/cartContext";
 
 const CartItem = ({ cartItem, calculateItemPrice }) => {
-  const { removeCartItem, updateCartItem } = useCart();
+  const { removeCartItem, updateCartItem, clearCart } = useCart();
   const [quantity, setNewQuantity] = useState(cartItem.quantity);
   const [isUpdated, setIsUpdated] = useState(false);
 
   useEffect(() => {
     calculateItemPrice();
-  }, [quantity, removeCartItem, updateCartItem]);
+  }, [quantity, removeCartItem, clearCart, updateCartItem]);
 
   const subTotal = quantity * cartItem.product.price;
 
@@ -18,7 +17,7 @@ const CartItem = ({ cartItem, calculateItemPrice }) => {
     setIsUpdated(true);
   };
   const decreaseQuantity = () => {
-    setNewQuantity((prev) => (prev >= 1 ? prev - 1 : prev));
+    setNewQuantity((prev) => (prev > 1 ? prev - 1 : prev));
     setIsUpdated(true);
   };
 

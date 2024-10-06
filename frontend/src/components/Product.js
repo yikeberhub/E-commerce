@@ -1,29 +1,42 @@
-import React, { useContext, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { ProductContext } from "../contexts/ProductContext";
-import SummaryApi from "../common";
 import { useCart } from "../contexts/cartContext";
+import { useWishlist } from "../contexts/WishlistContext";
+import AddWishlistIcon from "../assets/icons/images/wishlist_gold.png";
+import RemoveWishlistIcon from "../assets/icons/images/wishlist_purple.png";
+import AddCartIcon from "../assets/icons/images/cart.png";
+import RemoveCartIcon from "../assets/icons/images/cart_black_white.png";
 
 const Product = ({ product }) => {
-  const { onAddWishlist } = useContext(ProductContext);
+  const { newItem, checkItemInCart, addCartItem, removeCartItem } = useCart();
   const {
-    cartItems,
-    loading,
-    error,
-    newItem,
-    setNewItem,
-    fetchCart,
-    addCartItem,
-  } = useCart();
+    addWishlistItem,
+    removeWishlistItem,
+    checkItemInWishlist,
+    newWishlistItem,
+  } = useWishlist();
 
-  // Adding a percentage off for display purposes
+  const addedToCart = checkItemInCart(product.id)["isAdded"];
+  const addedToWishlist = checkItemInWishlist(product.id)["isAdded"];
+
   product = { ...product, get_percentage: 20 };
 
-  // Handling the click event to add the item to the cart
   const handleAddToCart = () => {
-    setNewItem({ product_id: product.id, quantity: newItem.quantity });
-    addCartItem(product.id, newItem.quantity);
-    console.log("new data:", newItem);
+    const checkedResult = checkItemInCart(product.id);
+    if (!checkedResult["isAdded"]) {
+      addCartItem(product.id, newItem.quantity);
+    } else {
+      removeCartItem(checkedResult["item"].id);
+    }
+  };
+
+  const handleAddToWishlist = () => {
+    const checkedResult = checkItemInWishlist(product.id);
+    if (!checkedResult["isAdded"]) {
+      addWishlistItem(product.id, newWishlistItem.quantity);
+    } else {
+      removeWishlistItem(checkedResult["item"].id);
+    }
   };
 
   return (
@@ -49,14 +62,50 @@ const Product = ({ product }) => {
         <div>
           <div className="flex flex-row justify-between items center border border-gray-200 px-2 py-2 my-2 rounded shadow-md font-bold">
             <span>${product.price}</span>
-            <p className="border border-gray-200 shadow-sm rounded px-0.5 hover:cursor-pointer">
-              <span onClick={handleAddToCart}> 🛒 Add</span>
+            <p className="border-gray-400 shadow-sm rounded px-0.5 hover:cursor-pointer">
+              <span onClick={handleAddToCart}>
+                {" "}
+                {!addedToCart ? (
+                  <span>
+                    <img
+                      src={AddCartIcon}
+                      alt="add_cart"
+                      className="w-6 h-6 rounded"
+                    />
+                  </span>
+                ) : (
+                  <span>
+                    <img
+                      src={RemoveCartIcon}
+                      alt="rmv_cart_icon"
+                      className="w-6 h-6 rounded"
+                    />
+                  </span>
+                )}{" "}
+              </span>
             </p>
-            <p
-              className="hover:cursor-pointer"
-              onClick={() => onAddWishlist(product)}
-            >
-              ❤️
+            <p className="hover:cursor-pointer">
+              <span onClick={handleAddToWishlist}>
+                {" "}
+                {!addedToWishlist ? (
+                  <span>
+                    <img
+                      src={AddWishlistIcon}
+                      className="w-6 h-6 rounded-full "
+                      alt="add_wish_img"
+                    />
+                  </span>
+                ) : (
+                  <span>
+                    {" "}
+                    <img
+                      src={RemoveWishlistIcon}
+                      className="w-6 h-6 rounded-full "
+                      alt="add_wish_img"
+                    />
+                  </span>
+                )}
+              </span>
             </p>
           </div>
           <span className="font-normal line-through">${product.old_price}</span>

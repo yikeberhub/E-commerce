@@ -18,6 +18,7 @@ import About from "../pages/About";
 import ContactUs from "../pages/ContactUs";
 import PageNotFound from "../pages/PageNotFound";
 import Wishlist from "../pages/Wishlist";
+import UserDashboard from "../pages/dashbord/userDashboard/UserDashboard";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -28,10 +29,20 @@ const router = createBrowserRouter(
       <Route path="forgot-password/" element={<ForgotPassword />} />
       <Route path="product-category/" element={<ProductCategory />} />
       <Route path="cart/" element={<Cart />} />
+      <Route
+        path="cart/:id/checkout/"
+        loader={async ({ request }) => {
+          let url = new URL(request.url);
+          let searchTerm = url.searchParams.get("id");
+          return searchTerm;
+        }}
+        element={<Checkout />}
+      />
+      <Route path="dashboard/" element={<UserDashboard />} />
       <Route path="wishlist/" element={<Wishlist />} />
       <Route path="products/" element={<Products />} />
       <Route path="product/:id" element={<ProductDetail />} />
-      <Route path="checkout/:id/checkout" element={<Checkout />} />
+      <Route path="checkout/:orderId" element={<Checkout />} />
       <Route
         path="search-product/"
         loader={async ({ request }) => {
@@ -41,7 +52,7 @@ const router = createBrowserRouter(
         }}
         element={<SearchProduct />}
       />
-      <Route path="product/:id/checkout/" element={<Checkout />} />
+      {/* <Route path="product/:id/checkout/" element={<Checkout />} /> */}
       <Route path="about/" element={<About />} />
       <Route path="contact-us/" element={<ContactUs />} />
       <Route path="*" element={<PageNotFound />} />

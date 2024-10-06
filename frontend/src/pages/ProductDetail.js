@@ -3,30 +3,56 @@ import { useParams } from "react-router-dom";
 import { ProductContext } from "../contexts/ProductContext";
 import CategoryLists from "../components/CategoryLists";
 import ProductLists from "../components/ProductList";
+import AddWishlistIcon from "../assets/icons/images/wishlist_gold.png";
+import RemoveWishlistIcon from "../assets/icons/images/wishlist_purple.png";
+import AddCartIcon from "../assets/icons/images/cart.png";
+import RemoveCartIcon from "../assets/icons/images/cart_black_white.png";
 import { useCart } from "../contexts/cartContext";
 
 import SummaryApi from "../common";
+import { useWishlist } from "../contexts/WishlistContext";
 
 const ProductDetail = () => {
   const { id } = useParams();
-  const { products, onAddToCart, onAddWishlist } = useContext(ProductContext);
+  const { products } = useContext(ProductContext);
   const [product, setProduct] = useState(() => {
     return products.find((product) => (product.id = id));
   });
 
+  const { newItem, addCartItem, removeCartItem, checkItemInCart } = useCart();
   const {
-    cartItems,
-    loading,
-    error,
-    fetchCart,
-    updateCartItem,
-    removeCartItem,
-    clearCart,
-  } = useCart();
+    newWishlistItem,
+    addWishlistItem,
+    removeWishlistItem,
+    checkItemInWishlist,
+  } = useWishlist();
 
   useEffect(() => {
     getProductDetail();
   }, [id]);
+
+  const addedToCart = checkItemInCart(product.id)["isAdded"];
+  const addedToWishlist = checkItemInWishlist(product.id)["isAdded"];
+
+  // product = { ...product, get_percentage: 20 };
+
+  const handleAddToCart = () => {
+    const checkedResult = checkItemInCart(product.id);
+    if (!checkedResult["isAdded"]) {
+      addCartItem(product.id, newItem.quantity);
+    } else {
+      removeCartItem(checkedResult["item"].id);
+    }
+  };
+
+  const handleAddToWishlist = () => {
+    const checkedResult = checkItemInWishlist(product.id);
+    if (!checkedResult["isAdded"]) {
+      addWishlistItem(product.id, newWishlistItem.quantity);
+    } else {
+      removeWishlistItem(checkedResult["item"].id);
+    }
+  };
 
   const getProductDetail = async () => {
     try {
@@ -55,27 +81,26 @@ const ProductDetail = () => {
           <div className=" shadow-lg border-gray-300 rounded w-2/5">
             <div className="shadow-md rounded-md py-2 my-2">
               <img
-                key={product?.id}
+                key={product?.image.id}
                 src={product?.image}
                 className="w-auto h-60"
                 alt="product.title"
               />
             </div>
-            {
-              <div className="flex flex-row justify-between px-2 my-2 mx-2 rounded shadow-sm ">
-                {product?.images?.map((image) => (
-                  <div>
-                    <img
-                      key={image?.id}
-                      src={image?.image}
-                      className="h-28"
-                      alt="product_img"
-                    />
-                    <span className="mx-2"></span>
-                  </div>
-                ))}
-              </div>
-            }
+
+            <div className="flex flex-row justify-between px-2 my-2 mx-2 rounded shadow-sm ">
+              {product?.images?.map((image) => (
+                <div>
+                  <img
+                    key={image?.id}
+                    src={image?.image}
+                    className="h-28"
+                    alt="product_img"
+                  />
+                  <span className="mx-2"></span>
+                </div>
+              ))}
+            </div>
           </div>
 
           <div className="w-3/5 shadow-md  rounded-md ">
@@ -112,19 +137,45 @@ const ProductDetail = () => {
                       className="w-20 py-2 px-2 border outline-none border-gray-300 rounded-md"
                     />
                   </div>
-                  <div className="flex flex-row gap-2 py-2 px-auto mx-auto">
+                  <div className="flex flex-row gap-2 py-2 px-auto mx-auto  border-gray-300 shaddow-md ">
                     <p
-                      className=" bg-green-500  text-white  shadow-sm rounded px-2 py-1  hover:cursor-pointer "
-                      onClick={(e) => onAddToCart(product)}
+                      className=" text-white  shadow-sm rounded px-2 py-1  hover:cursor-pointer "
+                      onClick={(e) => handleAddToCart()}
                     >
-                      🛒 Add to cart
+                      <span>
+                        {!addedToCart ? (
+                          <img
+                            src={AddCartIcon}
+                            className="w-6 h-6"
+                            alt="'add_art_icon"
+                          />
+                        ) : (
+                          <img
+                            src={RemoveCartIcon}
+                            className="w-6 h-6"
+                            alt="'remove_cart_icon"
+                          />
+                        )}
+                      </span>
                     </p>
 
                     <p
                       className=" text-white border rounded-md px-2 py-1 hover:cursor-pointer"
-                      onClick={(e) => onAddWishlist(product)}
+                      onClick={(e) => handleAddToWishlist()}
                     >
-                      ❤️
+                      {!addedToWishlist ? (
+                        <img
+                          src={AddWishlistIcon}
+                          className="w-6 h-6"
+                          alt="'add_art_icon"
+                        />
+                      ) : (
+                        <img
+                          src={RemoveWishlistIcon}
+                          className="w-6 h-6"
+                          alt="'remove_cart_icon"
+                        />
+                      )}
                     </p>
                   </div>
                   <div className=" text-sm text-slate-400 mt-4">

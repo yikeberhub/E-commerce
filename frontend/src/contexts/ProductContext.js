@@ -1,4 +1,4 @@
-import { createContext, useEffect, useState } from "react";
+import { createContext, useState } from "react";
 
 const ProductContext = createContext(null);
 
@@ -7,7 +7,6 @@ function ProductProvider({ children }) {
   const [cartItems, setCartItems] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [wishlists, setWishlists] = useState([]);
-  // const [showProductLists, setShowProductLists] = useState(true);
   const [searchedProducts, setSearchedProducts] = useState(products);
   const [showCartLists, setShowCartLists] = useState(false);
   const [showWishlists, setShowWishlists] = useState(false);

@@ -8,6 +8,10 @@ import { ProductContext } from "../contexts/ProductContext";
 import Card from "../utilities/CardComp";
 import ListComp from "../utilities/ListComp";
 import ProductLists from "../components/ProductList";
+import FilterByPrice from "../components/filters/FilterByPrice";
+import FilterByTags from "../components/filters/FilterByTags";
+import FilterByVendor from "../components/filters/FilterByVendor";
+import FilterByCategory from "../components/filters/FilterByCategory";
 
 function Products() {
   const { products } = useContext(ProductContext);
@@ -20,113 +24,16 @@ function Products() {
         </select>
         <div className="grid grid-col sm:grid-cols-5 gap-2 mx-5 px-4 py-2 items-center  shadow-md">
           {/* by categories */}
-
-          <Card title="By Category">
-            <ListComp style={`text-lg py-2 px-2 border rounded-sm shadow-sm`}>
-              <p className="flex flex-row items-center gap-3">
-                <input type="checkbox" name="vendor" />
-                <img src={Mobile} alt="img" className="w-7 h-7 rounded-md" />
-                <label className="ml-2">Laptop</label>
-              </p>
-            </ListComp>
-            <ListComp style={`text-lg py-2 px-2 border rounded-sm shadow-sm`}>
-              <p className="flex flex-row items-center gap-3">
-                <input type="checkbox" name="vendor" />
-                <img src={Camera} alt="img" className="w-7 h-7 rounded-md" />
-                <label className="ml-2">Camera</label>
-              </p>
-            </ListComp>
-            <ListComp style={`text-lg py-2 px-2 border rounded-sm shadow-sm`}>
-              <p className="flex flex-row items-center gap-3">
-                <input type="checkbox" name="vendor" />
-                <img src={Mobile} alt="img" className="w-7 h-7 rounded-md" />
-                <label className="ml-2">Tablet</label>
-              </p>
-            </ListComp>
-            <ListComp style={`text-lg py-2 px-2 border rounded-sm shadow-sm`}>
-              <p className="flex flex-row items-center gap-3">
-                <input type="checkbox" name="vendor" />
-                <img src={Earphone} alt="img" className="w-7 h-7 rounded-md" />
-                <label className="ml-2">Earphone</label>
-              </p>
-            </ListComp>
-          </Card>
+          <FilterByCategory />
 
           {/* by vendor */}
-          <Card title="By vendor">
-            <ListComp style={`text-lg py-2 px-2 border rounded-sm shadow-sm`}>
-              <input type="checkbox" name="vendor" />
-              <label className="ml-2">Samsung</label>
-            </ListComp>
-            <ListComp style={`text-lg py-2 px-2 border rounded-sm shadow-sm`}>
-              <input type="checkbox" name="vendor" />
-              <label className="ml-2">Dell</label>
-            </ListComp>
-            <ListComp style={`text-lg py-2 px-2 border rounded-sm shadow-sm`}>
-              <input type="checkbox" name="vendor" />
-              <label className="ml-2">Synix</label>
-            </ListComp>
-            <ListComp style={`text-lg py-2 px-2 border rounded-sm shadow-sm`}>
-              <input type="checkbox" name="vendor" />
-              <label className="ml-2">Lg</label>
-            </ListComp>
-          </Card>
+          <FilterByVendor />
           {/* by popular tags */}
 
-          <Card title="Popular Tags">
-            <div className="grid grid-col grid-cols-2">
-              <ListComp style={`my-2`}>
-                <button className="text-lg rounded-full px-3 py-1 my-2 text-green-600 border ">
-                  <span className="text-2xl mr-2">&times;</span>{" "}
-                  <span>Rogas</span>
-                </button>
-              </ListComp>
-              <ListComp style={`my-2`}>
-                <button className="text-lg rounded-full px-3 py-1 text-green-600 border">
-                  <span className="text-2xl mr-2">&times;</span>{" "}
-                  <span>Lenovo</span>
-                </button>
-              </ListComp>
-              <ListComp style={`my-2`}>
-                <button className="text-lg rounded-full px-3 py-1 text-green-600 border">
-                  <span className="text-2xl mr-2">&times;</span>{" "}
-                  <span>Dell</span>
-                </button>
-              </ListComp>
-              <ListComp style={`my-2`}>
-                <button className="text-lg rounded-full px-3 py-1 text-green-600 border">
-                  <span className="text-2xl mr-2">&times;</span>{" "}
-                  <span>Samsung</span>
-                </button>
-              </ListComp>
-            </div>
-          </Card>
+          <FilterByTags />
 
           {/* by price */}
-          <Card title="By Price">
-            <ListComp>
-              <input type="range" min={0} max={100} className="w-full" />
-              <p className="flex flex-row items-center justify-between">
-                <span>from: $0.0 </span>
-                <span>to:$500.0</span>
-              </p>
-            </ListComp>
-
-            <ListComp style={`my-2`}>
-              <input
-                type="number"
-                min={0}
-                className="`outline-none rounded-md bg-white border border-gray-500 px-2 text-green-500 py-2 my-2  w-full "
-                placeholder="0"
-              />
-              <button
-                type="submit"
-                className="bg-blue-500 rounded-md px-2 py-2 mt-2 text-xl font-semibold text-white w-full"
-              >
-                filter
-              </button>
-            </ListComp>
-          </Card>
+          <FilterByPrice />
         </div>
 
         <div className="px-2 mx-2 py-2 mb-7">
