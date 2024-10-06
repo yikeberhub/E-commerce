@@ -60,7 +60,7 @@ class UserUpdateView(generics.UpdateAPIView):
             return Response(serializer.errors,status=400)
         except Exception as e:
             print('Error encountered',str(e))
-        return Response({'error':str(e)},status=500)
+            return Response({'error':str(e)},status=500)
     
 class LoginView(TokenObtainPairView):
     serializer_class = LoginSerializer
