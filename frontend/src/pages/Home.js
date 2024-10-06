@@ -14,6 +14,7 @@ import FilterByCategory from "../components/filters/FilterByCategory";
 import FilterByTags from "../components/filters/FilterByTags";
 
 function Home() {
+  const { user } = useAuth();
   const { products, onSetProduct } = useContext(ProductContext);
   const { authTokens, fetchUserInfo } = useAuth();
 

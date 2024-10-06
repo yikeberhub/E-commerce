@@ -36,6 +36,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const fetchUserInfo = async () => {
+    console.log("fetch user is called");
     if (!authTokens.access) {
       setUser(null);
       setLoading(false);
@@ -82,7 +83,9 @@ export const AuthProvider = ({ children }) => {
       if (response.ok) {
         const data = await response.json();
         setTokens(data); // Update tokens
-        await fetchUserInfo(); // Refetch user info with new tokens
+
+        await fetchUserInfo();
+        // Refetch user info with new tokens
       } else {
         clearTokens(); // Clear tokens if refresh fails
         navigate("login/");
