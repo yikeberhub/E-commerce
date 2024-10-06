@@ -6,6 +6,7 @@ from rest_framework.decorators import api_view,permission_classes
 from rest_framework import generics,permissions,status,serializers
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework import exceptions
 
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
@@ -29,11 +30,44 @@ class RegisterView(generics.CreateAPIView):
         self.perform_create(serializer)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     
+class UserUpdateView(generics.UpdateAPIView):
+    queryset = CustomUser.objects.all()
+    permission_classes = [AllowAny]
+    serializer_class = UserSerializer
+    
+    def get_object(self):
+        print('get object is called')
+        try:
+            user =CustomUser.objects.get(id = self.kwargs['pk'])
+            print('object user is',user)
+            return user
+        except CustomUser.DoesNotExist:
+            raise exceptions.NotFound('User not Found')
+        
+
+    def put(self, request, *args, **kwargs):
+        try:
+            user = self.get_object()
+            print('request data',request.data)
+            print('put is called',user)
+            serializer = self.get_serializer(user,data=request.data,partial = True)
+            serializer.is_valid(raise_exception=True) 
+            if serializer.is_valid():
+                print('srializer is valid')
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            print('serializer error')
+            return Response(serializer.errors,status=400)
+        except Exception as e:
+            print('Error encountered',str(e))
+        return Response({'error':str(e)},status=500)
+    
 class LoginView(TokenObtainPairView):
     serializer_class = LoginSerializer
     
     def post(self,request,*args,**kwargs):
         serializer = self.get_serializer(data = request.data)
+        print('i am called here')
         try:
            serializer.is_valid(raise_exception = True)
         except serializers.ValidationError as e:

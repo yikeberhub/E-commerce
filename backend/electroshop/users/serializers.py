@@ -29,6 +29,15 @@ class RegisterSerializer(serializers.ModelSerializer):
             user.profile_image = profile_image
         user.save()
         return user
+    
+    # def update(self, validated_data):
+    #     profile_image = validated_data.pop('profile_image', None)
+    #     user = CustomUser(**validated_data)
+    #     user.set_password(validated_data['password'])  # Hash the password
+    #     if profile_image is not None:
+    #         user.profile_image = profile_image
+    #     user.save()
+    #     return user
 
     def validate_email(self, value):
         if CustomUser.objects.filter(email=value).exists():

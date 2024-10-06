@@ -12,6 +12,7 @@ from .serializers import WishlistItemSerializer, WishlistSerializer
 @api_view(['GET', 'PUT'])
 @permission_classes([IsAuthenticated])
 def wishlist_view(request):
+    print('user:',request.user)
     wishlist = Wishlist.objects.get(user=request.user)
 
     if request.method == 'GET':
@@ -26,11 +27,15 @@ def wishlist_add(request):
     product_id = request.data['product_id']
     product = Product.objects.get(id = product_id)
     user = request.user
-    print('user:',user,'product:',product)
-    wishlist = Wishlist.objects.get(user = user)
-    wishlist_item = WishlistItem.objects.get_or_create(wishlist= wishlist,product = product)
+    
+    wishlist = Wishlist.objects.get(user=user)
+    wishlist_item,created = WishlistItem.objects.get_or_create(wishlist = wishlist,product = product)
+    wishlist_item.quantity = request.data['quantity']
+    wishlist_item.save()
+    
     serializer = WishlistSerializer(instance=wishlist)
     if serializer.data:
+       print('serialized',serializer.data)
        return Response({'data':serializer.data})
     return Response({'errors':serializer.errors})
 

@@ -13,7 +13,7 @@ class Wishlist(models.Model):
         return f'wishlist for user {self.user.username}'
     
 class WishlistItem(models.Model):
-    wishlist = models.ForeignKey(Wishlist,related_name='wishlist_items',on_delete=models.CASCADE)
+    wishlist = models.ForeignKey(Wishlist,related_name='items',on_delete=models.CASCADE)
     product = models.ForeignKey(Product,related_name='product_items',on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField(default=1)
     

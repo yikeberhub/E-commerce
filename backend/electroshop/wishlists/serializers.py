@@ -24,6 +24,6 @@ class WishlistSerializer(serializers.ModelSerializer):
     class Meta:
         model = Wishlist
         fields = '__all__'
-        read_only_fields = ['user','items', 'created_at', 'updated_at']
+        read_only_fields = ['id','user','items', 'created_at', 'updated_at']
 
     

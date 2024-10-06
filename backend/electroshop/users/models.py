@@ -20,6 +20,7 @@ class CustomUser(AbstractUser):
     address = models.TextField(blank=True,null=True)
     profile_image = models.ImageField(upload_to='users/user_profile_images/',default='users/default_profile_image/img.png',blank=True,null=True)
     phone_number = models.CharField(max_length=15,blank=True,null=True)
+    bio = models.TextField(blank=True,null=True)
     date_of_birth = models.DateField(blank=True,null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at=models.DateTimeField(auto_now=True)

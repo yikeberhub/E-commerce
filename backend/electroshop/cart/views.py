@@ -12,12 +12,12 @@ from .serializers import CartSerializer, CartItemSerializer
 @api_view(['GET', 'PUT'])
 @permission_classes([IsAuthenticated])
 def cart_view(request):
-    cart = Cart.objects.get(user=request.user)
+    cart,created = Cart.objects.get_or_create(user=request.user)
 
     if request.method == 'GET':
         serializer = CartSerializer(cart)
         return Response(serializer.data)
-    return Response(status=status.HTTP_400_BAD_REQUEST)
+    return Response({'errors':serializer.errors},status=status.HTTP_400_BAD_REQUEST)
 
     
 @api_view(['POST'])
@@ -64,6 +64,8 @@ def cart_remove_view(request, pk):
 @permission_classes([IsAuthenticated])
 def cart_clear_view(request):
     cart = get_object_or_404(Cart, user=request.user)
-    cart.items.all().delete()
+    cart_items = CartItem.objects.filter(cart = cart)
+    cart_items.delete()
+    
     return Response(status=status.HTTP_204_NO_CONTENT)
     
