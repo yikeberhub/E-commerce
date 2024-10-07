@@ -1,11 +1,36 @@
-import React from "react";
+import { React, useState } from "react";
+import { Link, Outlet } from "react-router-dom";
 import AccountIcon from "../../../assets/icons/user.svg";
 
 import { useAuth } from "../../../contexts/AuthContext";
 import UserProfile from "./UserProfile";
+import Orders from "./order/Orders";
+import Address from "./Address";
+import AccountDetail from "./AccountDetail";
 
 function UserDashboard() {
   const { user } = useAuth();
+  const [display, setDisplay] = useState({
+    userProfile: true,
+    orders: false,
+    address: false,
+    accountDetail: false,
+  });
+
+  const handleDisplay = (component) => {
+    console.log("i am called comp");
+    setDisplay((prevDisplay) => ({
+      ...Object.keys(prevDisplay).reduce(
+        (acc, key) => {
+          acc[key] = key === component ? true : false;
+
+          return acc;
+        },
+
+        {}
+      ),
+    }));
+  };
 
   if (!user) return <div className="w-44 h-14 bg-green-500">loading...</div>;
 
@@ -30,65 +55,95 @@ function UserDashboard() {
       <div className="grid grid-cols-6  mx-auto">
         <div className="col-span-6 sm:col-span-2 mx-auto py-2">
           <ul className="px-2 py-1 shadow-md shadow-gray-400 z-20 align-middle items-center mx-10 mt-2">
-            <li className="w-64 bg-green-600 py-2 mr-5  text-white text-sm font-semibold text-start ps-2  rounded-md">
-              <h2> 👩‍🏫 Profile</h2>
-            </li>
-            <li className="flex flex-rowi items-center w-64 py-2 my-2 border border-gray-300 text-gray-600 text-sm font-semibold text-start ps-2 pr-5 rounded-md">
-              <span>
-                <img
-                  src={AccountIcon}
-                  alt="account_det_img"
-                  className="w-4 h-4"
-                />
-              </span>
-              <h2 className="ms-2">Dashboard</h2>
-            </li>
-            <li className="flex flex-rowi items-center w-64 py-2 my-2 border border-gray-300 text-gray-600 text-sm font-semibold text-start ps-2 pr-5 rounded-md">
-              <span>
-                <img
-                  src={AccountIcon}
-                  alt="account_det_img"
-                  className="w-4 h-4"
-                />
-              </span>
-              <h2 className="ms-2">Orders</h2>
-            </li>
-            <li className="flex flex-rowi items-center w-64 py-2 my-2 border border-gray-300 text-gray-600 text-sm font-semibold text-start ps-2 pr-5 rounded-md">
-              <span>
-                <img
-                  src={AccountIcon}
-                  alt="account_det_img"
-                  className="w-4 h-4"
-                />
-              </span>
-              <h2 className="ms-2">Track your Order</h2>
-            </li>
-
-            <li className="flex flex-rowi items-center w-64 py-2 my-2 border border-gray-300 text-gray-600 text-sm font-semibold text-start ps-2 pr-5 rounded-md">
-              <span>
-                <img
-                  src={AccountIcon}
-                  alt="account_det_img"
-                  className="w-4 h-4"
-                />
-              </span>
-              <h2 className="ms-2">My Address</h2>
-            </li>
-            <li className="flex flex-rowi items-center w-64 py-2 my-2 border border-gray-300 text-gray-600 text-sm font-semibold text-start ps-2 pr-5 rounded-md">
-              <span>
-                <img
-                  src={AccountIcon}
-                  alt="account_det_img"
-                  className="w-4 h-4"
-                />
-              </span>
-              <h2 className="ms-2">Account Detail</h2>
-            </li>
+            <Link to={`profile/`}>
+              <li
+                className="w-64 bg-green-600 py-2 mr-5  text-white text-sm font-semibold text-start ps-2  rounded-md"
+                // onClick={() => handleDisplay("userProfile")}
+              >
+                <h2> 👩‍🏫 Profile</h2>
+              </li>
+            </Link>
+            <Link to={`dashboard/`}>
+              <li
+                className="flex flex-rowi items-center w-64 py-2 my-2 border border-gray-300 text-gray-600 text-sm font-semibold text-start ps-2 pr-5 rounded-md"
+                // onClick={() => handleDisplay("dashboard")}
+              >
+                <span>
+                  <img
+                    src={AccountIcon}
+                    alt="account_det_img"
+                    className="w-4 h-4"
+                  />
+                </span>
+                <h2 className="ms-2">Dashboard</h2>
+              </li>
+            </Link>
+            <Link to={`orders/`}>
+              <li
+                className="flex flex-rowi items-center w-64 py-2 my-2 border border-gray-300 text-gray-600 text-sm font-semibold text-start ps-2 pr-5 rounded-md"
+                // onClick={() => handleDisplay("orders")}
+              >
+                <span>
+                  <img
+                    src={AccountIcon}
+                    alt="account_det_img"
+                    className="w-4 h-4"
+                  />
+                </span>
+                <h2 className="ms-2">Orders</h2>
+              </li>
+            </Link>
+            <Link to={`track`}>
+              <li className="flex flex-rowi items-center w-64 py-2 my-2 border border-gray-300 text-gray-600 text-sm font-semibold text-start ps-2 pr-5 rounded-md">
+                <span>
+                  <img
+                    src={AccountIcon}
+                    alt="account_det_img"
+                    className="w-4 h-4"
+                  />
+                </span>
+                <h2 className="ms-2">Track your Order</h2>
+              </li>
+            </Link>
+            <Link to={`address/`}>
+              <li
+                className="flex flex-rowi items-center w-64 py-2 my-2 border border-gray-300 text-gray-600 text-sm font-semibold text-start ps-2 pr-5 rounded-md"
+                // onClick={() => handleDisplay("address")}
+              >
+                <span>
+                  <img
+                    src={AccountIcon}
+                    alt="account_det_img"
+                    className="w-4 h-4"
+                  />
+                </span>
+                <h2 className="ms-2">My Address</h2>
+              </li>
+            </Link>
+            <Link to={`account-detail/`}>
+              <li
+                className="flex flex-rowi items-center w-64 py-2 my-2 border border-gray-300 text-gray-600 text-sm font-semibold text-start ps-2 pr-5 rounded-md"
+                // onClick={() => handleDisplay("accountDetail")}
+              >
+                <span>
+                  <img
+                    src={AccountIcon}
+                    alt="account_det_img"
+                    className="w-4 h-4"
+                  />
+                </span>
+                <h2 className="ms-2">Account Detail</h2>
+              </li>
+            </Link>
           </ul>
         </div>
 
         <div className="sm:col-span-4   py-2 ">
-          <UserProfile />
+          <Outlet />
+          {/* {display.userProfile && <UserProfile />}
+          {display.orders && <Orders />}
+          {display.address && <Address />}
+          {display.accountDetail && <AccountDetail />} */}
         </div>
       </div>
     </div>

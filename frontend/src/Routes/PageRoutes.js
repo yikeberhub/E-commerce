@@ -2,6 +2,7 @@ import {
   createBrowserRouter,
   createRoutesFromElements,
   Route,
+  Routes,
 } from "react-router-dom";
 import App from "../App";
 import Home from "../pages/Home";
@@ -19,7 +20,11 @@ import ContactUs from "../pages/ContactUs";
 import PageNotFound from "../pages/PageNotFound";
 import Wishlist from "../pages/Wishlist";
 import UserDashboard from "../pages/dashbord/userDashboard/UserDashboard";
-
+import OrderDetail from "../pages/dashbord/userDashboard/order/OrderDetail";
+import UserProfile from "../pages/dashbord/userDashboard/UserProfile";
+import Address from "../pages/dashbord/userDashboard/Address";
+import AccountDetail from "../pages/dashbord/userDashboard/AccountDetail";
+import Orders from "../pages/dashbord/userDashboard/order/Orders";
 const router = createBrowserRouter(
   createRoutesFromElements(
     <Route path="/" element={<App />}>
@@ -38,7 +43,14 @@ const router = createBrowserRouter(
         }}
         element={<Checkout />}
       />
-      <Route path="dashboard/" element={<UserDashboard />} />
+      <Route path="dashboard/" element={<UserDashboard />}>
+        <Route index element={<UserProfile />} />
+        <Route path="profile/" element={<UserProfile />} />
+        <Route path="orders/" element={<Orders />} />
+        <Route path="address/" element={<Address />} />
+        <Route path="account-detail/" element={<AccountDetail />} />
+        <Route path="orders/:id" element={<OrderDetail />} />
+      </Route>
       <Route path="wishlist/" element={<Wishlist />} />
       <Route path="products/" element={<Products />} />
       <Route path="product/:id" element={<ProductDetail />} />
@@ -52,7 +64,6 @@ const router = createBrowserRouter(
         }}
         element={<SearchProduct />}
       />
-      {/* <Route path="product/:id/checkout/" element={<Checkout />} /> */}
       <Route path="about/" element={<About />} />
       <Route path="contact-us/" element={<ContactUs />} />
       <Route path="*" element={<PageNotFound />} />
