@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render,redirect
 from rest_framework import generics,status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -11,16 +11,18 @@ from .serializers import OrderSerializer
 
 class CheckoutView(generics.CreateAPIView):
     permission_classes = [IsAuthenticated]
+    serializer_class = OrderSerializer
     def post(self,request,*args,**kwargs):
         try:
             total_price = request.data['total_price']
             cart = Cart.objects.get(user = request.user)
             order= Order.objects.create(user = request.user,total_price=total_price)
             for item in cart.items.all():
+               print('for loop')
                OrderItem.objects.create(order=order,product=item.product,quantity = item.quantity)
-          
-            # cart.items.all().delete()
-            return Response({'order_id':order.id,'total_price':total_price},status=status.HTTP_201_CREATED)
+            print('order,',order)
+            serializer = self.get_serializer(order)
+            return Response(serializer.data,status=status.HTTP_201_CREATED)
         except Cart.DoesNotExist:
             return Response({"error":"Cart doesn't exist"},status=status.HTTP_404_NOT_FOUND)
         
