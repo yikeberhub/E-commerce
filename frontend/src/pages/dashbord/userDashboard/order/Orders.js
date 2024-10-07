@@ -45,6 +45,9 @@ function Orders() {
   return (
     <div>
       <div className="overflow-x-auto">
+        <h1 className="text-start text-xl font-semibold font-sans  py-2 text-gray-600">
+          Your Orders
+        </h1>
         <table className="min-w-full bg-white border border-gray-200 ">
           <thead>
             <tr className="bg-gray-100 text-gray-600 uppercase text-sm leading-normal">
@@ -63,7 +66,10 @@ function Orders() {
                 className="border-b border-gray-200 hover:bg-green-300"
               >
                 <td className="py-3 px-6"> {order.id}</td>
-                <td className="py-3 px-6"> {order.created_at}</td>
+                <td className="py-3 px-6">
+                  {" "}
+                  {new Date(order.created_at).toLocaleString()}
+                </td>
                 <td className="py-3 px-6"> {order.status}</td>
                 <td className="py-3 px-6">
                   {" "}

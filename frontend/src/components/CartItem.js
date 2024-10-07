@@ -54,8 +54,8 @@ const CartItem = ({ cartItem, calculateItemPrice }) => {
           (isUpdated ? "text-red-400" : "text-green-600")
         }
         onClick={(e) => {
-          updateCartItem(cartItem.id, quantity);
-          setIsUpdated(false);
+          isUpdated && updateCartItem(cartItem.id, quantity);
+          isUpdated && setIsUpdated(false);
         }}
       >
         {isUpdated ? "update" : "updated"}
