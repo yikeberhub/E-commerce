@@ -33,26 +33,24 @@ class OrderListView(generics.ListAPIView):
         user = self.request.user
         return Order.objects.filter(user=user)
     
-
 class OrderDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = OrderSerializer
-    permission_classes =[IsAuthenticated]
+    permission_classes = [IsAuthenticated]
     queryset = Order.objects.all()
-    
-    def get(self,request,*args,**kwargs):
+
+    def get_object(self):
         try:
-            order = Order.objects.get(id = self.kwargs['order_id'])
-            print('order:',order)
-            serializer = self.get_serializer(order)
-            print('datas:',serializer.data.items)
-            # order_items = serializer.items.all()
-            
-            
-            return Response(serializer.data
-                )
+            print('order id',self.kwargs['order_id'])
+            print('object is called')
+            return Order.objects.get(id=self.kwargs['order_id'])
         except Order.DoesNotExist:
-            raise Response({'error':'Order Not found'},status=status.HTTP_404_NOT_FOUND)
-        
+            return Response({'error': 'Order Not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    def get(self, request, *args, **kwargs):
+            order = self.get_object()
+            print('order is',order)
+            serializer = self.get_serializer(order)
+            return Response(serializer.data)
         
 
 class OrderUpdateView(generics.UpdateAPIView):
