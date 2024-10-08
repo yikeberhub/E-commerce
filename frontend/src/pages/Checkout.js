@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import OrderComponent from "./dashbord/userDashboard/order/OrderComponent";
-import OrderDetail from "./dashbord/userDashboard/order/OrderDetail";
-
+import PaypalImg from "../assets/icons/images/paypal_icon.png";
+import ChapaImg from "../assets/icons/images/chapa_logo.jpg";
 const Checkout = () => {
   const { orderId } = useParams();
   const [orderDetails, setOrderDetails] = useState(null);
   const [paymentMethod, setPaymentMethod] = useState("");
+  const [paymentGateway, setPaymentGetway] = useState("");
 
   useEffect(() => {
     fetchOrderDetails();
@@ -41,6 +42,10 @@ const Checkout = () => {
     setPaymentMethod(e.target.value);
   };
 
+  const handlePaymentGetway = (e) => {
+    setPaymentGetway(e.target.value);
+  };
+
   if (!orderDetails) return <div>Loading...</div>;
 
   return (
@@ -53,30 +58,30 @@ const Checkout = () => {
           <form>
             <input
               type="text"
-              className="border border-gray-300 rounded-sm py-2 px-2 placeholder-black"
+              className="w-1/2 border border-gray-300 focus:bg-indigo-200 focus:border-indigo-500 rounded-sm py-2 px-2 placeholder-black"
               placeholder="Enter coupon"
             />
-            <h1 className="text-xl my-2 ">Billing Details</h1>
+            <h1 className="text-xl my-2 text-gray-700">Billing Details</h1>
             <div className="flex flex-row gap-2 min-w-full">
               <input
                 type="username"
-                className="w-1/2 border border-gray-300 rounded-sm py-2 px-2 placeholder-black"
+                className="w-1/2 border border-gray-300 focus:bg-indigo-200 focus:border-indigo-500 rounded-sm py-2 px-2 placeholder-black"
                 placeholder="your name."
               />
               <input
                 type="phone_numberr"
-                className="w-1/2 border border-gray-300 rounded-sm py-2 px-2 placeholder-black"
+                className="w-1/2 border border-gray-300 focus:bg-indigo-200 focus:border-indigo-500 rounded-sm py-2 px-2 placeholder-black"
                 placeholder="your phone number."
               />
             </div>
             <input
               type="text"
               name="address"
-              className="w-1/2 border border-gray-300 rounded-sm my-2 py-2 px-2 placeholder-black"
+              className="w-1/2 border border-gray-300 focus:bg-indigo-200 focus:border-indigo-500 rounded-sm py-2 px-2 placeholder-black"
               placeholder="Enter your address"
             />
           </form>
-          <div className="mt-10 w-full shadow-md shadow-gray-400 rounded-md  text-gray-600  h-52">
+          <div className="mt-10 w-full shadow-md shadow-gray-400 rounded-md  text-gray-600  mb-4">
             <h2 className="text-xl ml-4 py-2"> Select Payment Method</h2>
             <div className="flex flex-row gap-2">
               <form className="flex flex-col gap-2 bg-gray-50 rounded-md shadow-red-400 px-2 mx-4 py-2 w-auto">
@@ -120,14 +125,60 @@ const Checkout = () => {
                     <h2 className="text-gray-700">cash in delivery</h2>
                   </div>
                 )}
-                {paymentMethod === "bank" && (
-                  <div>
-                    <h2 className="text-gray-700">Bank transfer</h2>
-                  </div>
-                )}
+                {paymentMethod === "bank" && <div using bank></div>}
                 {paymentMethod === "online" && (
-                  <div>
-                    <h2 className="text-gray-700">Online Gateway</h2>
+                  <div class="mt-6">
+                    <h3 class="text-lg font-semibold mb-2">
+                      Choose Payment paymentGateway
+                    </h3>
+                    <div class="flex flex-col items-center space-y-2 mb-4">
+                      <div class="flex flex-row items-center space-x-2">
+                        <input
+                          type="radio"
+                          id="chapa"
+                          checked={paymentGateway === "chapa"}
+                          onChange={handlePaymentGetway}
+                          name="payment"
+                          value="chapa"
+                          class="form-radio text-blue-600 h-5 w-5"
+                        />
+                        <label for="chapa" class="text-gray-700">
+                          Chapa
+                        </label>
+                        <img
+                          src={ChapaImg}
+                          alt="Chapa Logo"
+                          className="h-8 rounded-sm"
+                        />
+                      </div>
+                      <div class="flex items-center space-x-2">
+                        <input
+                          type="radio"
+                          checked={paymentGateway === "paypal"}
+                          onChange={handlePaymentGetway}
+                          id="paypal"
+                          name="payment"
+                          value="paypal"
+                          class="form-radio text-blue-600 h-5 w-5"
+                        />
+                        <label for="paypal" class="text-gray-700">
+                          PayPal
+                        </label>
+                        <img
+                          src={PaypalImg}
+                          alt="PayPal Logo"
+                          className="h-8 "
+                        />
+                      </div>
+                      <div className="flex flex-row items-center space-x-4 justify-between">
+                        <button className="mt-4 mb-4 bg-blue-600 text-white px-4 py-1 rounded hover:bg-green-600">
+                          Pay Now
+                        </button>
+                        <button className="mt-4 mb-4 bg-green-600 text-white px-4 py-1 rounded hover:bg-blue-600">
+                          Preview
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>

@@ -22,7 +22,7 @@ import Wishlist from "../pages/Wishlist";
 import UserDashboard from "../pages/dashbord/userDashboard/UserDashboard";
 import OrderDetail from "../pages/dashbord/userDashboard/order/OrderDetail";
 import UserProfile from "../pages/dashbord/userDashboard/UserProfile";
-import Address from "../pages/dashbord/userDashboard/Address";
+import Address from "../pages/dashbord/userDashboard/address/Address";
 import AccountDetail from "../pages/dashbord/userDashboard/AccountDetail";
 import Orders from "../pages/dashbord/userDashboard/order/Orders";
 const router = createBrowserRouter(

@@ -3,34 +3,24 @@ import { Link, Outlet } from "react-router-dom";
 import AccountIcon from "../../../assets/icons/user.svg";
 
 import { useAuth } from "../../../contexts/AuthContext";
-import UserProfile from "./UserProfile";
-import Orders from "./order/Orders";
-import Address from "./Address";
-import AccountDetail from "./AccountDetail";
 
 function UserDashboard() {
   const { user } = useAuth();
-  const [display, setDisplay] = useState({
-    userProfile: true,
-    orders: false,
-    address: false,
-    accountDetail: false,
-  });
 
-  const handleDisplay = (component) => {
-    console.log("i am called comp");
-    setDisplay((prevDisplay) => ({
-      ...Object.keys(prevDisplay).reduce(
-        (acc, key) => {
-          acc[key] = key === component ? true : false;
+  // const handleDisplay = (component) => {
+  //   console.log("i am called comp");
+  //   setDisplay((prevDisplay) => ({
+  //     ...Object.keys(prevDisplay).reduce(
+  //       (acc, key) => {
+  //         acc[key] = key === component ? true : false;
 
-          return acc;
-        },
+  //         return acc;
+  //       },
 
-        {}
-      ),
-    }));
-  };
+  //       {}
+  //     ),
+  //   }));
+  // };
 
   if (!user) return <div className="w-44 h-14 bg-green-500">loading...</div>;
 

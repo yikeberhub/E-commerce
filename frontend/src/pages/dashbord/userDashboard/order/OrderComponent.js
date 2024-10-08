@@ -20,7 +20,7 @@ function OrderComponent({ order, calculateTotal }) {
                 <img
                   src={item.product.image}
                   alt={item.title}
-                  className="w-20"
+                  className="w-10 h-10"
                 />
               </td>
               <td className="py-2 px-4 border-b">{item.product.title}</td>
