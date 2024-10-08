@@ -38,3 +38,19 @@ class CustomUser(AbstractUser):
 
     def __str__(self) -> str:
         return self.email
+    
+class Address(models.Model):
+    user = models.ForeignKey(CustomUser,on_delete=models.CASCADE,related_name='addresses')
+    full_name = models.CharField(max_length=255)
+    phone_number = models.CharField(max_length=20)
+    kebele = models.CharField(max_length=100)
+    city = models.CharField(max_length=100)
+    region = models.CharField(max_length=100)
+    woreda = models.CharField(max_length=100)
+    street_address = models.CharField(max_length=255)
+    postal_code = models.CharField(max_length=20,blank=True,null=True)
+    delivery_instruction = models.TextField(blank=True,null=True)
+    
+    def __str__(self) -> str:
+        return f"{self.full_name},{self.city},{self.region}"
+    
