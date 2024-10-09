@@ -13,8 +13,24 @@ User = get_user_model()
 class AddressSerializer(serializers.ModelSerializer):
     class Meta:
         model= Address
-        exclude = ['user']
+        exclude = ['user']   
     
+
+def set_default_address(id,user):
+        addresses = Address.objects.filter(user = user)
+        def_address =None
+        for address in addresses:
+            if address.id !=id:
+                address.is_default =False
+                address.save()
+            else:
+                address.is_default =True
+                address.save()
+                def_address =address
+                print('def add',def_address)
+        return def_address
+       
+         
 
 class UserSerializer(serializers.ModelSerializer):
     addresses = AddressSerializer(many=True)

@@ -45,6 +45,7 @@ class Address(models.Model):
     street_address = models.CharField(max_length=255)
     postal_code = models.CharField(max_length=20,blank=True,null=True)
     delivery_instruction = models.TextField(blank=True,null=True)
+    is_default = models.BooleanField(default=False)
     
     def __str__(self) -> str:
         return f"{self.full_name},{self.city},{self.region}"

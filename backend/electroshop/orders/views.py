@@ -20,7 +20,6 @@ class CheckoutView(generics.CreateAPIView):
             for item in cart.items.all():
                print('for loop')
                OrderItem.objects.create(order=order,product=item.product,quantity = item.quantity)
-            print('order,',order)
             serializer = self.get_serializer(order)
             return Response(serializer.data,status=status.HTTP_201_CREATED)
         except Cart.DoesNotExist:
