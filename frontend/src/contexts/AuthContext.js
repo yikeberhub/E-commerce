@@ -55,6 +55,7 @@ export const AuthProvider = ({ children }) => {
       if (response.ok) {
         const data = await response.json();
         setUser(data);
+        console.log("user data:", data);
       } else if (response.status === 401) {
         // Attempt to refresh tokens if access token is expired
         await refreshTokens();

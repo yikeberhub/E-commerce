@@ -1,83 +1,94 @@
-import React from "react";
+import { React, useEffect, useState } from "react";
 import { useAuth } from "../../../../contexts/AuthContext";
+import EditAddress from "./EditAddress";
 
 function Address() {
   const { user } = useAuth();
-  return (
-    <div className="container mx-auto items-center">
-      <div>
-        <h1>Address Here</h1>
-        <div className="bg-white">
-          <form className=" w-auto px-2  py-2 shadow-lg shadow-gray-300 align-middle items-center  lg-mr-10 mt-2">
-            <div className="flex flex-row gap-2">
-              <div className="lg-w-64 py-2 my-2   text-gray-600 text-sm font-semibold text-start ps-2 pr-5 rounded-sm">
-                <label className="mx-2 my-2">Full Name: </label>
-                <input
-                  type="text"
-                  placeholder="Enter full name"
-                  className="text-gray-700 mx-2 py-1 px-2 border border-gray-400 rounded-sm block focus:bg-gray-100 focus:outline-indigo-400 outline-1"
-                />
-              </div>
-              <div className="lg-w-64 py-2 my-2   text-gray-600 text-sm font-semibold text-start ps-2 pr-5 rounded-sm">
-                <label className="mx-2 my-2">Phone Number: </label>
-                <input
-                  type="text"
-                  placeholder="Enter phone number"
-                  className="text-gray-700 mx-2 py-1 px-2 border border-gray-400 rounded-sm block focus:bg-gray-100 focus:outline-indigo-400 outline-1"
-                />
-              </div>
-            </div>
-            <div className="flex flex-row gap-2">
-              <div className="lg-w-64 py-2 my-2   text-gray-600 text-sm font-semibold text-start ps-2 pr-5 rounded-sm">
-                <label className="mx-2 my-2">Kebele: </label>
-                <input
-                  type="text"
-                  placeholder="Enter full name"
-                  className="text-gray-700 mx-2 py-1 px-2 border border-gray-400 rounded-sm block focus:bg-gray-100 focus:outline-indigo-400 outline-1"
-                />
-              </div>
-              <div className="lg-w-64 py-2 my-2   text-gray-600 text-sm font-semibold text-start ps-2 pr-5 rounded-sm">
-                <label className="mx-2 my-2">City: </label>
-                <input
-                  type="text"
-                  placeholder="Enter City name"
-                  className="text-gray-700 mx-2 py-1 px-2 border border-gray-400 rounded-sm block focus:bg-gray-100 focus:outline-indigo-400 outline-1"
-                />
-              </div>
-            </div>
-            <div className="flex flex-row gap-2">
-              <div className="lg-w-64 py-2 my-2   text-gray-600 text-sm font-semibold text-start ps-2 pr-5 rounded-sm">
-                <label className="mx-2 my-2">Region: </label>
-                <input
-                  type="text"
-                  placeholder="Enter Region name"
-                  className="text-gray-700 mx-2 py-1 px-2 border border-gray-400 rounded-sm block focus:bg-gray-100 focus:outline-indigo-400 outline-1"
-                />
-              </div>
-              <div className="lg-w-64 py-2 my-2   text-gray-600 text-sm font-semibold text-start ps-2 pr-5 rounded-sm">
-                <label className="mx-2 my-2">Postal Code: </label>
-                <input
-                  type="text"
-                  placeholder="Enter Postal Code(optional)"
-                  className="text-gray-700 mx-2 py-1 px-2 border border-gray-400 rounded-sm block focus:bg-gray-100 focus:outline-indigo-400 outline-1"
-                />
-              </div>
-            </div>
+  const [defaultAddress, setDefaultAddress] = useState(1);
+  const [openedEditAddress, setOpenedEditAddress] = useState(false);
+  const addresses = user.addresses;
 
-            <div className="flex flex-row gap-6 items-center">
-              <div className="lg-w-64 py-2 my-2   text-gray-600 text-sm font-semibold text-start ps-2 pr-5 rounded-sm">
-                <label className="mx-2 my-2">Delivery Instructions: </label>
-                <input
-                  type="text"
-                  placeholder="Enter Delivery Instructions Code(optional)"
-                  className="text-gray-700 mx-2 py-1 px-2 border border-gray-400 rounded-sm block focus:bg-gray-100 focus:outline-indigo-400 outline-1"
-                />
+  if (!user.addresses) return <div>No address Found...</div>;
+
+  return (
+    <div className=" w-full items-center shadow-md rounded-sms px-2 py-2 mx-0">
+      <div className="w-full bg-white">
+        <h1 className="text-2xl py-2 px-2  font-mono  ">My Address</h1>
+        <div className="flex flex-row gap-2 w-full">
+          <div className="py-2 px-2 bg-white w-2/3">
+            {addresses.map((address, key) => (
+              <div
+                className="flex flex-row gap-2 py-1 w-fit mb-2 text-gray-700 bg-gray-50  shadow-md "
+                key={address.id}
+              >
+                <div className="px-2 py-2 ">
+                  <h2 className="bg-gray-200 px-2 py-1 rounded-sm w-fit">
+                    Address {key + 1}
+                  </h2>
+
+                  <div className="grid grid-cols-2 py-2  items-center gap-x-1 text-sm text-gray-700 ">
+                    <div className="flex flex-row gap-1 my-1 text-center">
+                      <p>Full Name:</p>
+                      <p className="text-xs">{address.full_name}</p>
+                    </div>
+                    <div className="flex flex-row gap-1 my-1">
+                      <p>Phone Number:</p>
+                      <p className="text-xs">{address.phone_number}</p>
+                    </div>
+                    <div className="flex flex-row gap-1 my-1">
+                      <p>Kebele:</p>
+                      <p className="text-xs">{address.kebele}</p>
+                    </div>
+                    <div className="flex flex-row gap-1 py-1">
+                      <p>City:</p>
+                      <p className="text-xs">{address.city}</p>
+                    </div>
+                    <div className="flex flex-row gap-1 py-1">
+                      <p> Woreda:</p>
+                      <p className="text-xs">{address.woreda}</p>
+                    </div>
+                    <div className="flex flex-row gap-1 py-1">
+                      <p>Region:</p>
+                      <p className="text-xs">{address.region}</p>
+                    </div>
+                    <div className="flex flex-row gap-1 py-1">
+                      <p>Postal Code:</p>
+                      <p className="text-xs">{address.postal_code}</p>
+                    </div>
+                  </div>
+                  <div className="flex flex-row justify-between">
+                    {defaultAddress !== key + 1 ? (
+                      <button
+                        className="mx-2 py-2 shadow-md rounded-sm w-fit px-2 flex flex-row gap-2 items-center"
+                        onClick={() => setDefaultAddress(key + 1)}
+                      >
+                        make Default
+                      </button>
+                    ) : (
+                      <span>✅</span>
+                    )}
+                    {!openedEditAddress && (
+                      <button
+                        className="bg-green-500 py-1 rounded-md px-2"
+                        onClick={() => setOpenedEditAddress(address.id)}
+                      >
+                        Edit Address
+                      </button>
+                    )}
+                  </div>
+                </div>
               </div>
-              <button className="bg-green-500 rounded-md py-1 px-2 hover:bg-purple-600">
-                Update Address
-              </button>
-            </div>
-          </form>
+            ))}
+          </div>
+          {openedEditAddress && (
+            <EditAddress
+              id={openedEditAddress}
+              setOpenedEditAddress={setOpenedEditAddress}
+              showCloseBtn={true}
+              edit={true}
+              shadow="shadow-2xl shadow-gray-700"
+            />
+          )}
         </div>
       </div>
     </div>

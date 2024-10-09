@@ -3,11 +3,18 @@ import { useParams, Link } from "react-router-dom";
 import OrderComponent from "./dashbord/userDashboard/order/OrderComponent";
 import PaypalImg from "../assets/icons/images/paypal_icon.png";
 import ChapaImg from "../assets/icons/images/chapa_logo.jpg";
+import EditAddress from "./dashbord/userDashboard/address/EditAddress";
+
+const PreviewOrder = () => {
+  return <div>This is preview</div>;
+};
+
 const Checkout = () => {
   const { orderId } = useParams();
   const [orderDetails, setOrderDetails] = useState(null);
-  const [paymentMethod, setPaymentMethod] = useState("");
-  const [paymentGateway, setPaymentGetway] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState("online");
+  const [paymentGateway, setPaymentGetway] = useState("chapa");
+  const [showPreview, setShowPreview] = useState(false);
 
   useEffect(() => {
     fetchOrderDetails();
@@ -45,44 +52,22 @@ const Checkout = () => {
   const handlePaymentGetway = (e) => {
     setPaymentGetway(e.target.value);
   };
+  console.log("show preview is", showPreview);
 
   if (!orderDetails) return <div>Loading...</div>;
 
   return (
     <div className="container m-auto mb-28">
-      <h1 className="text-2xl font-serif font-bold text-gray-700 py-2">
-        Checkout
-      </h1>
+      <h1 className="text-2xl font-mono font-bold text- py-2 mx-2">Checkout</h1>
       <div className=" flex flex-row min-w-full">
         <div className="w-1/2 px-2 py-2">
-          <form>
-            <input
-              type="text"
-              className="w-1/2 border border-gray-300 focus:bg-indigo-200 focus:border-indigo-500 rounded-sm py-2 px-2 placeholder-black"
-              placeholder="Enter coupon"
-            />
-            <h1 className="text-xl my-2 text-gray-700">Billing Details</h1>
-            <div className="flex flex-row gap-2 min-w-full">
-              <input
-                type="username"
-                className="w-1/2 border border-gray-300 focus:bg-indigo-200 focus:border-indigo-500 rounded-sm py-2 px-2 placeholder-black"
-                placeholder="your name."
-              />
-              <input
-                type="phone_numberr"
-                className="w-1/2 border border-gray-300 focus:bg-indigo-200 focus:border-indigo-500 rounded-sm py-2 px-2 placeholder-black"
-                placeholder="your phone number."
-              />
-            </div>
-            <input
-              type="text"
-              name="address"
-              className="w-1/2 border border-gray-300 focus:bg-indigo-200 focus:border-indigo-500 rounded-sm py-2 px-2 placeholder-black"
-              placeholder="Enter your address"
-            />
-          </form>
-          <div className="mt-10 w-full shadow-md shadow-gray-400 rounded-md  text-gray-600  mb-4">
-            <h2 className="text-xl ml-4 py-2"> Select Payment Method</h2>
+          <EditAddress id={1} use={true} />
+
+          <div className="mt-10 w-full shadow-md shadow-gray-400 rounded-md  text-gray-600 font-serif  mb-4">
+            <h2 className="text-xl ml-4 py-2 font-mono">
+              {" "}
+              Select Payment Method
+            </h2>
             <div className="flex flex-row gap-2">
               <form className="flex flex-col gap-2 bg-gray-50 rounded-md shadow-red-400 px-2 mx-4 py-2 w-auto">
                 <div>
@@ -174,8 +159,15 @@ const Checkout = () => {
                         <button className="mt-4 mb-4 bg-blue-600 text-white px-4 py-1 rounded hover:bg-green-600">
                           Pay Now
                         </button>
-                        <button className="mt-4 mb-4 bg-green-600 text-white px-4 py-1 rounded hover:bg-blue-600">
-                          Preview
+                        <button
+                          className="mt-4 mb-4 bg-green-600 text-white px-4 py-1 rounded hover:bg-blue-600"
+                          onClick={() => setShowPreview((prev) => !prev)}
+                        >
+                          {showPreview ? (
+                            <span>Show Order</span>
+                          ) : (
+                            <span>Preview</span>
+                          )}
                         </button>
                       </div>
                     </div>
@@ -188,20 +180,23 @@ const Checkout = () => {
 
         <div className="w-1/2  px-2 border border-gray-200 rounded-md shadow-md shadow-gray-600">
           <div className="flex flex-row items-center justify-between text-gray-600 py-2 px-2 text-lg font-semibold">
-            <h1>Your Order</h1>
+            <h1 className="font-mono text-xl text-gray-700">Your Order</h1>
             <p>Total price:{orderDetails.total_price}</p>
           </div>
           <Link to={"/cart/"}>
-            <button className="bg-green-500 py-2 px-2 text-white rounded-md ">
-              Go Back to Cart
-            </button>
+            <button className="btn-primary">Go Back to Cart</button>
           </Link>
-          {orderDetails && (
+          {orderDetails && !showPreview && (
             <div>
               <OrderComponent
                 order={orderDetails}
                 calculateTotal={calculateTotal}
               />
+            </div>
+          )}
+          {orderDetails && showPreview && (
+            <div>
+              <PreviewOrder />
             </div>
           )}
         </div>
