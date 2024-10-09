@@ -30,7 +30,7 @@ DEBUG = True
 # Application definition
 
 INSTALLED_APPS = [
-    'jazzmin',
+    # 'jazzmin',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -176,14 +176,14 @@ AUTH_USER_MODEL = 'users.CustomUser'
 
 CORS_ALLOW_ALL_ORIGINS = True
 
-JAZZMIN_ADMIN_SETTINGS = {
-    'site_title':'Yike shop',
-    'site_brand':'You order, We deliver',
-    'site_logo':'static/assets/img.png',
-    'site_copyright':'yike@ 2024',
-    'welcome_sign':'Welcome to My Admin pannel.',
-    'search_model' :'auth.CustomUser'
+# JAZZMIN_ADMIN_SETTINGS = {
+#     'site_title':'Yike shop',
+#     'site_brand':'You order, We deliver',
+#     'site_logo':'static/assets/img.png',
+#     'site_copyright':'yike@ 2024',
+#     'welcome_sign':'Welcome to My Admin pannel.',
+#     'search_model' :'auth.CustomUser'
     
     
-}
+# }
 

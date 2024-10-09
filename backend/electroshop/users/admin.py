@@ -4,7 +4,11 @@ from django.contrib.auth.admin import UserAdmin
 from .models import CustomUser,Address
 # Register your models here.
 
+class AddressAdmin(admin.TabularInline):
+    model = Address
+
 class CustomUserAdmin(UserAdmin):
+    inlines = [AddressAdmin]
     model = CustomUser
     ordering = ('email',)
 
@@ -17,8 +21,8 @@ class CustomUserAdmin(UserAdmin):
     fieldsets = UserAdmin.fieldsets +(
         (None,{
             'fields':(
-                'profile_image','phone_number','address','date_of_birth','role','account_status',
-                'is_email_verified','is_phone_verified','billing_address','payment_method',
+                'profile_image','phone_number','date_of_birth','role','account_status',
+                
             )
         }),
     )
@@ -26,8 +30,7 @@ class CustomUserAdmin(UserAdmin):
     add_fieldsets = UserAdmin.fieldsets +(
         (None,{
             'fields':(
-                'profile_image','phone_number','address','date_of_birth','role','account_status',
-                'is_email_verified','is_phone_verified','billing_address','payment_method',
+                'profile_image','phone_number','date_of_birth','role','account_status',
             )
         }),
     )

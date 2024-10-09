@@ -1,5 +1,5 @@
 from rest_framework.serializers import ModelSerializer
-from .models import CustomUser
+from .models import CustomUser,Address
 import base64
 from django.core.files.base import ContentFile
 
@@ -10,8 +10,14 @@ from django.contrib.auth import get_user_model,authenticate
 
 User = get_user_model()
 
+class AddressSerializer(serializers.ModelSerializer):
+    class Meta:
+        model= Address
+        exclude = ['user']
+    
 
 class UserSerializer(serializers.ModelSerializer):
+    addresses = AddressSerializer(many=True)
     class Meta:
         model = CustomUser
         fields = '__all__'
