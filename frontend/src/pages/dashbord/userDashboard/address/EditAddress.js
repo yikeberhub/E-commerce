@@ -4,22 +4,38 @@ import { useAuth } from "../../../../contexts/AuthContext";
 function EditAddress({
   id,
   setOpenedEditAddress,
+  setOpenedCreateAddress,
+  numSelected = false,
   showCloseBtn = false,
   shadow = "shadow-none",
   edit = false,
   use = false,
+  create = false,
 }) {
-  const { user } = useAuth();
-  const [data, setData] = useState({});
+  const { user, fetchUserInfo } = useAuth();
+  const [data, setData] = useState({
+    full_name: "",
+    phone_number: "",
+    kebele: "",
+    city: "",
+    region: "",
+    postal_code: "",
+    delivery_instruction: "",
+  });
+  const [message, setMessage] = useState("");
+
+  let value = user.addresses.filter((address, key) => address.id === id);
+  let address = value[0];
+  if (use) {
+    value = user.addresses.filter((address, key) => address.is_default);
+    address = value[0];
+  }
 
   useEffect(() => {
-    if (user) {
-      const value = user.addresses.filter((address) => address.id === id);
-      const address = value[0];
+    if (user && (edit || use)) {
       setData({
         full_name: address.full_name,
         phone_number: address.phone_number,
-        woreda: address.woreda,
         kebele: address.kebele,
         city: address.city,
         region: address.region,
@@ -38,26 +54,79 @@ function EditAddress({
       };
     });
   };
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const token = localStorage.getItem("access");
+    let url = "http://localhost:8000/users/address/create/";
+    let method = "POST";
+
+    if (edit) {
+      url = `http://localhost:8000/users/address/${address.id}/update/`;
+      method = "PUT";
+    }
+
+    try {
+      console.log("datas :", data);
+      const response = await fetch(url, {
+        method: method,
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        throw new Error("failed to Update Address");
+      }
+      const responseData = await response.json();
+      if (edit) {
+        console.log("Address Updated successfully!", responseData);
+        setMessage("Address Updated successfully");
+      } else {
+        console.log("Address Created successfully!", responseData);
+        setMessage("Address Created successfully");
+        setData({
+          full_name: "",
+          phone_number: "",
+          kebele: "",
+          city: "",
+          region: "",
+          postal_code: "",
+          delivery_instruction: "",
+        });
+      }
+      fetchUserInfo();
+    } catch (error) {
+      console.error("Error:", error.message);
+    }
+  };
+
   return (
     <div className={`w - fit bg-white ${shadow} rounded-md`}>
       <div className="flex flex-row justify-around items-center shadow-md my-1 ">
         <h1 className="text-center text-2xl py-2 px-2  font-mono  ">
-          {use ? (
-            <span>Use Address {id}</span>
-          ) : (
-            <span> Edit Address {id}</span>
-          )}
+          {use && <span>Use Default Address </span>}
+
+          {create && <span>Create New Address </span>}
+
+          {edit && <span> Edit Address {numSelected && numSelected}</span>}
         </h1>
         {showCloseBtn && (
           <span
             className=" hover:text-xl hover:cursor-pointer"
-            onClick={() => setOpenedEditAddress(false)}
+            onClick={() =>
+              edit ? setOpenedEditAddress(false) : setOpenedCreateAddress(false)
+            }
           >
             ❌
           </span>
         )}
       </div>
-      <form className="  py-2 shadow-lg shadow-gray-300  items-center   mt-2">
+      <form
+        className="  py-2 shadow-lg shadow-gray-300  items-center   mt-2"
+        onSubmit={handleSubmit}
+      >
         <div className="flex flex-row">
           <div className=" py-2 my-2   text-gray-600 text-sm font-semibold text-start ps-2  rounded-sm">
             <label className="mx-2 my-2">Full Name: </label>
@@ -138,16 +207,36 @@ function EditAddress({
               type="text"
               name="delivery_instruction"
               onChange={(e) => handleOnChange(e)}
-              value={data.delivery_instructions}
+              value={data.delivery_instruction}
               placeholder="Enter Delivery Instructions Code(optional)"
               className="text-gray-700 mx-2 py-1 px-2 border border-gray-400 rounded-sm block focus:bg-gray-100 focus:outline-indigo-400 outline-1"
             />
           </div>
-          <button className="bg-green-500 rounded-md py-1 px-2 hover:bg-purple-600">
-            Update Address
-          </button>
+
+          {create && (
+            <button
+              type="submit"
+              className="bg-green-500 rounded-md py-1 px-2 hover:bg-purple-600"
+            >
+              Create Address
+            </button>
+          )}
+          {edit && (
+            <button
+              type="submit"
+              className="bg-green-500 bg-opacity-100 rounded-md py-1 px-2 hover:bg-purple-600"
+            >
+              Update Address
+            </button>
+          )}
         </div>
       </form>
+      <div
+        className="text-green-500 ms-2 py-2 shadow-sm 
+      "
+      >
+        <small className="text-center py-2 items-center">{message}</small>
+      </div>
     </div>
   );
 }
