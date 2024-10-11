@@ -65,7 +65,6 @@ const SignUp = () => {
       });
 
       if (response.ok) {
-        const responseData = await response.json();
         navigate("/login");
       } else {
         const errorData = await response.json();

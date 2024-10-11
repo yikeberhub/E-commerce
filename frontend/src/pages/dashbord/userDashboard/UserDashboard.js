@@ -6,21 +6,7 @@ import { useAuth } from "../../../contexts/AuthContext";
 
 function UserDashboard() {
   const { user } = useAuth();
-
-  // const handleDisplay = (component) => {
-  //   console.log("i am called comp");
-  //   setDisplay((prevDisplay) => ({
-  //     ...Object.keys(prevDisplay).reduce(
-  //       (acc, key) => {
-  //         acc[key] = key === component ? true : false;
-
-  //         return acc;
-  //       },
-
-  //       {}
-  //     ),
-  //   }));
-  // };
+  console.log("user", user);
 
   if (!user) return <div className="w-44 h-14 bg-green-500">loading...</div>;
 

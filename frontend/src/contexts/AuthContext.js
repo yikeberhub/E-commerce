@@ -1,10 +1,8 @@
-import React, { createContext, useState, useContext } from "react";
+import React, { createContext, useState, useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
-// Create AuthContext
 const AuthContext = createContext();
 
-// Provider component
 export const AuthProvider = ({ children }) => {
   const [authTokens, setAuthTokens] = useState({
     access: localStorage.getItem("access"),
@@ -12,7 +10,11 @@ export const AuthProvider = ({ children }) => {
   });
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const { navigate } = useNavigate();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    fetchUserInfo();
+  }, []);
 
   // Function to set tokens and user information
   const setTokens = async (tokens, callback) => {
@@ -21,13 +23,11 @@ export const AuthProvider = ({ children }) => {
     localStorage.setItem("refresh", tokens.refresh);
 
     await fetchUserInfo();
-
     if (callback) {
       callback();
     }
   };
 
-  // Function to clear tokens and user information
   const clearTokens = () => {
     setAuthTokens({});
     setUser(null);
@@ -36,7 +36,6 @@ export const AuthProvider = ({ children }) => {
   };
 
   const fetchUserInfo = async () => {
-    console.log("fetch user is called");
     if (!authTokens.access) {
       setUser(null);
       setLoading(false);
@@ -55,9 +54,7 @@ export const AuthProvider = ({ children }) => {
       if (response.ok) {
         const data = await response.json();
         setUser(data);
-        console.log("user data:", data);
       } else if (response.status === 401) {
-        // Attempt to refresh tokens if access token is expired
         await refreshTokens();
       }
     } catch (error) {
@@ -83,23 +80,20 @@ export const AuthProvider = ({ children }) => {
 
       if (response.ok) {
         const data = await response.json();
-        setTokens(data); // Update tokens
-
-        await fetchUserInfo();
-        // Refetch user info with new tokens
+        setTokens(data);
       } else {
-        clearTokens(); // Clear tokens if refresh fails
-        navigate("login/");
+        clearTokens();
+        navigate("/login");
       }
     } catch (error) {
       console.error("Failed to refresh tokens:", error);
-      clearTokens(); // Clear tokens if there is an error
+      clearTokens();
     }
   };
 
   const logout = () => {
     clearTokens();
-    setUser(null);
+    navigate("/login");
   };
 
   return (

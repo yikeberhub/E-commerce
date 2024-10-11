@@ -1,8 +1,12 @@
+import React from "react";
 import ReactDOM from "react-dom/client";
-import "./index.css";
-import router from "./Routes/PageRoutes";
-import { RouterProvider } from "react-router-dom";
+import App from "./App"; // Import your main App component
+import "./index.css"; // Your global styles
 
-ReactDOM.createRoot(document.getElementById("root")).render(
-  <RouterProvider router={router} fallbackElement={<p>Loading...</p>} />
+const root = ReactDOM.createRoot(document.getElementById("root"));
+
+root.render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
 );

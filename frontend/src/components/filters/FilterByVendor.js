@@ -4,7 +4,6 @@ import Card from "../../utilities/CardComp";
 
 function FilterByVendor() {
   const [checked, setChecked] = useState(false);
-  console.log("checked is", checked);
 
   return (
     <div>

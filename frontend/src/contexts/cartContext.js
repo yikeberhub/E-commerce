@@ -13,6 +13,7 @@ export const CartProvider = ({ children }) => {
   const [message, setMessage] = useState(null);
   const [newItem, setNewItem] = useState({ product_id: "", quantity: 1 });
   const navigate = useNavigate();
+
   const token = localStorage.getItem("access");
 
   useEffect(() => {
@@ -73,7 +74,7 @@ export const CartProvider = ({ children }) => {
       });
 
       if (!response.ok) {
-        const errorResponse = await response.json(); // Get JSON error response
+        const errorResponse = await response.json();
         setMessage("please login first!");
         console.error("Error adding item to cart:", errorResponse);
         throw new Error("Failed to add item to cart.");
@@ -104,6 +105,8 @@ export const CartProvider = ({ children }) => {
       fetchCart();
     } catch (err) {
       setError(err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -120,12 +123,12 @@ export const CartProvider = ({ children }) => {
         }
       );
       if (response) {
-        const data = await response.json();
-        console.log(data);
         fetchCart();
       }
     } catch (err) {
       setError(err.error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -139,11 +142,12 @@ export const CartProvider = ({ children }) => {
         },
       });
       if (response) {
-        console.log("cart items:", cart.items);
         fetchCart();
       }
     } catch (err) {
       setError(err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -169,5 +173,4 @@ export const CartProvider = ({ children }) => {
   );
 };
 
-// Custom hook to use auth context
 export const useCart = () => useContext(CartContext);

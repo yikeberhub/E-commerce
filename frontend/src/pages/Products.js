@@ -1,12 +1,5 @@
-import Mobile from "../assets/products/mobile/SAMSUNG Galaxy A03 (Black, 32 GB) (3 GB RAM) 3.webp";
-import Earphone from "../assets/products/earphones/boAt Rockerz 103 Pro 3.webp";
-import Mobile2 from "../assets/products/mobile/realme Narzo 50 (Speed Blue, 64 GB) (4 GB RAM) 4.webp";
-import Camera from "../assets/products/camera/DIGITEK® (DTR 260 GT) Gorilla Tripod-Mini 33 CM (13 Inch) Tripod for Mobile Phone with Phone Mount & Remote, Flexible Gorilla Stand for DSLR & Action Cameras 2.jpg";
-
 import React, { useContext } from "react";
 import { ProductContext } from "../contexts/ProductContext";
-import Card from "../utilities/CardComp";
-import ListComp from "../utilities/ListComp";
 import ProductLists from "../components/ProductList";
 import FilterByPrice from "../components/filters/FilterByPrice";
 import FilterByTags from "../components/filters/FilterByTags";

@@ -1,4 +1,4 @@
-import { React, useState, useEffect } from "react";
+import { React, useState } from "react";
 import AccountIcon from "../../../assets/icons/user.svg";
 
 import { useAuth } from "../../../contexts/AuthContext";

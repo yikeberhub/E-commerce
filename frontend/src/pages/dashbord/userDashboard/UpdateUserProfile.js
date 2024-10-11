@@ -1,6 +1,4 @@
 import { React, useState, useEffect } from "react";
-import AccountIcon from "../../../assets/icons/user.svg";
-
 import { useAuth } from "../../../contexts/AuthContext";
 
 function UpdateUserProfile({ setOpenEditProfile }) {
@@ -15,7 +13,6 @@ function UpdateUserProfile({ setOpenEditProfile }) {
         bio: user.bio,
         phone_number: user.phone_number,
       });
-      console.log("bio is", data.bio);
     }
   }, [user]);
 

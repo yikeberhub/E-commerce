@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 
 const WishlistContext = createContext();
 
-// Provider component
 export const WishlistProvider = ({ children }) => {
   const [wishlist, setWishlist] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -82,8 +81,6 @@ export const WishlistProvider = ({ children }) => {
         navigate("/");
         throw new Error("Failed to add item to Wishlist.", errorResponse);
       }
-      const data = await response.json();
-      console.log("data:", data);
       setMessage("");
       fetchWishlist();
     } catch (err) {
@@ -110,6 +107,8 @@ export const WishlistProvider = ({ children }) => {
       fetchWishlist();
     } catch (err) {
       setError(err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -126,11 +125,12 @@ export const WishlistProvider = ({ children }) => {
         }
       );
       if (response) {
-        const data = await response.json();
         fetchWishlist();
       }
     } catch (err) {
       setError(err.error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -143,10 +143,13 @@ export const WishlistProvider = ({ children }) => {
           "Content-Type": "application/json",
         },
       });
-
-      fetchWishlist();
+      if (response.ok) {
+        fetchWishlist();
+      }
     } catch (err) {
       setError(err.message);
+    } finally {
+      setLoading("false");
     }
   };
 
@@ -175,5 +178,4 @@ export const WishlistProvider = ({ children }) => {
   );
 };
 
-// Custom hook to use auth context
 export const useWishlist = () => useContext(WishlistContext);

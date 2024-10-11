@@ -34,8 +34,6 @@ const ProductDetail = () => {
   const addedToCart = checkItemInCart(product.id)["isAdded"];
   const addedToWishlist = checkItemInWishlist(product.id)["isAdded"];
 
-  // product = { ...product, get_percentage: 20 };
-
   const handleAddToCart = () => {
     const checkedResult = checkItemInCart(product.id);
     if (!checkedResult["isAdded"]) {

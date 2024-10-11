@@ -25,6 +25,8 @@ import UserProfile from "../pages/dashbord/userDashboard/UserProfile";
 import Address from "../pages/dashbord/userDashboard/address/Address";
 import AccountDetail from "../pages/dashbord/userDashboard/AccountDetail";
 import Orders from "../pages/dashbord/userDashboard/order/Orders";
+import PaymentConfirmation from "../pages/dashbord/userDashboard/order/PaymentConfirmation";
+
 const router = createBrowserRouter(
   createRoutesFromElements(
     <Route path="/" element={<App />}>
@@ -43,7 +45,8 @@ const router = createBrowserRouter(
         }}
         element={<Checkout />}
       />
-      <Route path="dashboard/" element={<UserDashboard />}>
+
+      <Route path="/dashboard/" element={<UserDashboard />}>
         <Route index element={<UserProfile />} />
         <Route path="profile/" element={<UserProfile />} />
         <Route path="orders/" element={<Orders />} />
@@ -51,6 +54,7 @@ const router = createBrowserRouter(
         <Route path="account-detail/" element={<AccountDetail />} />
         <Route path="orders/:id" element={<OrderDetail />} />
       </Route>
+      <Route path="/payment/confirm" element={<PaymentConfirmation />} />
       <Route path="wishlist/" element={<Wishlist />} />
       <Route path="products/" element={<Products />} />
       <Route path="product/:id" element={<ProductDetail />} />
@@ -66,6 +70,7 @@ const router = createBrowserRouter(
       />
       <Route path="about/" element={<About />} />
       <Route path="contact-us/" element={<ContactUs />} />
+
       <Route path="*" element={<PageNotFound />} />
     </Route>
   )
