@@ -1,22 +1,27 @@
-# from django.shortcuts import render
-# from rest_framework import generics
+from django.shortcuts import render
+from rest_framework import generics
 
-# # Create your views here.
+from .models import Review
 
-# class ReviewListView(generics.ListCreateAPIView):
-#     serializer_class = ReviewSerializer
+class ReviewSerializer:
+    pass
 
-#     def get_queryset(self):
-#         product_id = self.kwargs['product_id']
-#         return Review.objects.filter(product_id=product_id)
+# Create your views here.
 
-# class ReviewCreateView(generics.CreateAPIView):
-#     serializer_class = ReviewSerializer
+class ReviewListView(generics.ListCreateAPIView):
+    serializer_class = ReviewSerializer
 
-# class ReviewUpdateView(generics.RetrieveUpdateDestroyAPIView):
-#     serializer_class = ReviewSerializer
-#     queryset = Review.objects.all()
+    def get_queryset(self):
+        product_id = self.kwargs['product_id']
+        return Review.objects.filter(product_id=product_id)
 
-# class ReviewDeleteView(generics.DestroyAPIView):
-#     serializer_class = ReviewSerializer
-#     queryset = Review.objects.all()
+class ReviewCreateView(generics.CreateAPIView):
+    serializer_class = ReviewSerializer
+
+class ReviewUpdateView(generics.RetrieveUpdateDestroyAPIView):
+    serializer_class = ReviewSerializer
+    queryset = Review.objects.all()
+
+class ReviewDeleteView(generics.DestroyAPIView):
+    serializer_class = ReviewSerializer
+    queryset = Review.objects.all()

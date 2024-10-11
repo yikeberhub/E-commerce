@@ -1,9 +1,9 @@
-# from django.urls import path
+# urls.py
 
-# from .views import PaymentInitiateView,PaymentConfirmView,PaymentHistoryView
+from django.urls import path
+from .views import CreatePaymentView,chapa_callback
 
-# urlpatterns = [
-#      path('initiate/', PaymentInitiateView.as_view(), name='payment-initiate'),
-#     path('confirm/', PaymentConfirmView.as_view(), name='payment-confirm'),
-#     path('history/', PaymentHistoryView.as_view(), name='payment-history'),
-# ]
+urlpatterns = [
+    path('create/', CreatePaymentView.as_view(), name='create-payment'),
+     path('callback/', chapa_callback, name='chapa-webhook')
+]

@@ -5,8 +5,12 @@ from rest_framework.response import Response
 
 from .models import Order,OrderItem
 from cart.models import Cart
+from users.models import CustomUser,Address
 
+from payments .process_payment import process_payment
 from .serializers import OrderSerializer
+from payments.serializers import PaymentSerializer
+from payments.models import Payment
 # Create your views here.
 
 class CheckoutView(generics.CreateAPIView):
@@ -34,6 +38,7 @@ class OrderListView(generics.ListAPIView):
         user = self.request.user
         return Order.objects.filter(user=user)
     
+ 
 class OrderDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = OrderSerializer
     permission_classes = [IsAuthenticated]
@@ -55,8 +60,76 @@ class OrderDetailView(generics.RetrieveUpdateDestroyAPIView):
         
 
 class OrderUpdateView(generics.UpdateAPIView):
-    serializer_class = OrderSerializer
     queryset = Order.objects.all()
+    serializer_class = OrderSerializer
+    
+
+    def put(self, request, *args, **kwargs):
+        try:
+            order_id = self.kwargs['order_id']
+            order = Order.objects.get(id=order_id)
+            address_id = request.data.get('address_id')
+            payment_method = request.data.get('payment_method')
+            payment_gateway = request.data.get('payment_gateway')
+            if address_id:
+                try:
+                    address = Address.objects.get(id=address_id)
+                    order.address = address
+                    print('address',address)
+                except Address.DoesNotExist:
+                    return Response({'error': 'Address not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+            if payment_method:
+                order.payment_method = payment_method
+                print('pay method')
+            if payment_gateway:
+                order.payment_gateway = payment_gateway
+                print('pay gateway')
+            
+            order.save()
+
+            # Return the updated order data
+            serializer = self.get_serializer(order)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        except Order.DoesNotExist:
+            return Response({'error': 'Order not found.'}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        
+        
+class ProcessPaymentView(generics.GenericAPIView):
+    queryset = Order.objects.all()
+
+    def post(self, request, *args, **kwargs):
+        try:
+            order = self.get_object()
+            # Check if payment info is set
+            if not order.payment_method or not order.payment_gateway:
+                return Response({'error': 'Payment information is missing.'}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Process payment using stored payment method and gateway
+            payment_data = process_payment(order, order.payment_method, order.payment_gateway)
+            if payment_data is None:
+                return Response({'error': 'Payment processing failed.'}, status=status.HTTP_400_BAD_REQUEST)
+
+            # If payment is successful, save the transaction ID
+            if not order.payment:
+                # Create and associate a new payment record if needed
+                payment = Payment(...,order=order, transaction_id=payment_data['transaction_id'])
+                payment.save()
+                order.payment = payment
+            
+            order.payment.transaction_id = payment_data['transaction_id']
+            order.payment.save()
+
+            return Response({'message': 'Payment processed successfully.', 'transaction_id': payment_data['transaction_id']}, status=status.HTTP_200_OK)
+
+        except Order.DoesNotExist:
+            return Response({'error': 'Order not found.'}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
 
 class OrderCancelView(generics.DestroyAPIView):
     serializer_class = OrderSerializer

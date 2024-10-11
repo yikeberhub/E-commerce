@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 import os
 from pathlib import Path
+from decouple import config
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -175,6 +177,11 @@ AUTHENTICATION_BACKENDS = [
 AUTH_USER_MODEL = 'users.CustomUser'
 
 CORS_ALLOW_ALL_ORIGINS = True
+
+CHAPA_API_KEY = config('CHAPA_API_KEY')
+CHAPA_API_URL = 'https://api.chapa.co/v1/transaction/initialize'  
+CHAPA_CALLBACK_URL = 'http://localhost:8000/payments/callback/'  
+
 
 # JAZZMIN_ADMIN_SETTINGS = {
 #     'site_title':'Yike shop',
