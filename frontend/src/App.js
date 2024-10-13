@@ -21,7 +21,7 @@ import UserProfile from "./pages/dashbord/userDashboard/UserProfile";
 import Address from "./pages/dashbord/userDashboard/address/Address";
 import AccountDetail from "./pages/dashbord/userDashboard/AccountDetail";
 import Orders from "./pages/dashbord/userDashboard/order/Orders";
-import PaymentConfirmation from "./pages/dashbord/userDashboard/order/PaymentConfirmation";
+import PaymentConfirmation from "./pages/dashbord/userDashboard/order/PaymentDetail";
 import Navigation from "./components/Navigation"; // Assuming you have a Navigation component
 import Footer from "./components/Footer"; // Assuming you have a Footer component
 
@@ -29,6 +29,8 @@ import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { ProductProvider } from "./contexts/ProductContext";
 import { CartProvider } from "./contexts/cartContext";
 import { WishlistProvider } from "./contexts/WishlistContext";
+import AdminDashboard from "./pages/AdminDashboard/AdminDashboard";
+import PaymentDetail from "./pages/dashbord/userDashboard/order/PaymentDetail";
 
 function App() {
   return (
@@ -59,11 +61,12 @@ function App() {
                     <Route path="account-detail" element={<AccountDetail />} />
                     <Route path="orders/:id" element={<OrderDetail />} />
                   </Route>
-
                   <Route
-                    path="/payment/confirm"
-                    element={<PaymentConfirmation />}
-                  />
+                    path="/admin-dashboard/"
+                    element={<AdminDashboard />}
+                  ></Route>
+
+                  <Route path="/payment/confirm" element={<PaymentDetail />} />
                   <Route path="/wishlist" element={<Wishlist />} />
                   <Route path="/products" element={<Products />} />
                   <Route path="/product/:id" element={<ProductDetail />} />

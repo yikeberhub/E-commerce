@@ -9,9 +9,9 @@ function Wishlist() {
     useWishlist();
   const { user } = useAuth();
 
-  useEffect(() => {
-    fetchWishlist();
-  }, []);
+  // useEffect(() => {
+  //   fetchWishlist();
+  // }, []);
 
   if (loading) return <div>Loading...</div>;
   if (!user) return alert(message);

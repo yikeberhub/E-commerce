@@ -14,10 +14,8 @@ import { useWishlist } from "../contexts/WishlistContext";
 
 const ProductDetail = () => {
   const { id } = useParams();
-  const { products } = useContext(ProductContext);
-  const [product, setProduct] = useState(() => {
-    return products.find((product) => (product.id = id));
-  });
+  const { products, loading, setLoading } = useContext(ProductContext);
+  const [product, setProduct] = useState(null);
 
   const { newItem, addCartItem, removeCartItem, checkItemInCart } = useCart();
   const {
@@ -26,13 +24,19 @@ const ProductDetail = () => {
     removeWishlistItem,
     checkItemInWishlist,
   } = useWishlist();
+  const [addedToCart, setAddedToCart] = useState(false);
+  const [addedToWishlist, setAddedToWishlist] = useState(false);
 
   useEffect(() => {
-    getProductDetail();
+    const fetch = async () => {
+      await getProductDetail();
+      if (product) {
+        setAddedToCart(checkItemInCart(product.id)["isAdded"]);
+        setAddedToWishlist(checkItemInWishlist(product.id)["isAdded"]);
+      }
+    };
+    fetch();
   }, [id]);
-
-  const addedToCart = checkItemInCart(product.id)["isAdded"];
-  const addedToWishlist = checkItemInWishlist(product.id)["isAdded"];
 
   const handleAddToCart = () => {
     const checkedResult = checkItemInCart(product.id);
@@ -54,6 +58,7 @@ const ProductDetail = () => {
 
   const getProductDetail = async () => {
     try {
+      setLoading(true);
       const response = await fetch(`${SummaryApi.productDetail.url}/${id} `, {
         method: SummaryApi.method,
         headers: {
@@ -65,12 +70,16 @@ const ProductDetail = () => {
       }
 
       const data = await response.json();
-      const fetchedproduct = data || []; // Default to an empty array if products is undefined
+      const fetchedproduct = data;
       setProduct(fetchedproduct);
     } catch (error) {
       console.error("error", error);
+    } finally {
+      setLoading(false);
     }
   };
+
+  if (loading || !product) return <div>Loading...</div>;
 
   return (
     <div className="grid grid-cols-7 gap-4 mt-4 border border-gray-200 p-6 px-20 mx-4 ">
@@ -79,7 +88,6 @@ const ProductDetail = () => {
           <div className=" shadow-lg border-gray-300 rounded w-2/5">
             <div className="shadow-md rounded-md py-2 my-2">
               <img
-                key={product?.image.id}
                 src={product?.image}
                 className="w-auto h-60"
                 alt="product.title"
@@ -87,17 +95,22 @@ const ProductDetail = () => {
             </div>
 
             <div className="flex flex-row justify-between px-2 my-2 mx-2 rounded shadow-sm ">
-              {product?.images?.map((image) => (
-                <div>
-                  <img
-                    key={image?.id}
-                    src={image?.image}
-                    className="h-28"
-                    alt="product_img"
-                  />
-                  <span className="mx-2"></span>
-                </div>
-              ))}
+              {product.images ? (
+                product.images.map((image) => (
+                  <div>
+                    <img
+                      key={image?.id}
+                      src={image?.image}
+                      className="h-28"
+                      alt="product_img"
+                    />
+
+                    <span className="mx-2"></span>
+                  </div>
+                ))
+              ) : (
+                <span></span>
+              )}
             </div>
           </div>
 
@@ -121,12 +134,12 @@ const ProductDetail = () => {
                   <p className="inline text-3xl text-green-600 font-semibold mr-2 ">
                     ${product?.price}
                   </p>
-                  <p className="text-2xl text-slate-400   px-2 inline-block">
+                  <div className="text-2xl text-slate-400   px-2 inline-block">
                     <p className="text-sm">-20% off</p>
                     <span className="line-through font-semibold">
                       ${product?.old_price}
                     </span>
-                  </p>
+                  </div>
                   <div className=" w-24 py-2 px-2 ">
                     <input
                       type="number"
@@ -223,10 +236,10 @@ const ProductDetail = () => {
             Delivery
           </h1>
           <p className="text-md font-semibold ">➕ location</p>
-          <p className="my-4 py-2 flex flex-row gap-10 items-center px-2 font-semibold">
+          <div className="my-4 py-2 flex flex-row gap-10 items-center px-2 font-semibold">
             <p className="text-sm text-red-500 py-1">unverified address</p>
             <p className="text-blue-500 hover:cursor-pointer">change</p>
-          </p>
+          </div>
           <hr />
           <h2 className="font-semibold text-xl px-2">Return & Warrenty</h2>
           <p className="flex flex-col gap-2 text-lg px-2 font-semibold text-slate-400">
@@ -259,20 +272,20 @@ const ProductDetail = () => {
             <small>Contact seller: +2519539503</small>
           </p>
           <hr />
-          <p className="flex flex-row justify-between px-2 text-lg font-semibold">
-            <p className="py-2 my-2">
+          <div className="flex flex-row justify-between px-2 text-lg font-semibold">
+            <div className="py-2 my-2">
               <p> Rating</p>
               <p className="text-xl">100%</p>
-            </p>
-            <p className="py-2 my-2">
+            </div>
+            <div className="py-2 my-2">
               <p> Ship on time</p>
               <p className="text-xl">100%</p>
-            </p>
-            <p className="py-2 my-2">
+            </div>
+            <div className="py-2 my-2">
               <p> Chat response</p>
               <p className="text-xl">100%</p>
-            </p>
-          </p>
+            </div>
+          </div>
           <hr />
           <h2 className="py-2">
             Become vendor?

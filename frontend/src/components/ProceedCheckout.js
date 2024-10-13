@@ -5,7 +5,6 @@ const ProceedCheckout = ({ itemsTotalPrice, shipingPrice, cart }) => {
   const navigate = useNavigate();
   const totalPrice = itemsTotalPrice + shipingPrice;
   const token = localStorage.getItem("access");
-  console.log("token", token);
 
   const handleCheckout = async () => {
     try {

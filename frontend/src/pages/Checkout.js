@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams, Link, json } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import OrderComponent from "./dashbord/userDashboard/order/OrderComponent";
 import PaypalImg from "../assets/icons/images/paypal_icon.png";
 import ChapaImg from "../assets/icons/images/chapa_logo.jpg";
@@ -7,6 +7,7 @@ import EditAddress from "./dashbord/userDashboard/address/EditAddress";
 import { useAuth } from "../contexts/AuthContext";
 
 const PreviewOrder = ({ updatedOrder }) => {
+  const { user } = useAuth();
   console.log("order preview component:", updatedOrder);
   const token = localStorage.getItem("access");
 
@@ -15,12 +16,14 @@ const PreviewOrder = ({ updatedOrder }) => {
       const response = await fetch("http://localhost:8000/payments/create/", {
         method: "POST",
         headers: {
+          Authorization: `Bearer${token}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
           amount: 1000,
-          email: "yikeber@gmail.com",
-          first_name: "yikeber",
+          email: user.email,
+          order_id: updatedOrder.id,
+          first_name: updatedOrder.address.full_name,
           last_name: "misganaw",
           phone_number: "0946472687",
         }),
@@ -178,6 +181,8 @@ const Checkout = () => {
     fetchOrderDetails();
   }, [orderId]);
 
+  console.log("user addresses", user.addresses);
+
   const fetchOrderDetails = async () => {
     try {
       const response = await fetch(`http://localhost:8000/orders/${orderId}`, {
@@ -200,7 +205,7 @@ const Checkout = () => {
 
   const updateOrder = async () => {
     console.log("Order ID:", orderId);
-    const address = user.addresses.find((address) => address.is_default); // Ensure you're getting the default address
+    const address = user.addresses.find((address) => address.is_default);
     try {
       const response = await fetch(
         `http://localhost:8000/orders/${orderId}/update/`,

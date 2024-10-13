@@ -1,4 +1,4 @@
-import { createContext, useState } from "react";
+import { createContext, useEffect, useState } from "react";
 import SummaryApi from "../common";
 const ProductContext = createContext(null);
 
@@ -7,6 +7,11 @@ function ProductProvider({ children }) {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [searchedProducts, setSearchedProducts] = useState(products);
   const [showSearchedProducts, setShowSearchedProducts] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    getProducts();
+  }, []);
 
   const handleFilterProduct = (products) => {
     setSearchedProducts(products);
@@ -33,6 +38,8 @@ function ProductProvider({ children }) {
       setProduct(products);
     } catch (error) {
       console.error("error:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -40,6 +47,8 @@ function ProductProvider({ children }) {
     <ProductContext.Provider
       value={{
         products,
+        loading,
+        setLoading,
         getProducts: getProducts,
         searchedProducts,
         selectedProduct,

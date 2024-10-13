@@ -12,10 +12,6 @@ const CartLists = () => {
   const { user } = useAuth();
 
   useEffect(() => {
-    fetchCart();
-  }, []);
-
-  useEffect(() => {
     calculateItemPrice();
   }, [fetchCart]);
 

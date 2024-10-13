@@ -5,10 +5,10 @@ import AccountIcon from "../../../assets/icons/user.svg";
 import { useAuth } from "../../../contexts/AuthContext";
 
 function UserDashboard() {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   console.log("user", user);
 
-  if (!user) return <div className="w-44 h-14 bg-green-500">loading...</div>;
+  if (loading) return <div className="w-44 h-14 bg-green-500">loading...</div>;
 
   return (
     <div>

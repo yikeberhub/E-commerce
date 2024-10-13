@@ -13,7 +13,9 @@ const Header = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    handleSearch();
+    if (searchedValue) {
+      handleSearch();
+    }
   }, [searchedValue]);
 
   const handleSearch = () => {
