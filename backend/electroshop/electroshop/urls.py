@@ -1,8 +1,10 @@
 
 from django.contrib import admin
-from django.urls import path,include
+from django.urls import path,re_path,include
+from django.views.generic import TemplateView
 from django.conf import settings
 from django.conf.urls.static import static
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -18,6 +20,7 @@ urlpatterns = [
     # path('notifications/', include('notifications.urls')),
     path('cart/', include('cart.urls')),
     path('wishlist/', include('wishlists.urls')),
+    # re_path(r'^.*$',TemplateView.as_view(template_name = '../../../frontend/public/index.html'))
 
 ]
 if settings.DEBUG:  

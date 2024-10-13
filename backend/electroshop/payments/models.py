@@ -4,13 +4,9 @@ from users.models import CustomUser
 
 PAYMENT_STATUS = [('pending','Pending'),('completed','Completed'),('failed','Failed')]
 
-PAYMENT_GATEWAY = [('chapa','Chapa'),('paypal','Paypal')]
-# Create your models here.
 class Payment(models.Model):
-    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='payments')
-    order = models.OneToOneField('orders.Order',null=True, on_delete=models.CASCADE, related_name='payment_order')  # Unique related_name
-    payment_status = models.CharField(max_length=20,choices=PAYMENT_GATEWAY)
-    amount = models.DecimalField(max_digits=10, decimal_places=2,blank=True,null=True)
+    order = models.OneToOneField('orders.Order',null=True, on_delete=models.CASCADE, related_name='payment_order')  
+    payment_status = models.CharField(max_length=20,choices=PAYMENT_STATUS)
     transaction_id = models.CharField(max_length=255, unique=True)
     created_at = models.DateTimeField(auto_now_add=True)
 

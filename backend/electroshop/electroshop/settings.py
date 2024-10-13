@@ -161,7 +161,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR,'media')
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, '/static/')
-STATICFILES_DIRS = [os.path.join(BASE_DIR,'static'),]
+# STATICFILES_DIRS = [os.path.join(BASE_DIR,'build/static')]
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
@@ -180,7 +180,6 @@ CORS_ALLOW_ALL_ORIGINS = True
 
 CHAPA_API_KEY = config('CHAPA_API_KEY')
 CHAPA_API_URL = 'https://api.chapa.co/v1/transaction/initialize'  
-CHAPA_CALLBACK_URL = 'http://localhost:8000/payments/callback/'  
 
 
 # JAZZMIN_ADMIN_SETTINGS = {
