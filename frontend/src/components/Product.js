@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
 import { useCart } from "../contexts/cartContext";
 import { useWishlist } from "../contexts/WishlistContext";
@@ -40,76 +40,49 @@ const Product = ({ product }) => {
   };
 
   return (
-    <div className="sm:col-span-2 flex flex-col items-center px-0 border-green-300 rounded py-2 shadow-md w-full">
-      <div className="border rounded-lg border-gray-200">
-        <span className="bg-red-500 rounded-tl-md rounded-br-md px-2 py-1 shadow-md">
+    <div className="sm:col-span-2 flex flex-col items-center border border-gray-200 rounded-lg shadow-md transition-transform hover:scale-105 duration-300 w-full p-4">
+      <div className="relative w-full">
+        <span className="absolute top-2 left-2 bg-red-500 text-white rounded-full px-2 py-1 text-sm shadow-md">
           {`-${product.get_percentage}% off!`}
         </span>
         <Link to={`/product/${product.id}`}>
           <img
             src={product.image}
-            className="w-auto h-64 rounded-md mt-2 hover:w-full hover:h-72"
-            alt="logo"
+            className="w-full h-64 rounded-md object-cover transition-transform duration-200 hover:scale-105"
+            alt={product.title}
           />
-          <p className="text-[#3e3e3f] text-lg">{product?.category?.title}</p>
-          <p className="text-[#4d2d96] text-sm">{product?.title}</p>
-          <p className="text-[#4d2d96] text-sm">{product?.specifications}</p>
+          <p className="text-gray-700 text-lg font-semibold mt-2">
+            {product?.category?.title}
+          </p>
+          <p className="text-blue-800 text-sm font-medium">{product?.title}</p>
+          <p className="text-gray-600 text-xs">{product?.specifications}</p>
         </Link>
-        <p className="text-[#bb7cc0e9] text-sm">
+        <p className="text-yellow-500 text-sm mt-1">
           Rating✨✨✨ ({product.rating})
         </p>
-        <p className="text-[#313432]">{product.vendor.title}</p>
-        <div>
-          <div className="flex flex-row justify-between items center border border-gray-200 px-2 py-2 my-2 rounded shadow-md font-bold">
-            <span>${product.price}</span>
-            <p className="border-gray-400 shadow-sm rounded px-0.5 hover:cursor-pointer">
-              <span onClick={handleAddToCart}>
-                {" "}
-                {!addedToCart ? (
-                  <span>
-                    <img
-                      src={AddCartIcon}
-                      alt="add_cart"
-                      className="w-6 h-6 rounded"
-                    />
-                  </span>
-                ) : (
-                  <span>
-                    <img
-                      src={RemoveCartIcon}
-                      alt="rmv_cart_icon"
-                      className="w-6 h-6 rounded"
-                    />
-                  </span>
-                )}{" "}
-              </span>
-            </p>
-            <p className="hover:cursor-pointer">
-              <span onClick={handleAddToWishlist}>
-                {" "}
-                {!addedToWishlist ? (
-                  <span>
-                    <img
-                      src={AddWishlistIcon}
-                      className="w-6 h-6 rounded-full "
-                      alt="add_wish_img"
-                    />
-                  </span>
-                ) : (
-                  <span>
-                    {" "}
-                    <img
-                      src={RemoveWishlistIcon}
-                      className="w-6 h-6 rounded-full "
-                      alt="add_wish_img"
-                    />
-                  </span>
-                )}
-              </span>
-            </p>
-          </div>
-          <span className="font-normal line-through">${product.old_price}</span>
+        <p className="text-gray-700 text-sm">{product.vendor.title}</p>
+        <div className="flex flex-row justify-between items-center border border-gray-300 rounded-md p-2 my-2 shadow-sm">
+          <span className="text-lg font-bold text-green-600">
+            ${product.price}
+          </span>
+          <span className="cursor-pointer" onClick={handleAddToCart}>
+            <img
+              src={addedToCart ? RemoveCartIcon : AddCartIcon}
+              alt={addedToCart ? "Remove from Cart" : "Add to Cart"}
+              className="w-6 h-6 rounded transition duration-200 hover:opacity-80"
+            />
+          </span>
+          <span className="cursor-pointer" onClick={handleAddToWishlist}>
+            <img
+              src={addedToWishlist ? RemoveWishlistIcon : AddWishlistIcon}
+              alt={addedToWishlist ? "Remove from Wishlist" : "Add to Wishlist"}
+              className="w-6 h-6 rounded-full transition duration-200 hover:opacity-80"
+            />
+          </span>
         </div>
+        <span className="text-gray-500 line-through text-sm">
+          ${product.old_price}
+        </span>
       </div>
     </div>
   );

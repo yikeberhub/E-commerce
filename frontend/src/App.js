@@ -22,15 +22,30 @@ import Address from "./pages/dashbord/userDashboard/address/Address";
 import AccountDetail from "./pages/dashbord/userDashboard/AccountDetail";
 import Orders from "./pages/dashbord/userDashboard/order/Orders";
 import PaymentConfirmation from "./pages/dashbord/userDashboard/order/PaymentDetail";
-import Navigation from "./components/Navigation"; // Assuming you have a Navigation component
 import Footer from "./components/Footer"; // Assuming you have a Footer component
+
+import OverviewPanel from "./pages/AdminDashboard/OverviewPanel";
+import OrderManagement from "./pages/AdminDashboard/OrderManagement";
+import ProductManagement from "./pages/AdminDashboard/ProductManagement";
+import CustomerManagement from "./pages/AdminDashboard/CustomerManagement";
+import FinancialOverview from "./pages/AdminDashboard/FinancialOverview";
+import SupportResources from "./pages/AdminDashboard/SupportResources";
+
+import VendorAdminDashboard from "./pages/vendorDashboard/VendorAdminDashboard";
+
+import AdminDashboard from "./pages/AdminDashboard/AdminDashboard";
+import UserList from "./pages/AdminDashboard/AdminComponent/UserList";
+import EditUser from "./pages/AdminDashboard/AdminComponent/EditUser";
+import AddUser from "./pages/AdminDashboard/AdminComponent/AddUser";
+import UserDetail from "./pages/AdminDashboard/AdminComponent/UserDetail";
 
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { ProductProvider } from "./contexts/ProductContext";
 import { CartProvider } from "./contexts/cartContext";
 import { WishlistProvider } from "./contexts/WishlistContext";
-import AdminDashboard from "./pages/AdminDashboard/AdminDashboard";
 import PaymentDetail from "./pages/dashbord/userDashboard/order/PaymentDetail";
+
+import NavigationWrapper from "./utilities/NavigationWrapper";
 
 function App() {
   return (
@@ -39,7 +54,7 @@ function App() {
         <ProductProvider>
           <CartProvider>
             <WishlistProvider>
-              <Navigation />
+              <NavigationWrapper />
               <main>
                 <Routes>
                   <Route path="" element={<Home />} />
@@ -61,10 +76,64 @@ function App() {
                     <Route path="account-detail" element={<AccountDetail />} />
                     <Route path="orders/:id" element={<OrderDetail />} />
                   </Route>
+                  <Route path="/admin-dashboard/" element={<AdminDashboard />}>
+                    <Route index element={<OverviewPanel />} />
+                    <Route
+                      path="order-management"
+                      element={<OrderManagement />}
+                    />
+                    <Route
+                      path="product-management"
+                      element={<ProductManagement />}
+                    />
+
+                    <Route
+                      path="customer-management/"
+                      element={<CustomerManagement />}
+                    >
+                      <Route index element={<UserList />} />{" "}
+                      {/* Default route under customer management */}
+                      <Route path="add-user" element={<AddUser />} />
+                      <Route path="edit-user/:id" element={<EditUser />} />
+                      <Route path="user-detail/:id" element={<UserDetail />} />
+                    </Route>
+
+                    <Route
+                      path="financial-overview"
+                      element={<FinancialOverview />}
+                    />
+                    <Route
+                      path="support-resources"
+                      element={<SupportResources />}
+                    />
+                  </Route>
+
                   <Route
-                    path="/admin-dashboard/"
-                    element={<AdminDashboard />}
-                  ></Route>
+                    path="/vendor-dashboard/"
+                    element={<VendorAdminDashboard />}
+                  >
+                    <Route index element={<OverviewPanel />} />
+                    <Route
+                      path="order-management"
+                      element={<OrderManagement />}
+                    />
+                    <Route
+                      path="product-management"
+                      element={<ProductManagement />}
+                    />
+                    <Route
+                      path="customer-management"
+                      element={<CustomerManagement />}
+                    />
+                    <Route
+                      path="financial-overview"
+                      element={<FinancialOverview />}
+                    />
+                    <Route
+                      path="support-resources"
+                      element={<SupportResources />}
+                    />
+                  </Route>
 
                   <Route path="/payment/confirm" element={<PaymentDetail />} />
                   <Route path="/wishlist" element={<Wishlist />} />

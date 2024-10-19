@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import loginIcons from "../assets/icons/images/signin.gif";
-import Loader from "../common/Loader";
 import { useAuth } from "../contexts/AuthContext";
+import Spinner from "../common/Spinner";
 
 const Login = () => {
   const { setTokens } = useAuth();
@@ -73,7 +73,7 @@ const Login = () => {
   return (
     <>
       {loading ? (
-        <Loader />
+        <Spinner />
       ) : (
         <section id="login">
           <div className="mx-auto container p-4">

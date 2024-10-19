@@ -27,7 +27,7 @@ export const CartProvider = ({ children }) => {
         if (item.product.id === product_id) {
           result["item"] = item;
           result["isAdded"] = true;
-          return false;
+          return result;
         } else {
           return result;
         }

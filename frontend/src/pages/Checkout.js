@@ -5,24 +5,30 @@ import PaypalImg from "../assets/icons/images/paypal_icon.png";
 import ChapaImg from "../assets/icons/images/chapa_logo.jpg";
 import EditAddress from "./dashbord/userDashboard/address/EditAddress";
 import { useAuth } from "../contexts/AuthContext";
+import Spinner from "../common/Spinner";
 
-const PreviewOrder = ({ updatedOrder }) => {
+const PreviewOrder = ({ updatedOrder, paymentGateway, paymentMethod }) => {
   const { user } = useAuth();
+  const [loading, setLoading] = useState(false);
+
   console.log("order preview component:", updatedOrder);
   const token = localStorage.getItem("access");
 
   const handlePayment = async () => {
+    console.log("i am called");
     try {
       const response = await fetch("http://localhost:8000/payments/create/", {
         method: "POST",
         headers: {
-          Authorization: `Bearer${token}`,
+          Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
           amount: 1000,
           email: user.email,
           order_id: updatedOrder.id,
+          payment_gateway: paymentGateway,
+          payment_method: paymentMethod,
           first_name: updatedOrder.address.full_name,
           last_name: "misganaw",
           phone_number: "0946472687",
@@ -32,15 +38,23 @@ const PreviewOrder = ({ updatedOrder }) => {
       const data = await response.json();
 
       if (response.ok) {
-        console.log("Payment initiated:", data);
+        console.log(
+          "Payment initiated, redirecting to URL:",
+          data.data.checkout_url
+        );
+        console.log("sucessfull initiation datas:", data);
         window.location.href = data.data.checkout_url;
       } else {
         console.error("Payment initiation failed:", data);
       }
     } catch (error) {
-      console.error("unable to process payment", error);
+      console.error("Unable to process payment", error);
+    } finally {
+      setLoading(false);
     }
   };
+
+  // if (loading) return <Spinner />;
   return (
     <div className="bg-white p-4 rounded-lg shadow-lg max-w-md mx-auto">
       <h2 className="text-3xl font-bold text-gray-800 mb-4 text-center">
@@ -181,8 +195,6 @@ const Checkout = () => {
     fetchOrderDetails();
   }, [orderId]);
 
-  console.log("user addresses", user.addresses);
-
   const fetchOrderDetails = async () => {
     try {
       const response = await fetch(`http://localhost:8000/orders/${orderId}`, {
@@ -217,8 +229,6 @@ const Checkout = () => {
           },
           body: JSON.stringify({
             address_id: address.id,
-            payment_method: paymentMethod,
-            payment_gateway: paymentGateway,
             amount: orderDetails.total_price,
           }),
         }
@@ -242,7 +252,7 @@ const Checkout = () => {
     setPaymentGetway(e.target.value);
   };
 
-  if (!orderDetails) return <div>Loading...</div>;
+  if (!orderDetails) return <Spinner />;
 
   return (
     <div className="container m-auto mb-28">
@@ -389,7 +399,11 @@ const Checkout = () => {
           )}
           {orderDetails && updatedOrder && showPreview && (
             <div>
-              <PreviewOrder updatedOrder={updatedOrder} />
+              <PreviewOrder
+                updatedOrder={updatedOrder}
+                paymentGateway={paymentGateway}
+                paymentMethod={paymentMethod}
+              />
             </div>
           )}
         </div>
