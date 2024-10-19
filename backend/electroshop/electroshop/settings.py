@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'corsheaders',
     #my apps
     'users',
+    'admin_app',
     'vendors',
     'products',
     'orders',
@@ -178,7 +179,24 @@ AUTH_USER_MODEL = 'users.CustomUser'
 
 CORS_ALLOW_ALL_ORIGINS = True
 
-CHAPA_API_KEY = config('CHAPA_API_KEY')
+CORS_ALLOW_METHODS = [
+    "GET",
+    "POST",
+    "PUT",
+    "PATCH",
+    "DELETE",
+    "OPTIONS"
+]
+CORS_ALLOW_HEADERS = [
+    "content-type",
+    "authorization",
+    "x-csrftoken",
+    
+]
+
+
+# CHAPA_API_KEY = config('CHAPA_API_KEY')
+CHAPA_SECRET_KEY = 'CHASECK_TEST-T8HXB7FmjR9orT5GecVmtZyuaK9UU9qy'
 CHAPA_API_URL = 'https://api.chapa.co/v1/transaction/initialize'  
 
 

@@ -69,8 +69,8 @@ class OrderUpdateView(generics.UpdateAPIView):
             order_id = self.kwargs['order_id']
             order = Order.objects.get(id=order_id)
             address_id = request.data.get('address_id')
-            payment_method = request.data.get('payment_method')
-            payment_gateway = request.data.get('payment_gateway')
+            # payment_method = request.data.get('payment_method')
+            # payment_gateway = request.data.get('payment_gateway')
             if address_id:
                 try:
                     address = Address.objects.get(id=address_id)
@@ -78,13 +78,6 @@ class OrderUpdateView(generics.UpdateAPIView):
                     print('address',address)
                 except Address.DoesNotExist:
                     return Response({'error': 'Address not found.'}, status=status.HTTP_404_NOT_FOUND)
-
-            if payment_method:
-                order.payment_method = payment_method
-                print('pay method')
-            if payment_gateway:
-                order.payment_gateway = payment_gateway
-                print('pay gateway')
             
             order.save()
 

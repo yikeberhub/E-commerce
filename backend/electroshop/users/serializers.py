@@ -33,10 +33,18 @@ def set_default_address(id,user):
          
 
 class UserSerializer(serializers.ModelSerializer):
-    addresses = AddressSerializer(many=True)
+    addresses = AddressSerializer(many=True,read_only=True)
     class Meta:
         model = CustomUser
         fields = '__all__'
+        
+        def update(self, instance, validated_data):
+            # Update the user fields first
+            instance.username = validated_data.get('username', instance.username)
+            instance.email = validated_data.get('email', instance.email)
+            instance.phone_number = validated_data.get('phone_number', instance.phone_number)
+            instance.save()
+            return instance
 
 class RegisterSerializer(serializers.ModelSerializer):
     class Meta:
