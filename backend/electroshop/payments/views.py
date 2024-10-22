@@ -39,8 +39,6 @@ class CreatePaymentView(APIView):
             'Authorization': f'Bearer {settings.CHAPA_SECRET_KEY}',
             'Content-Type': 'application/json'
         }
-        print('data here')
-        # Prepare payment data
         payment_data = {
             "amount": float(amount),
             "currency": "ETB",
@@ -95,7 +93,6 @@ def chapa_callback(request, order_id):
                 order.status = 'processing'
                 order.save()
 
-                # Determine the sub-method for Chapa
                 chapa_sub_method = payment_method if payment_method in ['telebirr', 'cbe'] else None
                 
                 payment = Payment.objects.create(

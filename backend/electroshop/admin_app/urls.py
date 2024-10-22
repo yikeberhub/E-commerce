@@ -12,6 +12,9 @@ urlpatterns = [
     # User management endpoints
     path('super-admin-dashboard/users/', user_list, name='user-list'),
     path('super-admin-dashboard/users/<int:pk>/', user_detail, name='user-detail'),
+    
+    # path('super-admin-dashboard/order/', order, name='user-detail'),
+    # path('super-admin-dashboard/users/<int:pk>/', user_detail, name='user-detail'),
 
     # Vendor admin dashboard view
     path('vendor-admin-dashboard/', VendorAdminDashboardView.as_view(), name='vendor_admin_dashboard'),

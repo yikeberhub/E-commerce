@@ -33,10 +33,23 @@ class CheckoutView(generics.CreateAPIView):
 
 class OrderListView(generics.ListAPIView):
     serializer_class = OrderSerializer
+    permission_classes = [IsAuthenticated]  
 
     def get_queryset(self):
+        print('user is ',self.request.user)
         user = self.request.user
-        return Order.objects.filter(user=user)
+        
+        if user.role == 'admin':
+            return Order.objects.all()  
+        elif user.role == 'customer':
+            return Order.objects.filter(customer_name=user.username)  
+        return Order.objects.none() 
+
+    def get(self, request, *args, **kwargs):
+        print('hello i am called')
+        orders = self.get_queryset()
+        serializer = self.get_serializer(orders, many=True)
+        return Response(serializer.data)
     
  
 class OrderDetailView(generics.RetrieveUpdateDestroyAPIView):
@@ -69,8 +82,6 @@ class OrderUpdateView(generics.UpdateAPIView):
             order_id = self.kwargs['order_id']
             order = Order.objects.get(id=order_id)
             address_id = request.data.get('address_id')
-            # payment_method = request.data.get('payment_method')
-            # payment_gateway = request.data.get('payment_gateway')
             if address_id:
                 try:
                     address = Address.objects.get(id=address_id)
