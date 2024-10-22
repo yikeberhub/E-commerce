@@ -15,11 +15,14 @@ const Header = () => {
   useEffect(() => {
     if (searchedValue) {
       handleSearch();
+    } else {
+      navigate("/");
     }
   }, [searchedValue]);
 
   const handleSearch = () => {
     const lowercaseSearchedValue = searchedValue.toLowerCase();
+    console.log("searched is", lowercaseSearchedValue);
     if (lowercaseSearchedValue !== "") {
       const filteredProducts = products.filter((product) =>
         product.title.toLowerCase().includes(lowercaseSearchedValue)
@@ -27,13 +30,11 @@ const Header = () => {
 
       onFilterProducts(filteredProducts);
       navigate(`search-product/?ld=${isLoading}`);
-    } else {
-      navigate("/");
     }
   };
 
   return (
-    <nav className="flex flex-row items-center justify-between mx-1 mt-1 px-2 py-5 shadow-md border border-gray-300">
+    <nav className="flex flex-row bg-bg_secondary items-center justify-between mx-1 mt-1 px-2 py-5 border-b border-gray">
       <Link to={"/"}>
         <Logo logo={logo} />
       </Link>

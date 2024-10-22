@@ -10,8 +10,8 @@ function Products() {
   const { products } = useContext(ProductContext);
 
   return (
-    <div className="container-fluid mx-auto px-2">
-      <div className="mt-2 px-2 shadow-md ">
+    <div className="container-fluid mx-auto">
+      <div className=" px-2 shadow-md ">
         <select className="py-2 px-r ml-4my-1 rounded shadow-sm bg-gray-200">
           <option value={4}>Filters</option>
         </select>

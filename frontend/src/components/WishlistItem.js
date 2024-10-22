@@ -22,7 +22,7 @@ function WishlistItem({ wishlistItem }) {
   };
 
   return (
-    <tr className="py-2  my-1 w-full text-center border border-gray-200">
+    <tr className="py-2  my-1 w-full text-center border border-gray_light">
       <td className="pl-4">
         <img
           src={wishlistItem.product.image}

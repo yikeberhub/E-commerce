@@ -22,7 +22,7 @@ const CartItem = ({ cartItem, calculateItemPrice }) => {
   };
 
   return (
-    <tr className="py-2  my-1 w-full text-center border border-gray-200">
+    <tr className="py-2  my-1 w-full text-center border border-gray">
       <td className="pl-4">
         <img
           src={cartItem?.product?.image}
@@ -34,14 +34,14 @@ const CartItem = ({ cartItem, calculateItemPrice }) => {
       <td>${cartItem.product.price}</td>
       <td>
         <span
-          className="bg-gray-600 text-white px-1 py-0 my-1 mx-1 rounded-full shadow-sm hover:bg-green-500 hover:shadow-inner hover:cursor-pointer"
+          className="bg-danger text-white px-1 py-0 my-1 mx-1 rounded-full shadow-sm hover:bg-green-500 hover:shadow-inner hover:cursor-pointer"
           onClick={decreaseQuantity}
         >
           -
         </span>
         {quantity}
         <span
-          className="bg-gray-600 text-white px-1 py-0 my-1 mx-1 rounded-full shadow-sm hover:bg-green-500 hover:shadow-inner hover:cursor-pointer"
+          className="bg-green text-white px-1 py-0 my-1 mx-1 rounded-full shadow-sm hover:bg-green-500 hover:shadow-inner hover:cursor-pointer"
           onClick={increaseQuantity}
         >
           +
@@ -51,7 +51,7 @@ const CartItem = ({ cartItem, calculateItemPrice }) => {
       <td
         className={
           "hover:cursor-pointer text-md " +
-          (isUpdated ? "text-red-400" : "text-green-600")
+          (isUpdated ? "text-red" : "text-green")
         }
         onClick={(e) => {
           isUpdated && updateCartItem(cartItem.id, quantity);

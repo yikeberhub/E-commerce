@@ -20,7 +20,7 @@ function FilterByCategory() {
           ].map((item, index) => (
             <ListComp
               key={index}
-              style="text-lg py-2 px-2 border border-gray-200 rounded-md shadow-sm hover:shadow-lg transition-shadow duration-300"
+              style={`text-lg py-2 px-2 border border-gray-200 rounded-md shadow-sm hover:shadow-lg transition-shadow duration-300`}
             >
               <p className="flex flex-row items-center gap-3">
                 <input

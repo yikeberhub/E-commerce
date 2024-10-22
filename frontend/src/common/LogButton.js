@@ -14,10 +14,12 @@ const LogButton = () => {
   return (
     <>
       {user ? (
-        <button onClick={handleLogout}>Logout</button>
+        <button onClick={handleLogout} className="text-gray_light">
+          Logout
+        </button>
       ) : (
         <Link to="/login">
-          <div>Login</div>
+          <div className="text-gray_light">Login</div>
         </Link>
       )}
     </>

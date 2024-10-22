@@ -31,20 +31,22 @@ const CartLists = () => {
   if (!user) return alert(message);
 
   return (
-    <div className="col-span-5 grid grid-cols-6 border border-gray-200 shadow-sm  pb-10">
+    <div className="col-span-5  grid grid-cols-6 border  border-gray-50 shadow-sm  pb-10 min-h-screen">
       <div className="col-span-4 px-2">
-        <h1 className="text-3xl mx-2 py-2">Your Cart</h1>
-        <p>
+        <h1 className="text-3xl mx-2 py-2 text-black font-mono font-semibold">
+          Your Cart
+        </h1>
+        <p className="text-center text-gray-700">
           You have{" "}
           {cart?.items?.length
             ? `${cart.items.length} Item in the cart`
             : "no Item in the cart"}{" "}
           .
         </p>
-        <div className="bg-gray-50 h-64 rounded-lg shadow-md">
-          <table className="border border-separate border-spacing-2   border-gray-200 w-full  table-auto md:table-fixed">
+        <div className="bg-gray-100 h-auto rounded-lg shadow-md">
+          <table className="border border-separate border-spacing-2   border-card w-full  table-auto md:table-fixed">
             <thead>
-              <tr className="bg-gray-200 w-full">
+              <tr className=" w-full">
                 <th>product</th>
                 <th>Title</th>
                 <th>Unit price</th>
@@ -72,13 +74,13 @@ const CartLists = () => {
           </table>
           <div className="flex flex-row items-center justify-between px-2 py-2">
             <Link to={`/`}>
-              <button className="bg-green-500 mt-2 py-1 px-2 rounded text-white">
+              <button className="bg-blue-500 mt-2 py-1 px-2 rounded text-white">
                 Continue shoping
               </button>
             </Link>
             {cart?.items?.length ? (
               <button
-                className="bg-green-500 mt-1  py-2 px-2 rounded text-white"
+                className="bg-red-500 mt-1  py-1 px-2 rounded text-white"
                 onClick={(e) => clearCart()}
               >
                 clear cart
@@ -89,7 +91,7 @@ const CartLists = () => {
           </div>
         </div>
       </div>
-      <div className="col-span-2  mb-2 shadow-md">
+      <div className="col-span-2  mb-2 shadow-md ">
         <ProceedCheckout
           cart={cart}
           itemsTotalPrice={itemsTotalPrice}

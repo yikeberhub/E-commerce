@@ -29,30 +29,32 @@ const ProceedCheckout = ({ itemsTotalPrice, shipingPrice, cart }) => {
 
   return (
     <div className="container-sm mx-auto pt-2 ">
-      <div className="rounded-md border border-gray-100 h-auto px-10 mx-5 my-3 py-5 pt-3 font-snas font-semibold shadow-lg">
-        <div className="border border-gray-300 rounded-t  py-2 px-4 flex flex-row justify-between">
-          <span className="">Subtotal</span>
-          <span>${itemsTotalPrice}</span>
-        </div>
-        <div className="border border-gray-300   py-2 px-4 flex flex-row justify-between">
-          <span className="">Shiping</span>
-          {shipingPrice === 0 ? (
-            <span>free</span>
-          ) : (
-            <span>$ {shipingPrice}</span>
-          )}
-        </div>
-        <div className="border border-gray-300 rounded-b shadow-lg py-2 px-4 flex flex-row justify-between">
-          <span className="">Total</span>
-          <span>${totalPrice}</span>
-        </div>
-        <div>
-          <button
-            className="bg-green-500 mt-2 w-full py-1 rounded text-white"
-            onClick={handleCheckout}
-          >
-            Proceed to checkout
-          </button>
+      <div className="rounded-md border bg-gray-10 border-blue-200 shadow-gray shadow-sm h-auto px-4 w-auto mx-4 my-3 py-5 pt-3 font-snas font-semibold ">
+        <div className="w-full px-auto mx-auto">
+          <div className="border border-gray rounded-t  py-2 px-4 flex flex-row  justify-between">
+            <span className="text-gray_lighter">Subtotal</span>
+            <span className="text-green-400">${itemsTotalPrice}.00</span>
+          </div>
+          <div className="border border-gray   py-2 px-4 flex flex-row justify-between">
+            <span className="text-gray_lighter">Shiping</span>
+            {shipingPrice === 0 ? (
+              <span className="text-purple-500">free</span>
+            ) : (
+              <span className="text-yellow">$ {shipingPrice}</span>
+            )}
+          </div>
+          <div className="border border-gray rounded-b shadow-lg py-2 px-4 flex flex-row justify-between">
+            <span className="">Total</span>
+            <span className="text-blue-700">${totalPrice}.00</span>
+          </div>
+          <div className="w-auto">
+            <button
+              className="bg-blue-500 mt-2 w-full py-1 rounded text-white hover:bg-blue-700"
+              onClick={handleCheckout}
+            >
+              Proceed to checkout
+            </button>
+          </div>
         </div>
       </div>
     </div>

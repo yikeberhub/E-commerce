@@ -40,28 +40,28 @@ const Product = ({ product }) => {
   };
 
   return (
-    <div className="sm:col-span-2 flex flex-col items-center border border-gray-200 rounded-lg shadow-md transition-transform hover:scale-105 duration-300 w-full p-4">
-      <div className="relative w-full">
+    <div className="sm:col-span-2  flex flex-col items-center shadow-gray-400 rounded-lg shadow-md transition-transform hover:scale-105 duration-300 max-w-full mx-2">
+      <div className="relative sm:w-full px-2 pt-1">
         <span className="absolute top-2 left-2 bg-red-500 text-white rounded-full px-2 py-1 text-sm shadow-md">
           {`-${product.get_percentage}% off!`}
         </span>
         <Link to={`/product/${product.id}`}>
           <img
             src={product.image}
-            className="w-full h-64 rounded-md object-cover transition-transform duration-200 hover:scale-105"
+            className=" h-50  sm:h-44 sm:w-full rounded-md object-cover "
             alt={product.title}
           />
-          <p className="text-gray-700 text-lg font-semibold mt-2">
+          <p className="text-gray-900 text-lg font-semibold mt-2">
             {product?.category?.title}
           </p>
-          <p className="text-blue-800 text-sm font-medium">{product?.title}</p>
+          <p className="text-gray-700 text-sm font-medium">{product?.title}</p>
           <p className="text-gray-600 text-xs">{product?.specifications}</p>
         </Link>
-        <p className="text-yellow-500 text-sm mt-1">
+        <p className="text-yellow-300 text-sm mt-1">
           Rating✨✨✨ ({product.rating})
         </p>
         <p className="text-gray-700 text-sm">{product.vendor.title}</p>
-        <div className="flex flex-row justify-between items-center border border-gray-300 rounded-md p-2 my-2 shadow-sm">
+        <div className="flex flex-row justify-between items-center border border-gray rounded-md p-2 my-2 shadow-sm">
           <span className="text-lg font-bold text-green-600">
             ${product.price}
           </span>

@@ -11,7 +11,7 @@ function UserDashboard() {
   if (loading) return <div className="w-44 h-14 bg-green-500">loading...</div>;
 
   return (
-    <div>
+    <div className="text-gray bg-white min-h-screen">
       <div className="mx-6 my-2 py-2 flex flex-row">
         <p>
           {" "}

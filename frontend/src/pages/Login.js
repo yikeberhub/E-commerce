@@ -77,7 +77,7 @@ const Login = () => {
       ) : (
         <section id="login">
           <div className="mx-auto container p-4">
-            <div className="bg-white p-5 w-full max-w-sm mx-auto">
+            <div className="bg-white text-black rounded-sm p-5 w-full max-w-sm mx-auto">
               <div className="w-20 h-20 mx-auto">
                 <img src={loginIcons} alt="login icons" />
               </div>
@@ -134,7 +134,7 @@ const Login = () => {
                   </Link>
                 </div>
 
-                <button className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 w-full max-w-[150px] rounded-full hover:scale-110 transition-all mx-auto block mt-6">
+                <button className="bg-red hover:bg-red-700 text-white px-6 py-2 w-full max-w-[150px] rounded-full hover:scale-110 transition-all mx-auto block mt-6">
                   Login
                 </button>
               </form>

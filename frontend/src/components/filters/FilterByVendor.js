@@ -23,7 +23,7 @@ function FilterByVendor() {
         {Object.keys(checkedVendors).map((vendor) => (
           <ListComp
             key={vendor}
-            style="text-lg py-2 px-2 border rounded-md shadow-sm hover:shadow-lg transition-shadow duration-300"
+            style={`text-lg py-2 px-2 border rounded-md shadow-sm hover:shadow-lg transition-shadow duration-300`}
           >
             <input
               type="checkbox"

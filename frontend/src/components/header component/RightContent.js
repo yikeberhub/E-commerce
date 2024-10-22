@@ -16,13 +16,17 @@ function RightContent() {
 
   return (
     <div className="flex flex-row sm:gap-4 gap-2 items-center  ">
-      <div className="border border-gray-300 sm:px-2 rounded  py-1 shadow-md">
-        <select className="py-1">
-          <option value="loc">Your Location</option>
-        </select>
-      </div>
-      <div className="border border-gray-300 px-2 rounded py-1  shadow-md  relative">
-        <small className="bottom-5 left-6 absolute text-xs px-1 rounded-full border bg-green-500">
+      <select className="py-1 bg-card outline-gray border rounded-sm border-gray_lighter text-gray_lighter ">
+        <option value="location" className="bg-bg_secondary text-gray_light">
+          Your Location
+        </option>
+        <option value="Electronics">Electronics</option>
+        <option value="Fashion">Fashion</option>
+        <option value="Home">Home</option>
+      </select>
+
+      <div className="bg-white border border-gray_lighter px-2 rounded py-1  shadow-md  relative">
+        <small className="bottom-5 left-6 absolute text-xs px-1 rounded-full  bg-green-500">
           {cart?.items?.length}
         </small>
         <Link to={`cart/`}>
@@ -31,8 +35,8 @@ function RightContent() {
           </p>
         </Link>
       </div>
-      <div className="border border-gray-300 px-2 rounded py-1  shadow-md  relative">
-        <small className="bottom-5 left-6 absolute text-xs px-1 rounded-full border bg-green-500">
+      <div className=" bg-white border  border-gray_lighter px-2 rounded py-1  shadow-md  relative">
+        <small className="bottom-5 left-6 absolute text-xs px-1 rounded-full  bg-red-500">
           {wishlist?.items?.length}
         </small>{" "}
         <Link to={`wishlist/`}>
@@ -46,13 +50,15 @@ function RightContent() {
         </Link>
       </div>
       <Link to={`/dashboard/`}>
-        <div className="border border-gray-300 sm:px-2 rounded  py-1 shadow-md flex flex-row items-center gap-2">
+        <div className="bg-white border border-gray_lighter sm:px-2 rounded  py-1 shadow-md flex flex-row items-center gap-2">
           <img
             src={user ? user.profile_image : AccountIcon}
             alt="accountIcon"
             className="w-6 h-6 rounded-md"
           />
-          <p className="font-sans ">{user ? user.username : "Account"}</p>
+          <p className="font-sans text-gray">
+            {user ? user.username : "Account"}
+          </p>
         </div>
       </Link>
       <LogButton />

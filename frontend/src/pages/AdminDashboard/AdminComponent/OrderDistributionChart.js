@@ -13,7 +13,6 @@ import {
 ChartJS.register(ArcElement, BarElement, Tooltip, Legend);
 
 const OrderDistributionChart = ({ orderData }) => {
-  // Define colors for each status
   const statusColors = {
     pending: "#3498db",
     payment_processing: "#f39c12",
@@ -27,13 +26,12 @@ const OrderDistributionChart = ({ orderData }) => {
     refunded: "#95a5a6",
   };
 
-  // Prepare chart data
   const data = {
     labels: orderData.map(
       (order) =>
         order.status.charAt(0).toUpperCase() +
         order.status.slice(1).replace(/_/g, " ")
-    ), // Capitalize and format labels
+    ),
     datasets: [
       {
         data: orderData.map((order) => order.count),

@@ -55,7 +55,7 @@ function App() {
           <CartProvider>
             <WishlistProvider>
               <NavigationWrapper />
-              <main>
+              <main className="">
                 <Routes>
                   <Route path="" element={<Home />} />
                   <Route path="/login" element={<Login />} />
