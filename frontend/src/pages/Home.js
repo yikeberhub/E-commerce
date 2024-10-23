@@ -11,7 +11,7 @@ import FilterByPrice from "../components/filters/FilterByPrice";
 import FilterByVendor from "../components/filters/FilterByVendor";
 import FilterByCategory from "../components/filters/FilterByCategory";
 import FilterByTags from "../components/filters/FilterByTags";
-
+import FeaturedProducts from "../components/FeaturedProducts";
 function Home() {
   const { products, loading, getProducts } = useContext(ProductContext);
   const { authTokens, fetchUserInfo } = useAuth();
@@ -25,26 +25,26 @@ function Home() {
       fetchUserInfo();
     }
   }, [authTokens]);
+  console.log("home page");
 
   if (loading) {
     return <div>Loading...</div>;
   }
 
   return (
-    <div className="container-lg mx-auto px-4">
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-        <div className="col-span-1 md:sticky md:top-0">
-          <CategoryLists />
-          <FilterByPrice />
-          <FilterByVendor />
-          <FilterByCategory />
-          <FilterByTags />
-        </div>
-        <div className="col-span-4 items-center justify-center px-2  shadow-md">
-          <ProductBanner />
-          <HomeNavLink />
-          <ProductLists products={products} />
-        </div>
+    <div className="grid sm:grid-cols-5 md:grid-cols-7 lg:grid-cols-9 gap-2">
+      <div className="lg:col-span-2  w-full lg:px-2 md:top-0 sm:col-span-1 md:col-span-1">
+        <CategoryLists />
+        <FilterByPrice />
+        <FilterByVendor />
+        <FilterByCategory />
+        <FilterByTags />
+      </div>
+      <div className="sm:col-span-4 md:col-span-4 lg:col-span-7 items-center justify-center   shadow-md">
+        <ProductBanner />
+        <FeaturedProducts />
+        <HomeNavLink />
+        <ProductLists products={products} />
       </div>
     </div>
   );

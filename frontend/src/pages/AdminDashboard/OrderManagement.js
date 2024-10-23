@@ -112,7 +112,7 @@ const OrderManagement = () => {
   }
 
   return (
-    <div className="flex bg-gray-500">
+    <div className="flex bg-gray-50">
       {/* Sidebar Navigation */}
       <nav className="w-64  h-screen p-4">
         <h2 className="text-lg font-semibold mb-4">Order Actions</h2>

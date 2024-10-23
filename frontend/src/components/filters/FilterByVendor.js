@@ -1,20 +1,54 @@
-import { React, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import ListComp from "../../utilities/ListComp";
 import Card from "../../utilities/CardComp";
+import { ProductContext } from "../../contexts/ProductContext";
 
 function FilterByVendor() {
-  const [checkedVendors, setCheckedVendors] = useState({
-    Samsung: false,
-    Dell: false,
-    Synix: false,
-    Lg: false,
-  });
+  const { products, onFilterProducts } = useContext(ProductContext);
+  const [checkedVendors, setCheckedVendors] = useState({});
+
+  useEffect(() => {
+    // Get unique vendors from products
+    const vendors = [
+      ...new Set(products.map((product) => product.vendor.title)),
+    ];
+
+    // Initialize checked vendors state
+    const initialChecked = vendors.reduce((acc, vendor) => {
+      acc[vendor] = false;
+      return acc;
+    }, {});
+
+    setCheckedVendors(initialChecked);
+  }, [products]);
 
   const handleCheckboxChange = (vendor) => {
-    setCheckedVendors((prev) => ({
-      ...prev,
-      [vendor]: !prev[vendor],
-    }));
+    setCheckedVendors((prev) => {
+      const newChecked = { ...prev, [vendor]: !prev[vendor] };
+      applyFilter(newChecked);
+      return newChecked;
+    });
+  };
+
+  const applyFilter = (checkedVendorsState) => {
+    // Get selected vendors
+    const selectedVendors = Object.keys(checkedVendorsState).filter(
+      (vendor) => checkedVendorsState[vendor]
+    );
+
+    // Filter products based on selected vendors
+    const filteredProducts =
+      selectedVendors.length === 0
+        ? products
+        : products.filter((product) =>
+            selectedVendors.includes(product.vendor)
+          );
+
+    handleFilter(filteredProducts);
+  };
+
+  const handleFilter = (filteredProducts) => {
+    onFilterProducts(filteredProducts); // Use the filtered products correctly
   };
 
   return (
