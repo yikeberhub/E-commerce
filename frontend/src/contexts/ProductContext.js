@@ -5,7 +5,7 @@ const ProductContext = createContext(null);
 function ProductProvider({ children }) {
   const [products, setProduct] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null);
-  const [searchedProducts, setSearchedProducts] = useState(products);
+  const [filteredProducts, setFilteredProducts] = useState(products);
   const [showSearchedProducts, setShowSearchedProducts] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -14,7 +14,7 @@ function ProductProvider({ children }) {
   }, []);
 
   const handleFilterProduct = (products) => {
-    setSearchedProducts(products);
+    setFilteredProducts(products);
     setShowSearchedProducts((state) => !state);
   };
 
@@ -50,7 +50,7 @@ function ProductProvider({ children }) {
         loading,
         setLoading,
         getProducts: getProducts,
-        searchedProducts,
+        filteredProducts,
         selectedProduct,
         onFilterProducts: handleFilterProduct,
         onSetProduct: handleSetProduct,

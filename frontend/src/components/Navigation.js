@@ -3,7 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 
 const Navigation = () => {
   const location = useLocation();
-  const search = location.pathname.includes("search-product");
+  const search = location.pathname.includes("products");
   const home = location.pathname === "/";
 
   return (

@@ -41,6 +41,7 @@ import UserDetail from "./pages/AdminDashboard/AdminComponent/UserDetail";
 
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { ProductProvider } from "./contexts/ProductContext";
+import { BreadcrumbProvider } from "./contexts/BreadCrumbContext";
 import { CartProvider } from "./contexts/cartContext";
 import { WishlistProvider } from "./contexts/WishlistContext";
 import PaymentDetail from "./pages/dashbord/userDashboard/order/PaymentDetail";
@@ -55,97 +56,114 @@ function App() {
           <CartProvider>
             <WishlistProvider>
               <NavigationWrapper />
-              <main className="">
-                <Routes>
-                  <Route path="" element={<Home />} />
-                  <Route path="/login" element={<Login />} />
-                  <Route path="/signup" element={<SignUp />} />
-                  <Route path="/forgot-password" element={<ForgotPassword />} />
-                  <Route
-                    path="/product-category"
-                    element={<ProductCategory />}
-                  />
-                  <Route path="/cart" element={<Cart />} />
-                  <Route path="/cart/:id/checkout" element={<Checkout />} />
-
-                  <Route path="/dashboard/" element={<UserDashboard />}>
-                    <Route index element={<UserProfile />} />
-                    <Route path="profile" element={<UserProfile />} />
-                    <Route path="orders" element={<Orders />} />
-                    <Route path="address" element={<Address />} />
-                    <Route path="account-detail" element={<AccountDetail />} />
-                    <Route path="orders/:id" element={<OrderDetail />} />
-                  </Route>
-                  <Route path="/admin-dashboard/" element={<AdminDashboard />}>
-                    <Route index element={<OverviewPanel />} />
+              <BreadcrumbProvider>
+                <main className="">
+                  <Routes>
+                    <Route path="" element={<Home />} />
+                    <Route path="/login" element={<Login />} />
+                    <Route path="/signup" element={<SignUp />} />
                     <Route
-                      path="order-management"
-                      element={<OrderManagement />}
+                      path="/forgot-password"
+                      element={<ForgotPassword />}
                     />
                     <Route
-                      path="product-management"
-                      element={<ProductManagement />}
+                      path="/product-category"
+                      element={<ProductCategory />}
                     />
+                    <Route path="/cart" element={<Cart />} />
+                    <Route path="/cart/:id/checkout" element={<Checkout />} />
 
+                    <Route path="/dashboard/" element={<UserDashboard />}>
+                      <Route index element={<UserProfile />} />
+                      <Route path="profile" element={<UserProfile />} />
+                      <Route path="orders" element={<Orders />} />
+                      <Route path="address" element={<Address />} />
+                      <Route
+                        path="account-detail"
+                        element={<AccountDetail />}
+                      />
+                      <Route path="orders/:id" element={<OrderDetail />} />
+                    </Route>
                     <Route
-                      path="customer-management/"
-                      element={<CustomerManagement />}
+                      path="/admin-dashboard/"
+                      element={<AdminDashboard />}
                     >
-                      <Route index element={<UserList />} />{" "}
-                      {/* Default route under customer management */}
-                      <Route path="add-user" element={<AddUser />} />
-                      <Route path="edit-user/:id" element={<EditUser />} />
-                      <Route path="user-detail/:id" element={<UserDetail />} />
+                      <Route index element={<OverviewPanel />} />
+                      <Route
+                        path="order-management"
+                        element={<OrderManagement />}
+                      />
+                      <Route
+                        path="product-management"
+                        element={<ProductManagement />}
+                      />
+
+                      <Route
+                        path="customer-management/"
+                        element={<CustomerManagement />}
+                      >
+                        <Route index element={<UserList />} />{" "}
+                        {/* Default route under customer management */}
+                        <Route path="add-user" element={<AddUser />} />
+                        <Route path="edit-user/:id" element={<EditUser />} />
+                        <Route
+                          path="user-detail/:id"
+                          element={<UserDetail />}
+                        />
+                      </Route>
+
+                      <Route
+                        path="financial-overview"
+                        element={<FinancialOverview />}
+                      />
+                      <Route
+                        path="support-resources"
+                        element={<SupportResources />}
+                      />
                     </Route>
 
                     <Route
-                      path="financial-overview"
-                      element={<FinancialOverview />}
-                    />
-                    <Route
-                      path="support-resources"
-                      element={<SupportResources />}
-                    />
-                  </Route>
+                      path="/vendor-dashboard/"
+                      element={<VendorAdminDashboard />}
+                    >
+                      <Route index element={<OverviewPanel />} />
+                      <Route
+                        path="order-management"
+                        element={<OrderManagement />}
+                      />
+                      <Route
+                        path="product-management"
+                        element={<ProductManagement />}
+                      />
+                      <Route
+                        path="customer-management"
+                        element={<CustomerManagement />}
+                      />
+                      <Route
+                        path="financial-overview"
+                        element={<FinancialOverview />}
+                      />
+                      <Route
+                        path="support-resources"
+                        element={<SupportResources />}
+                      />
+                    </Route>
 
-                  <Route
-                    path="/vendor-dashboard/"
-                    element={<VendorAdminDashboard />}
-                  >
-                    <Route index element={<OverviewPanel />} />
                     <Route
-                      path="order-management"
-                      element={<OrderManagement />}
+                      path="/payment/confirm"
+                      element={<PaymentDetail />}
                     />
-                    <Route
-                      path="product-management"
-                      element={<ProductManagement />}
-                    />
-                    <Route
-                      path="customer-management"
-                      element={<CustomerManagement />}
-                    />
-                    <Route
-                      path="financial-overview"
-                      element={<FinancialOverview />}
-                    />
-                    <Route
-                      path="support-resources"
-                      element={<SupportResources />}
-                    />
-                  </Route>
-
-                  <Route path="/payment/confirm" element={<PaymentDetail />} />
-                  <Route path="/wishlist" element={<Wishlist />} />
-                  <Route path="/products" element={<Products />} />
-                  <Route path="/product/:id" element={<ProductDetail />} />
-                  <Route path="/checkout/:orderId" element={<Checkout />} />
-                  <Route path="/search-product" element={<SearchProduct />} />
-                  <Route path="/about" element={<About />} />
-                  <Route path="/contact-us" element={<ContactUs />} />
-                  <Route path="*" element={<PageNotFound />} />
-                </Routes>
-              </main>
+                    <Route path="/wishlist" element={<Wishlist />} />
+                    <Route path="/products" element={<Products />} />
+                    <Route path="/product/:id" element={<ProductDetail />} />
+                    <Route path="/checkout/:orderId" element={<Checkout />} />
+                    <Route path="/search-product" element={<SearchProduct />} />
+                    <Route path="/about" element={<About />} />
+                    <Route path="/contact-us" element={<ContactUs />} />
+                    <Route path="*" element={<PageNotFound />} />
+                  </Routes>
+                </main>
+              </BreadcrumbProvider>
               <Footer />
             </WishlistProvider>
           </CartProvider>

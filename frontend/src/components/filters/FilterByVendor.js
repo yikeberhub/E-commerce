@@ -4,13 +4,10 @@ import Card from "../../utilities/CardComp";
 import { ProductContext } from "../../contexts/ProductContext";
 
 function FilterByVendor() {
-  const { products, searchedProducts, onFilterProducts } =
-    useContext(ProductContext);
+  const { products, onFilterProducts } = useContext(ProductContext);
   const [checkedVendors, setCheckedVendors] = useState({});
-  console.log("filter by vendor", searchedProducts);
 
   useEffect(() => {
-    // Get unique vendors from products
     const vendors = [
       ...new Set(products.map((product) => product.vendor.title)),
     ];
