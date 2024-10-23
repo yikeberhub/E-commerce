@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import Category,Product,ProductImages,ProductReview
+from .models import Category,Product,ProductImages,ProductReview,Tag
 
 
 class ProductImagesAdmin(admin.TabularInline):
@@ -13,6 +13,9 @@ class ProductAdmin(admin.ModelAdmin):
 class CategoryAdmin(admin.ModelAdmin):
     list_display = ['title','category_image']
     
+class TagAdmin(admin.ModelAdmin):
+    list_display = ['id','name']
+    
 class ProductReviewAdmin(admin.ModelAdmin):
     list_display = ['product','user','comment','rating','created_at','updated_at']
     
@@ -20,5 +23,6 @@ class ProductReviewAdmin(admin.ModelAdmin):
 # Register your models here.
 
 admin.site.register(Product,ProductAdmin)
+admin.site.register(Tag,TagAdmin)
 admin.site.register(Category,CategoryAdmin)
 admin.site.register(ProductReview,ProductReviewAdmin)
