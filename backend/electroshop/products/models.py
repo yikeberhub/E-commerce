@@ -19,7 +19,7 @@ STATUS = (
 )
 
 class Category(models.Model):
-    title = models.CharField(max_length=100, default='Electronics')
+    title = models.CharField(max_length=100, unique=True, default='Electronics')
     image = models.ImageField(upload_to='category/category_images/', default='category/default_category_image/img.png')
 
     class Meta:
@@ -30,7 +30,6 @@ class Category(models.Model):
     
     def __str__(self):
         return self.title
-    
 class Tag(models.Model):
     name = models.CharField(max_length=50, unique=True)
 
