@@ -43,7 +43,7 @@ const Product = ({ product }) => {
       <div className="relative sm:w-50  pt-1 items-center">
         {product.discount_percentage !== 0 && (
           <span className="absolute top-2 left-2 bg-red-500 text-white rounded-full px-2 py-1 text-sm shadow-md">
-            {`${product.discount_percentage}% off!`}
+            {`${product.discount_percentage.toFixed(1)}% off!`}
           </span>
         )}
         <Link to={`/product/${product.id}`}>

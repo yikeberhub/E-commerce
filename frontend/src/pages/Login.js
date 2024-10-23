@@ -134,7 +134,7 @@ const Login = () => {
                   </Link>
                 </div>
 
-                <button className="bg-red hover:bg-red-700 text-white px-6 py-2 w-full max-w-[150px] rounded-full hover:scale-110 transition-all mx-auto block mt-6">
+                <button className="bg-red-500 hover:bg-red-700 text-white px-6 py-2 w-full max-w-[150px] rounded-full hover:scale-110 transition-all mx-auto block mt-6">
                   Login
                 </button>
               </form>

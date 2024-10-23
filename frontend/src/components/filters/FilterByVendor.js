@@ -4,8 +4,10 @@ import Card from "../../utilities/CardComp";
 import { ProductContext } from "../../contexts/ProductContext";
 
 function FilterByVendor() {
-  const { products, onFilterProducts } = useContext(ProductContext);
+  const { products, searchedProducts, onFilterProducts } =
+    useContext(ProductContext);
   const [checkedVendors, setCheckedVendors] = useState({});
+  console.log("filter by vendor", searchedProducts);
 
   useEffect(() => {
     // Get unique vendors from products
@@ -40,15 +42,15 @@ function FilterByVendor() {
     const filteredProducts =
       selectedVendors.length === 0
         ? products
-        : products.filter((product) =>
-            selectedVendors.includes(product.vendor)
+        : products.filter(
+            (product) => selectedVendors.includes(product.vendor.title) // Ensure you compare with vendor.title
           );
 
     handleFilter(filteredProducts);
   };
 
   const handleFilter = (filteredProducts) => {
-    onFilterProducts(filteredProducts); // Use the filtered products correctly
+    onFilterProducts(filteredProducts);
   };
 
   return (

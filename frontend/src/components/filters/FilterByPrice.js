@@ -2,59 +2,60 @@ import React, { useContext, useState } from "react";
 import ListComp from "../../utilities/ListComp";
 import Card from "../../utilities/CardComp";
 import { ProductContext } from "../../contexts/ProductContext";
-import { useNavigate } from "react-router-dom";
 
 function FilterByTags() {
   const { products, onFilterProducts } = useContext(ProductContext);
   const [price, setPrice] = useState(0);
-  const [isLoading, setIsLoading] = useState(false);
-  const navigate = useNavigate();
-  console.log("price is", price);
+
   const handleSearch = () => {
-    if (price !== 0) {
-      console.log("price is", price);
+    if (price > 0) {
       const filteredProducts = products.filter(
         (product) => product.price <= Number(price)
       );
-      console.log(filteredProducts);
 
       onFilterProducts(filteredProducts);
-      navigate(`search-product/?ld=${isLoading}`);
     }
   };
+
   return (
-    <div>
-      <Card title="By Price">
+    <div className="p-4">
+      <Card title="Filter by Price" className="shadow-lg rounded-lg">
         <ListComp>
+          <label className="block mb-2 text-sm font-medium text-gray-700">
+            Select Price Range:
+          </label>
           <input
             onChange={(e) => setPrice(e.target.value)}
             type="range"
             min={1000}
             value={price}
             max={100000}
-            className="w-full"
+            className="w-full h-2 bg-green-500 rounded-lg appearance-none cursor-pointer"
           />
-          <p className="flex flex-row items-center justify-between">
-            <span>from: $0.0 </span>
-            <span>to:${price}.0</span>
-          </p>
+          <div className="flex justify-between text-sm mt-2">
+            <span className="text-gray-500">from: $0.0</span>
+            <span className="text-gray-500">to: ${price}.0</span>
+          </div>
         </ListComp>
 
-        <ListComp style={`my-2`}>
+        <ListComp style="my-4">
+          <label className="block mb-2 text-sm font-medium text-gray-700">
+            Or Enter Price:
+          </label>
           <input
             type="number"
             min={0}
             value={price}
             onChange={(e) => setPrice(e.target.value)}
-            className="outline-none rounded-md bg-gray-50 border border-gray px-2 text-green py-2 my-2  w-full placeholder-blue-500 "
-            placeholder="0"
+            className="outline-none rounded-md bg-gray-50 border border-gray-300 px-3 py-2 w-full placeholder-gray-400 focus:border-blue-500 focus:ring focus:ring-blue-200"
+            placeholder="Enter price"
           />
           <button
-            type="submit"
-            className="bg-blue-500 rounded-md px-2 py-2 my-1 mt-2 text-md font-semibold text-white w-full"
-            onClick={(e) => handleSearch()}
+            type="button"
+            className="mt-2 w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-md transition duration-150"
+            onClick={handleSearch}
           >
-            filter
+            Filter
           </button>
         </ListComp>
       </Card>

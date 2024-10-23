@@ -24,7 +24,6 @@ const FeaturedProducts = () => {
         }
         const data = await response.json();
         setFeaturedProducts(data);
-        console.log("featured products", data);
       } catch (error) {
         setError(error.message);
       } finally {
@@ -112,7 +111,8 @@ const FeaturedProducts = () => {
       <Slider {...settings}>
         {featuredProducts.map((product) => (
           <div key={product.id} className="p-4">
-            <div className="flex flex-col items-center p-4 w-full bg-white shadow-lg rounded-lg transition-transform hover:scale-105 duration-300 relative">
+            <Product product={product} />
+            {/* <div className="flex flex-col items-center p-4 w-full bg-white shadow-lg rounded-lg transition-transform hover:scale-105 duration-300 relative">
               <Link to={`/product/${product.id}`} className="w-full">
                 <img
                   src={product.image}
@@ -143,7 +143,7 @@ const FeaturedProducts = () => {
                   <FaHeart className="mr-1" /> Wishlist
                 </button>
               </div>
-            </div>
+            </div> */}
           </div>
         ))}
       </Slider>
