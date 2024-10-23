@@ -1,37 +1,46 @@
 from django.shortcuts import render
-from django.core import exceptions
-from rest_framework.decorators import api_view
+from django.db.models import F, ExpressionWrapper, DecimalField
+
+from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework import generics
+from rest_framework import status
+from .models import Product, ProductReview
+from .serializers import ProductSerializer, ProductReviewSerializer
 
-from .models import Product,ProductImages,Category
-from .serializers import ProductSerializer
-
-
-# Create your views here.
-
-@api_view(['GET'])
-def product_list(request):
-    try:
-      products = Product.objects.all()
-      serializer = ProductSerializer(instance=products,many=True)
-    except exceptions.ObjectDoesNotExist:
-        return Response({'error':'product not found'})
-    
-    return Response(serializer.data)
-  
-@api_view(['GET'])
-def get_product_detail(request,id):
-    try:
-      products = Product.objects.get(id = id)
-      serializer = ProductSerializer(instance=products,many=False)
-    except exceptions.ObjectDoesNotExist:
-        return Response({'error':'product not found'})
-    
-    return Response(serializer.data)
-  
-class ProductCreateView(generics.CreateAPIView):
+# Product Views
+class ProductListView(generics.ListCreateAPIView):
+    queryset = Product.objects.all()
     serializer_class = ProductSerializer
+
+class ProductDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+
+# Product Review Views
+class ProductReviewListView(generics.ListCreateAPIView):
+    queryset = ProductReview.objects.all()
+    serializer_class = ProductReviewSerializer
+
+class ProductReviewDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = ProductReview.objects.all()
+    serializer_class = ProductReviewSerializer
     
-    
+
+class FeaturedProductsView(generics.ListAPIView):
+    serializer_class = ProductSerializer
+
+    def get_queryset(self):
+        queryset = (
+            Product.objects
+            .filter(featured=True)
+            .annotate(
+                discount_percentage=ExpressionWrapper(
+                    (F('old_price') - F('price')) / F('old_price') * 100,
+                    output_field=DecimalField()
+                )
+            )
+        )
+
+        # Now you can order by the annotated field
+        return queryset.order_by('-discount_percentage', '-ratings')[:10]  

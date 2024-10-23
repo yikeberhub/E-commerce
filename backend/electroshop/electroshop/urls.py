@@ -14,13 +14,11 @@ urlpatterns = [
     path('products/', include('products.urls')),
     path('orders/', include('orders.urls')),
     path('payments/', include('payments.urls')),
-    path('reviews/', include('reviews.urls')),
     # path('promotions/', include('promotions.urls')),
     # path('analytics/', include('analytics.urls')),
     # path('notifications/', include('notifications.urls')),
     path('cart/', include('cart.urls')),
     path('wishlist/', include('wishlists.urls')),
-    # re_path(r'^.*$',TemplateView.as_view(template_name = '../../../frontend/public/index.html'))
 
 ]
 if settings.DEBUG:  
