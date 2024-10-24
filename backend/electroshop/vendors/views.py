@@ -15,5 +15,5 @@ class VendorListView(generics.ListCreateAPIView):
 # Retrieve, Update, and Delete Vendor
 class VendorDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Vendor.objects.all()
-    permission_classes = [AllowAny]  # Adjust permissions as needed
+    permission_classes = [AllowAny]  
     serializer_class = VendorSerializer
