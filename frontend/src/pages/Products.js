@@ -31,7 +31,7 @@ function Products() {
     };
 
     sortProducts();
-  }, [filteredProducts, sortOrder, onFilterProducts]);
+  }, [sortOrder]);
 
   // Pagination logic
   const indexOfLastProduct = currentPage * productsPerPage;
@@ -97,22 +97,6 @@ function Products() {
           >
             Next
           </button>
-        </div>
-
-        {/* Additional Features */}
-        <div className="mt-6">
-          <h2 className="text-xl font-bold">Related Products</h2>
-          {/* Implement related products logic here */}
-        </div>
-
-        <div className="mt-6">
-          <h2 className="text-xl font-bold">User Reviews</h2>
-          {/* Implement user reviews logic here */}
-        </div>
-
-        <div className="mt-6">
-          <h2 className="text-xl font-bold">Wishlist</h2>
-          {/* Implement wishlist logic here */}
         </div>
       </div>
     </div>

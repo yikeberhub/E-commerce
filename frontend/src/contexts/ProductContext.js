@@ -4,6 +4,9 @@ const ProductContext = createContext(null);
 
 function ProductProvider({ children }) {
   const [products, setProduct] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [vendors, setVendors] = useState(null);
+
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [filteredProducts, setFilteredProducts] = useState(products);
   const [showSearchedProducts, setShowSearchedProducts] = useState(false);
@@ -19,6 +22,22 @@ function ProductProvider({ children }) {
   };
 
   const handleSetProduct = (products) => setProduct(products);
+
+  const fetchCategories = async () => {
+    try {
+      const response = await fetch(
+        "http://localhost:8000/products/categories/"
+      );
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+      const categoryData = await response.json();
+      setCategories(categoryData);
+      console.log("Fetched categories:", categoryData);
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+    }
+  };
 
   const getProducts = async () => {
     try {
@@ -47,6 +66,9 @@ function ProductProvider({ children }) {
     <ProductContext.Provider
       value={{
         products,
+        categories,
+        onSetCategories: setCategories,
+        fetchCategories,
         loading,
         setLoading,
         getProducts: getProducts,

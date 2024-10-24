@@ -1,10 +1,35 @@
+import { useContext, useEffect, useState } from "react";
 import Header from "./header component/Header";
 import { Link, useLocation } from "react-router-dom";
+import { ProductContext } from "../contexts/ProductContext";
 
 const Navigation = () => {
+  const { products, categories, fetchCategories, onFilterProducts } =
+    useContext(ProductContext);
+  const [selectedCategory, setSelectedCategory] = useState("all");
+
   const location = useLocation();
   const search = location.pathname.includes("products");
   const home = location.pathname === "/";
+
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
+  const handleCategoryChange = (category) => {
+    setSelectedCategory(category);
+
+    if (category === "all") {
+      console.log("selected category", selectedCategory);
+      onFilterProducts(products);
+    } else {
+      const filteredProducts = products.filter(
+        (product) => product?.category?.title === selectedCategory
+      );
+
+      onFilterProducts(filteredProducts);
+    }
+  };
 
   return (
     <div className="p-0  bg-gray-50 shadow-md ">
@@ -49,15 +74,21 @@ const Navigation = () => {
         <hr className="border-gray" />
         {(home || search) && <Header />}
       </div>
+
       <nav className="max-w-screen-lg  px-4 py-2 mb-2 ">
         <div className="flex items-center">
-          <select className="rounded-sm border-none py-2 sm:px-3 bg-blue-500 text-white rounded-t focus:outline-none focus:ring-2 focus:ring-blue-500-200">
+          <select
+            className="rounded-sm border-none py-2 sm:px-3 bg-blue-500 text-white rounded-t focus:outline-none focus:ring-2 focus:ring-blue-500-200"
+            onChange={(e) => handleCategoryChange(e.target.value)}
+          >
             <option value="All" className="rounded sm:text-sm ">
               All Categories
             </option>
-            <option value="Electronics">Electronics</option>
-            <option value="Fashion">Fashion</option>
-            <option value="Home">Home</option>
+            {categories?.map((cat) => (
+              <option key={cat.title} value={cat?.title}>
+                {cat.title}
+              </option>
+            ))}
           </select>
           <ul className="flex sm:ml-4 sm:space-x-4 justify-between text-gray_light">
             <li>
