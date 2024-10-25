@@ -25,7 +25,7 @@ class ProductImagesSerializer(ModelSerializer):
         fields = ['id','image']
  
 class ProductSerializer(serializers.ModelSerializer):
-    tags = TagSerializer(many=True)  # Include tags in the product serializer
+    tags = TagSerializer(many=True)  
     vendor = VendorSerializer()
     category = CategorySerializer(read_only=True)
     images = ProductImagesSerializer(many=True, required=False)

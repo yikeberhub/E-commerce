@@ -2,6 +2,9 @@ from django.db import models
 from django.utils.html import mark_safe
 from django.core.validators import MinValueValidator
 from decimal import Decimal
+from django.dispatch import receiver
+from django.db.models.signals import post_save, post_delete
+
 
 
 
@@ -9,7 +12,6 @@ from users.models import CustomUser
 from vendors .models import Vendor
 
 
-# Create your models here.
 STATUS = (
     ('draft', 'Draft'),
     ('disabled', 'Disabled'),
@@ -21,63 +23,70 @@ STATUS = (
 class Category(models.Model):
     title = models.CharField(max_length=100, unique=True, default='Electronics')
     image = models.ImageField(upload_to='category/category_images/', default='category/default_category_image/img.png')
+    num_of_products = models.IntegerField(default=0)
 
     class Meta:
         verbose_name_plural = 'Categories'
-        
+
+    def calculate_num_of_products(self):
+        """Update the number of products in this category."""
+        self.num_of_products = self.products.count()  
+        self.save()
+
     def category_image(self):
         return mark_safe('<img src="%s" width="50" height="50"/>' % self.image.url)
-    
+
     def __str__(self):
         return self.title
+
+
 class Tag(models.Model):
     name = models.CharField(max_length=50, unique=True)
 
     def __str__(self):
         return self.name
 
+
 class Product(models.Model):
-    title = models.CharField(max_length=100, default='New brand')
+    title = models.CharField(max_length=100, default='New Brand')
     image = models.ImageField(upload_to='products/product_image/', default='products/default_product_image/img.png')
     description = models.TextField(null=True, blank=True, default='This is the product')
     user = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True)
-    vendor = models.ForeignKey(Vendor, on_delete=models.SET_NULL, null=True)
+    vendor = models.ForeignKey(Vendor, on_delete=models.SET_NULL, null=True)  
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, related_name='products')
     tags = models.ManyToManyField(Tag, related_name='products', blank=True)
     price = models.DecimalField(max_digits=10, decimal_places=2, default=1.99)
     old_price = models.DecimalField(max_digits=10, decimal_places=2, default=2.99)
     specifications = models.TextField(null=True, blank=True)
     product_status = models.CharField(choices=STATUS, max_length=10, default='in_review')
-    status = models.BooleanField(default=True)
-    stock_quantity = models.PositiveIntegerField(default=0)  
+    stock_quantity = models.PositiveIntegerField(default=0)
     featured = models.BooleanField(default=False)
     digital = models.BooleanField(default=True)
     date = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(null=True, auto_now=True, blank=True)
     discount_percentage = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
 
-
-    def __str__(self):
-        return self.title
-
     class Meta:
         verbose_name_plural = 'Products'
-        
-    def product_image(self):
-        return mark_safe('<img src="%s" width="50" height="50"/>' % self.image.url)
-    
+
     def __str__(self):
         return self.title
-    
+
+    def product_image(self):
+        return mark_safe('<img src="%s" width="50" height="50"/>' % self.image.url)
+
     def calculate_discount_percentage(self):
         if self.old_price > 0:
             return ((self.old_price - self.price) / self.old_price) * 100
         return 0
-            
+
     def average_rating(self):
         ratings = self.ratings.all()  
-        return ratings.aggregate(models.Avg('score'))['score__avg'] or 0  
-    
+        return ratings.aggregate(models.Avg('score'))['score__avg'] or 0
+
+   
+
+
 class Rating(models.Model):
     product = models.ForeignKey(Product, related_name='ratings', on_delete=models.CASCADE)
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
