@@ -54,14 +54,14 @@ function Wishlist() {
           </table>
           <div className="flex flex-row items-center justify-between px-2 py-2 my-2 ">
             <Link to={`/`}>
-              <button className="bg-green mt-2 py-1 px-2 rounded text-white">
+              <button className="bg-green-500 mt-2 py-1 px-2 rounded text-white">
                 Continue shoping
               </button>
             </Link>
 
             {wishlist.items && (
               <button
-                className="bg-green mt-1  py-2 px-2 rounded text-white"
+                className="bg-red-500 mt-1  py-2 px-2 rounded text-white"
                 onClick={clearWishlist}
               >
                 clear wishlist

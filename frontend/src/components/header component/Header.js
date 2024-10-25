@@ -8,8 +8,8 @@ import RightContent from "./RightContent";
 
 const Header = () => {
   const { products, onFilterProducts } = useContext(ProductContext);
-  const [searchedValue, setSearchedValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const { searchedValue, setSearchedValue } = useContext(ProductContext);
   const navigate = useNavigate();
 
   useEffect(() => {

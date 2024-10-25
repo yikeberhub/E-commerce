@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { FaMobileAlt } from "react-icons/fa"; // Importing an icon
 import ProductLists from "../components/ProductList";
 import CategoryLists from "../components/CategoryLists";
-import ProductBanner from "../components/ProductBanner";
+import Promotions from "../components/Promotions";
 import HomeNavLink from "../components/HomeNavLink";
 import { ProductContext } from "../contexts/ProductContext";
 import { useAuth } from "../contexts/AuthContext";
@@ -13,7 +13,8 @@ import FilterByCategory from "../components/filters/FilterByCategory";
 import FilterByTags from "../components/filters/FilterByTags";
 import FeaturedProducts from "../components/FeaturedProducts";
 function Home() {
-  const { products, loading, getProducts } = useContext(ProductContext);
+  const { products, loading, searchTerm, getProducts } =
+    useContext(ProductContext);
   const { authTokens, fetchUserInfo } = useAuth();
 
   useEffect(() => {
@@ -41,7 +42,7 @@ function Home() {
         <FilterByTags />
       </div>
       <div className="sm:col-span-4 md:col-span-4 lg:col-span-7 items-center justify-center   shadow-md">
-        <ProductBanner />
+        {!searchTerm && <Promotions />}
         <FeaturedProducts />
         <HomeNavLink />
         <ProductLists products={products} />

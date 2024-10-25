@@ -10,6 +10,8 @@ function ProductProvider({ children }) {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [filteredProducts, setFilteredProducts] = useState(products);
   const [showSearchedProducts, setShowSearchedProducts] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -69,6 +71,8 @@ function ProductProvider({ children }) {
         categories,
         onSetCategories: setCategories,
         fetchCategories,
+        searchTerm,
+        setSearchTerm,
         loading,
         setLoading,
         getProducts: getProducts,

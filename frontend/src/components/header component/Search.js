@@ -2,10 +2,10 @@ import React, { useState, useEffect, useContext } from "react";
 import { FaSearch } from "react-icons/fa"; // Importing the search icon
 import { ProductContext } from "../../contexts/ProductContext";
 
-function Search({ searchedValue, onSearch }) {
-  const { products, onFilterProducts } = useContext(ProductContext);
+function Search() {
+  const { products, searchTerm, setSearchTerm, onFilterProducts } =
+    useContext(ProductContext);
   const [selectedCategory, setSelectedCategory] = useState("All");
-  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     onFilterProducts(
