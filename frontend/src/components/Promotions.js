@@ -105,7 +105,7 @@ const Promotions = () => {
   return (
     <div className="w-full">
       <h2 className="text-2xl font-bold mb-4 text-black text-left mt-2 bg-gray-100">
-        Featured Products
+        Promotion
       </h2>
       <Slider {...settings}>
         {promotions.map((promotion) => (

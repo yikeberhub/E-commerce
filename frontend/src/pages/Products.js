@@ -8,6 +8,26 @@ import FilterByCategory from "../components/filters/FilterByCategory";
 import { useBreadcrumb } from "../contexts/BreadCrumbContext";
 import Breadcrumb from "../components/BreadCrumb";
 
+// FilterByRating Component
+function FilterByRating({ onRatingChange }) {
+  return (
+    <div className="flex flex-col">
+      <label className="text-gray-700">Filter by Rating:</label>
+      <select
+        className="rounded border px-2 py-1"
+        onChange={(e) => onRatingChange(e.target.value)}
+      >
+        <option value="All">All Ratings</option>
+        <option value="1">1 Star & Up</option>
+        <option value="2">2 Stars & Up</option>
+        <option value="3">3 Stars & Up</option>
+        <option value="4">4 Stars & Up</option>
+        <option value="5">5 Stars</option>
+      </select>
+    </div>
+  );
+}
+
 function Products() {
   const { filteredProducts, onFilterProducts } = useContext(ProductContext);
   const { addBreadcrumb, clearBreadcrumbs } = useBreadcrumb();
@@ -15,12 +35,15 @@ function Products() {
   const [currentPage, setCurrentPage] = useState(1);
   const [productsPerPage] = useState(20);
   const [sortOrder, setSortOrder] = useState("default");
+  const [rating, setRating] = useState("All");
 
   useEffect(() => {
     clearBreadcrumbs();
     addBreadcrumb({ label: "Home", path: "/" });
     addBreadcrumb({ label: "Products", path: "/products" });
+  }, []);
 
+  useEffect(() => {
     const sortProducts = () => {
       const sorted = [...filteredProducts].sort((a, b) => {
         if (sortOrder === "priceLowToHigh") return a.price - b.price;
@@ -33,6 +56,24 @@ function Products() {
     sortProducts();
   }, [sortOrder]);
 
+  useEffect(() => {
+    const filterByRating = () => {
+      let filtered = filteredProducts;
+      console.log("filtered", filtered);
+      console.log("rating", rating);
+      // Filter by rating
+      if (rating !== "All") {
+        filtered = filtered.filter(
+          (product) => product.average_rating <= Number(rating)
+        );
+      }
+
+      onFilterProducts(filtered);
+    };
+
+    filterByRating();
+  }, [rating]);
+
   // Pagination logic
   const indexOfLastProduct = currentPage * productsPerPage;
   const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
@@ -42,18 +83,23 @@ function Products() {
   );
   const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
 
+  const handleFilterByRating = (newRating) => {
+    setRating(newRating);
+  };
+
   return (
     <div className="container-fluid mx-auto">
       <div className="mx-2">
         <Breadcrumb />
       </div>
-      <div className=" shadow-md">
+      <div className="shadow-md py-0">
         {/* Filters */}
-        <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 mx-5 px-4 py-2 items-center shadow-md">
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 mx-5 px-4 py-2 items-baseline shadow-md">
           <FilterByCategory />
           <FilterByVendor />
           <FilterByTags />
           <FilterByPrice />
+          <FilterByRating onRatingChange={handleFilterByRating} />
         </div>
 
         {/* Sorting and Display Options */}
