@@ -35,7 +35,7 @@ const CategoryLists = () => {
       <ul className="bg-gray-50">
         {categories.map((category) => (
           <li key={category.id}>
-            <Link to={`/category/${category.title}`}>
+            <Link to={`/categories/${category.id}`}>
               <Category category={category} />
             </Link>
           </li>

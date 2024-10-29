@@ -5,7 +5,6 @@ const ProductContext = createContext(null);
 function ProductProvider({ children }) {
   const [products, setProduct] = useState([]);
   const [categories, setCategories] = useState([]);
-  const [vendors, setVendors] = useState(null);
 
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [filteredProducts, setFilteredProducts] = useState(products);

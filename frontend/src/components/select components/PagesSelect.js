@@ -4,18 +4,16 @@ import { useNavigate } from "react-router-dom";
 const PagesSelect = () => {
   const navigate = useNavigate();
 
-  // Manually defined pages
   const pages = [
     { id: "", title: "Home" },
     { id: "vendors", title: "Vendors" },
     { id: "products", title: "Products" },
     { id: "contact-us", title: "Contact Us" },
+    { id: "categories", title: "categories" },
   ];
 
   const handlePageSelect = (pageId) => {
-    if (pageId) {
-      navigate(`/${pageId}`);
-    }
+    navigate(`/${pageId}`);
   };
 
   return (

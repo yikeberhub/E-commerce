@@ -7,6 +7,7 @@ import FilterByVendor from "../components/filters/FilterByVendor";
 import FilterByCategory from "../components/filters/FilterByCategory";
 import { useBreadcrumb } from "../contexts/BreadCrumbContext";
 import Breadcrumb from "../components/BreadCrumb";
+import DiscountFilter from "../components/filters/DiscountFilter";
 
 function FilterByRating({ onRatingChange }) {
   return (
@@ -28,12 +29,14 @@ function FilterByRating({ onRatingChange }) {
 }
 
 function Products() {
-  const { filteredProducts, onFilterProducts } = useContext(ProductContext);
+  const { products, filteredProducts, onFilterProducts } =
+    useContext(ProductContext);
   const { addBreadcrumb, clearBreadcrumbs } = useBreadcrumb();
   const [currentPage, setCurrentPage] = useState(1);
   const [productsPerPage] = useState(20);
   const [sortOrder, setSortOrder] = useState("default");
   const [rating, setRating] = useState("All");
+  const [discountFilter, setDiscountFilter] = useState("");
 
   useEffect(() => {
     clearBreadcrumbs();
@@ -72,6 +75,23 @@ function Products() {
     filterByRating();
   }, [rating]);
 
+  useEffect(() => {
+    const applyFilter = () => {
+      const newFilteredProducts = products.filter((product) => {
+        if (discountFilter === "") return true;
+        const discountThreshold = parseInt(discountFilter, 10);
+        return product.discount_percentage >= discountThreshold;
+      });
+      onFilterProducts(newFilteredProducts);
+    };
+
+    applyFilter();
+  }, [discountFilter]);
+
+  const handleDiscountChange = (value) => {
+    setDiscountFilter(value);
+  };
+
   // Pagination logic
   const indexOfLastProduct = currentPage * productsPerPage;
   const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
@@ -87,7 +107,7 @@ function Products() {
 
   return (
     <div className="container-fluid mx-auto">
-      <div className="mx-2 text-sm">
+      <div className="w-full  bg-gray-50 rounded-md py-6 mx-auto shadow-lg px-2 lg:px-10">
         <Breadcrumb />
       </div>
       <div className="shadow-md py-0">
@@ -110,11 +130,14 @@ function Products() {
             <option value="priceLowToHigh">Price: Low to High</option>
             <option value="priceHighToLow">Price: High to Low</option>
           </select>
-
           <span className="text-gray-600">
             Showing {currentProducts.length} of {filteredProducts.length}{" "}
             products
           </span>
+          <DiscountFilter
+            selectedDiscount={discountFilter}
+            onDiscountChange={handleDiscountChange}
+          />{" "}
         </div>
 
         {/* Product List */}

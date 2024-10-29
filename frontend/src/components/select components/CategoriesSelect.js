@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from "react";
 import { ProductContext } from "../../contexts/ProductContext";
 
-function CategoriesSelect() {
+function CategoriesSelect({ style }) {
   const {
     products,
     categories,
@@ -30,11 +30,11 @@ function CategoriesSelect() {
 
   return (
     <select
-      className="rounded-sm border-none py-2 sm:px-3 text-black focus:outline-none "
+      className={`sm:px-3 text-black focus:outline-none  ${style && style}`}
       onChange={(e) => handleCategoryChange(e.target.value)}
       value={selectedCategory}
     >
-      <option value="All" className="text-black">
+      <option value="All" className="text-black ">
         All Categories
       </option>
       {categories?.map((cat) => (

@@ -6,6 +6,8 @@ import VendorSelect from "./select components/VendorSelect";
 import PagesSelect from "./select components/PagesSelect";
 import CategoriesSelect from "./select components/CategoriesSelect";
 
+const customStyle = "border border-gray-200 py-1 rounded-md  ";
+
 const Navigation = () => {
   const { products, categories, fetchCategories, onFilterProducts } =
     useContext(ProductContext);
@@ -78,8 +80,8 @@ const Navigation = () => {
 
       <nav className="max-w-screen-lg px-4 py-2 mb-2">
         <div className="flex items-center">
-          <CategoriesSelect />
-          <ul className="flex sm:ml-4 sm:space-x-4 justify-between text-gray_light">
+          <CategoriesSelect style={customStyle} />
+          <ul className="flex sm:ml-4 sm:space-x-4 justify-between items-centers text-gray_light">
             <li>
               <Link
                 to="/"
@@ -93,7 +95,7 @@ const Navigation = () => {
                 to="/products"
                 className="text-black hover:border-blue-500 hover:border-b hover:rounded-b sm:px-3 py-2"
               >
-                Products
+                Shop
               </Link>
             </li>
             <li>
@@ -102,14 +104,7 @@ const Navigation = () => {
             <li>
               <PagesSelect />
             </li>
-            <li>
-              <Link
-                to="/shop/"
-                className="text-black hover:border-blue-500 hover:border-b hover:rounded-b px-3 py-2"
-              >
-                Shop
-              </Link>
-            </li>
+
             <li>
               <Link
                 to="/contact"
