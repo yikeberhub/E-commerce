@@ -66,10 +66,7 @@ function App() {
                       path="/forgot-password"
                       element={<ForgotPassword />}
                     />
-                    <Route
-                      path="/product-category"
-                      element={<ProductCategory />}
-                    />
+                    <Route path="/categories" element={<ProductCategory />} />
                     <Route path="/cart" element={<Cart />} />
                     <Route path="/cart/:id/checkout" element={<Checkout />} />
 

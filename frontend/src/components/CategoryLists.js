@@ -17,15 +17,7 @@ const CategoryLists = () => {
           throw new Error("Network response was not ok");
         }
         const categoryData = await response.json();
-
-        // Initialize checked categories state
-        const initialChecked = categoryData.reduce((acc, category) => {
-          acc[category.title] = false;
-          return acc;
-        }, {});
-
         setCategories(categoryData);
-
         console.log("Fetched categories:", categoryData);
       } catch (error) {
         console.error("Error fetching categories:", error);
@@ -36,15 +28,17 @@ const CategoryLists = () => {
   }, []);
 
   return (
-    <div className="  bg-white py-2 shadow-md shadow-gray-300 rounded mt-4 mx-2 px-2 mb-4">
-      <h3 className="px-2 font-bold text-gray-900 text-lg py-2  rounded  border-b border-green-500">
-        Catagories
+    <div className="bg-white py-2 shadow-md shadow-gray-300 rounded mt-4 mx-2 px-2 mb-4">
+      <h3 className="px-2 font-bold text-gray-900 text-lg py-2 rounded border-b border-green-500">
+        Categories
       </h3>
       <ul className="bg-gray-50">
-        {categories.map((category, key) => (
-          <Link to={`/category/${category.title}`}>
-            <Category category={category} key={key} />
-          </Link>
+        {categories.map((category) => (
+          <li key={category.id}>
+            <Link to={`/category/${category.title}`}>
+              <Category category={category} />
+            </Link>
+          </li>
         ))}
       </ul>
     </div>

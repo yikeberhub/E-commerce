@@ -11,6 +11,7 @@ function ProductProvider({ children }) {
   const [filteredProducts, setFilteredProducts] = useState(products);
   const [showSearchedProducts, setShowSearchedProducts] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("All");
 
   const [loading, setLoading] = useState(true);
 
@@ -73,6 +74,8 @@ function ProductProvider({ children }) {
         fetchCategories,
         searchTerm,
         setSearchTerm,
+        selectedCategory,
+        setSelectedCategory,
         loading,
         setLoading,
         getProducts: getProducts,

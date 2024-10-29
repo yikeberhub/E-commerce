@@ -43,7 +43,7 @@ function Home() {
       </div>
       <div className="sm:col-span-4 md:col-span-4 lg:col-span-7 items-center justify-center   shadow-md">
         {!searchTerm && <Promotions />}
-        <FeaturedProducts />
+        {!searchTerm && <FeaturedProducts />}
         <HomeNavLink />
         <ProductLists products={products} />
       </div>

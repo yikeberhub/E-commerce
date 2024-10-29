@@ -2,6 +2,9 @@ import { useContext, useEffect, useState } from "react";
 import Header from "./header component/Header";
 import { Link, useLocation } from "react-router-dom";
 import { ProductContext } from "../contexts/ProductContext";
+import VendorSelect from "./select components/VendorSelect";
+import PagesSelect from "./select components/PagesSelect";
+import CategoriesSelect from "./select components/CategoriesSelect";
 
 const Navigation = () => {
   const { products, categories, fetchCategories, onFilterProducts } =
@@ -75,20 +78,7 @@ const Navigation = () => {
 
       <nav className="max-w-screen-lg px-4 py-2 mb-2">
         <div className="flex items-center">
-          <select
-            className="rounded-sm border-none py-2 sm:px-3 bg-blue-500 text-white rounded-t focus:outline-none focus:ring-2 focus:ring-blue-500-200"
-            onChange={(e) => handleCategoryChange(e.target.value)}
-            value={selectedCategory}
-          >
-            <option value="All" className="rounded sm:text-sm">
-              All Categories
-            </option>
-            {categories?.map((cat) => (
-              <option key={cat.title} value={cat.title}>
-                {cat.title}
-              </option>
-            ))}
-          </select>
+          <CategoriesSelect />
           <ul className="flex sm:ml-4 sm:space-x-4 justify-between text-gray_light">
             <li>
               <Link
@@ -107,24 +97,10 @@ const Navigation = () => {
               </Link>
             </li>
             <li>
-              <select className="border-none bg-inherit outline-none sm:px-4 hover:bg-blue-500 hover:text-white rounded focus:outline-none focus:ring-2 focus:ring-blue-500-300">
-                <option value="vendors" disabled>
-                  Vendors
-                </option>
-                <option value="/vendor1">Vendor 1</option>
-                <option value="/vendor2">Vendor 2</option>
-                <option value="/vendor3">Vendor 3</option>
-              </select>
+              <VendorSelect />
             </li>
             <li>
-              <select className="border-none bg-inherit outline-none px-4 hover:text-white hover:bg-blue-500 text-black rounded">
-                <option value="pages" disabled>
-                  Pages
-                </option>
-                <option value="/page1">Page 1</option>
-                <option value="/page2">Page 2</option>
-                <option value="/page3">Page 3</option>
-              </select>
+              <PagesSelect />
             </li>
             <li>
               <Link

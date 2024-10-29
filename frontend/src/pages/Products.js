@@ -8,7 +8,6 @@ import FilterByCategory from "../components/filters/FilterByCategory";
 import { useBreadcrumb } from "../contexts/BreadCrumbContext";
 import Breadcrumb from "../components/BreadCrumb";
 
-// FilterByRating Component
 function FilterByRating({ onRatingChange }) {
   return (
     <div className="flex flex-col">
@@ -31,7 +30,6 @@ function FilterByRating({ onRatingChange }) {
 function Products() {
   const { filteredProducts, onFilterProducts } = useContext(ProductContext);
   const { addBreadcrumb, clearBreadcrumbs } = useBreadcrumb();
-
   const [currentPage, setCurrentPage] = useState(1);
   const [productsPerPage] = useState(20);
   const [sortOrder, setSortOrder] = useState("default");
@@ -89,7 +87,7 @@ function Products() {
 
   return (
     <div className="container-fluid mx-auto">
-      <div className="mx-2">
+      <div className="mx-2 text-sm">
         <Breadcrumb />
       </div>
       <div className="shadow-md py-0">
