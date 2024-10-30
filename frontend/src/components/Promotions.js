@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
@@ -14,6 +14,7 @@ const PromotedProduct = ({ promotion }) => {
     checkItemInWishlist,
     newWishlistItem,
   } = useWishlist();
+  const navigate = useNavigate();
 
   const addedToCart = checkItemInCart(promotion.product.id)["isAdded"];
   const addedToWishlist = checkItemInWishlist(promotion.product.id)["isAdded"];
@@ -35,16 +36,21 @@ const PromotedProduct = ({ promotion }) => {
       removeWishlistItem(checkedResult["item"].id);
     }
   };
+  const handleNavigate = (id) => {
+    navigate(`/product/${id}`);
+  };
+
   return (
-    <div className="relative mb-4 flex items-center bg-gray-50 hover:cursor-pointer">
-      <Link to={`/product/${promotion.product.id}`}>
-        {" "}
-        <img
-          src={promotion.product.image}
-          alt={promotion.product.title}
-          className="w-auto h-72 object-cover rounded-lg shadow-lg"
-        />
-      </Link>
+    <div
+      className="relative mb-4 flex items-center bg-gray-50"
+      onClick={() => handleNavigate(promotion.product.id)}
+    >
+      <img
+        src={promotion.product.image}
+        alt={promotion.product.title}
+        className="w-auto h-72 object-cover rounded-lg shadow-lg"
+      />
+
       <div className="absolute inset-0 flex flex-col justify-center items-center text-white bg-opacity-50 rounded-lg p-4">
         <h2 className="text-xl font-bold mb-2 text-blue-500">
           {promotion.product.title}
@@ -58,18 +64,22 @@ const PromotedProduct = ({ promotion }) => {
         <div className="flex space-x-2 mt-2">
           <button
             className="bg-blue-500 text-white px-4 py-2 rounded-lg"
-            onClick={() => handleAddToCart()}
+            onClick={handleAddToCart}
           >
-            {!addedToCart ? <span>Add to Cart</span> : <span>Remove cart</span>}
+            {!addedToCart ? (
+              <span>Add to Cart</span>
+            ) : (
+              <span>Remove from Cart</span>
+            )}
           </button>
           <button
             className="bg-gray-400 text-white px-4 py-2 rounded-lg"
-            onClick={() => handleAddToWishlist()}
+            onClick={handleAddToWishlist}
           >
             {!addedToWishlist ? (
               <span>Add to Wishlist</span>
             ) : (
-              <span>Remove wishlist</span>
+              <span>Remove from Wishlist</span>
             )}
           </button>
         </div>

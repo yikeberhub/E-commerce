@@ -2,8 +2,8 @@ import { useContext } from "react";
 import Product from "./Product";
 import { ProductContext } from "../contexts/ProductContext";
 
-const ProductLists = ({ products }) => {
-  const { filteredProducts, onFilterProducts } = useContext(ProductContext);
+const ProductLists = () => {
+  const { products, filteredProducts } = useContext(ProductContext);
 
   console.log("filtered product:", filteredProducts);
   if (!filteredProducts.length) {

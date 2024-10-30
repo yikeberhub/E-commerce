@@ -62,15 +62,11 @@ const Navigation = () => {
               +2511946472687
             </li>
             <li className="text-sm">
-              <select className="bg-card border border-gray rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <option value="en">English</option>
-              </select>
-            </li>
-            <li className="text-sm">
-              <select className="bg-card border border-gray rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <option value="en">ETB</option>
-                <option value="en">USD</option>
-              </select>
+              <Link to="/about">
+                <p className="bg-card border bg-blue-600 text-white font-bold border-yellow-600 hover:border-gray-500 hover:cursor-pointer rounded px-2 py-1 focus:outline-none ">
+                  About us
+                </p>
+              </Link>
             </li>
           </ul>
         </div>

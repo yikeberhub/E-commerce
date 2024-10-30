@@ -11,7 +11,7 @@ import Products from "./pages/Products";
 import Checkout from "./pages/Checkout";
 import SearchProduct from "./pages/SearchProduct";
 import Cart from "./pages/Cart";
-import About from "./pages/About";
+import AboutUs from "./pages/AboutUs";
 import ContactUs from "./pages/ContactUs";
 import PageNotFound from "./pages/PageNotFound";
 import Wishlist from "./pages/Wishlist";
@@ -171,8 +171,8 @@ function App() {
                         path="/search-product"
                         element={<SearchProduct />}
                       />
-                      <Route path="/about" element={<About />} />
-                      <Route path="/contact-us" element={<ContactUs />} />
+                      <Route path="/about" element={<AboutUs />} />
+                      <Route path="/contact" element={<ContactUs />} />
                       <Route path="*" element={<PageNotFound />} />
                     </Routes>
                   </main>
