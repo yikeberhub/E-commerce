@@ -10,6 +10,7 @@ from users.models import CustomUser
 class Vendor(models.Model):
     title = models.CharField(max_length=100, default='Electro shop')
     image = models.ImageField(upload_to='vendors/vendors_images/', default='vendors/default_vendor_image/img.png')
+    banner_image = models.ImageField(upload_to='vendors/banner_images/', default='vendors/default_banner_image/default_banner_image.webp')
     description = models.TextField(null=True, blank=True, default='Amazing vendor')
     address = models.CharField(max_length=100, default='123 Main street')
     phone_number = models.CharField(max_length=15, default='+251946472687')
