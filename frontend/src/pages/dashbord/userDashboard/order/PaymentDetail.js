@@ -35,6 +35,7 @@ const PaymentDetail = () => {
           setError(data.error);
         } else {
           setPaymentDetail(data.payment);
+          consloe.log("payment detail", paymentDetail);
         }
       } catch (err) {
         setError(err.message);
@@ -73,18 +74,14 @@ const PaymentDetail = () => {
           <p><strong>User:</strong> ${
             paymentDetail.order?.user.username || "N/A"
           }</p>
-          <p><strong>Amount:</strong> $${
-            paymentDetail.order?.total_price || "0.00"
-          }</p>
+          <p><strong>Amount:</strong> $ ${paymentDetail.amount || "0.00"}</p>
           <p><strong>Payment Method:</strong> ${
-            paymentDetail.order?.payment_method
+            paymentDetail.payment_method
           }</p>
           <p><strong>Payment Gateway:</strong> ${
-            paymentDetail.order?.payment_gateway
+            paymentDetail.payment_gateway
           }</p>
-          <p><strong>Status:</strong> ${
-            paymentDetail.payment_status || "N/A"
-          }</p>
+          <p><strong>Status:</strong> ${paymentDetail.payment_status}</p>
           <p><strong>Date:</strong> ${
             new Date(paymentDetail.created_at).toLocaleString() || "N/A"
           }</p>

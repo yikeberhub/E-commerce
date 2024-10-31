@@ -53,6 +53,7 @@ import ProductCategory from "./pages/ProductCategory";
 import Vendors from "./pages/Vendors";
 import VendorDetail from "./pages/VendorDetail";
 import { VendorProvider } from "./contexts/VendorContext";
+import OrderChart from "./pages/dashbord/userDashboard/order/OrderChart";
 
 function App() {
   return (
@@ -85,6 +86,7 @@ function App() {
                         <Route index element={<UserProfile />} />
                         <Route path="profile" element={<UserProfile />} />
                         <Route path="orders" element={<Orders />} />
+                        <Route path="order-chart" element={<OrderChart />} />
                         <Route path="address" element={<Address />} />
                         <Route
                           path="account-detail"
