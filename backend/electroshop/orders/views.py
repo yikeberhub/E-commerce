@@ -7,7 +7,6 @@ from .models import Order,OrderItem
 from cart.models import Cart
 from users.models import CustomUser,Address
 
-from payments .process_payment import process_payment
 from .serializers import OrderSerializer
 from payments.serializers import PaymentSerializer
 from payments.models import Payment
