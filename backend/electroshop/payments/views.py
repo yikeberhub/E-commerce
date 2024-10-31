@@ -105,12 +105,7 @@ def check_payment_status(request):
         return Response({"error": "transaction_id is required."}, status=400)
 
     try:
-        # Log the transaction ID received
-        print(f"Received transaction_id: {transaction_id}")
-
         payment = Payment.objects.filter(transaction_id=transaction_id).first()
-        print('payment ',payment)
-
         if payment:
             response = verify_payment(transaction_id)
 
@@ -124,6 +119,7 @@ def check_payment_status(request):
 
 
                 serializer = PaymentSerializer(payment, many=False)
+                print('data',serializer.data)
                 return Response({"payment": serializer.data}, status=200)
             else:
                 print("Verification response:")

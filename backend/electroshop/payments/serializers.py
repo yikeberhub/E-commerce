@@ -30,7 +30,8 @@ class PaymentSerializer(serializers.ModelSerializer):
                     
     class Meta:
         model = Payment
-        fields = ['id', 'order', 'payment_status','currency','charge','payment_gateway','payment_method', 'transaction_id', 'created_at']
+        fields ='__all__'
+        # fields = ['id', 'order', 'payment_status','currency','charge','payment_gateway','payment_method', 'transaction_id', 'created_at']
         read_only_fields = ['id', 'order', 'created_at']
 
     def get_order(self, obj):
