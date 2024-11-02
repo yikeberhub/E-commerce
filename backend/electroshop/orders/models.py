@@ -35,6 +35,7 @@ class OrderItem(models.Model):
     product = models.ForeignKey(Product,on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField(default=1)
     
+    
     def __str__(self):
         return f'item of {self.order.id} ordered by {self.order.user.username}'
         

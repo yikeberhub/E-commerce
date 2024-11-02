@@ -5,7 +5,8 @@ from .views import (
     ProductDetailView,
     ProductReviewListView,
     ProductReviewDetailView,
-    FeaturedProductsView,CategoryList,CategoryDetail,TagList
+    ProductReviewCreateUpdateView,
+FeaturedProductsView,CategoryList,CategoryDetail,TagList
 )
 
 urlpatterns = [
@@ -23,6 +24,8 @@ urlpatterns = [
     path('categories/<int:pk>/', CategoryDetail.as_view(), name='category-detail'),  # Retrieve, update, delete category
     
     # Product Review URLs
-    path('reviews/', ProductReviewListView.as_view(), name='product-review-list'),  # List/Create
-    path('reviews/<int:pk>/', ProductReviewDetailView.as_view(), name='product-review-detail'),  # Retrieve/Update/Delete
+    path('<int:product_id>/reviews/', ProductReviewListView.as_view(), name='product-review-list'),  # List/Create
+    path("<int:product_id>/reviews/<int:pk>/", ProductReviewDetailView.as_view(), name="product-review-detail"),
+    path("<int:product_id>/reviews/add/", ProductReviewCreateUpdateView.as_view(), name="add-product-review"),
+
 ]

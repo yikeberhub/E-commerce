@@ -80,9 +80,19 @@ class Product(models.Model):
             return ((self.old_price - self.price) / self.old_price) * 100
         return 0
 
+    # def average_rating(self):
+    #     ratings = self.ratings.all()  
+    #     return ratings.aggregate(models.Avg('score'))['score__avg'] or 0
+    
+    
     def average_rating(self):
-        ratings = self.ratings.all()  
-        return ratings.aggregate(models.Avg('score'))['score__avg'] or 0
+        ratings = self.reviews.all()  # Get all related reviews
+        total_rating = sum(review.rating for review in ratings)
+        total_reviews = ratings.count()
+        return total_rating / total_reviews if total_reviews > 0 else 0
+
+    def number_of_reviews(self):
+        return self.reviews.count() 
 
    
 
@@ -109,7 +119,7 @@ class ProductImages(models.Model):
 class ProductReview(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='reviews')
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
-    rating = models.PositiveIntegerField()  # Assuming rating is from 1 to 5
+    rating = models.PositiveIntegerField()  
     comment = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

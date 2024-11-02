@@ -16,15 +16,33 @@ class ProductListView(generics.ListCreateAPIView):
 class ProductDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
+    
+class ProductReviewCreateUpdateView(generics.CreateAPIView):
+    serializer_class = ProductReviewSerializer
 
-# Product Review Views
+    def post(self, request, product_id):
+        existing_review = ProductReview.objects.filter(product_id=product_id, user=request.user).first()
+        
+        if existing_review:
+            existing_review.rating = request.data.get('rating', existing_review.rating)
+            existing_review.comment = request.data.get('comment', existing_review.comment)
+            existing_review.save()
+            return Response(self.get_serializer(existing_review).data, status=status.HTTP_200_OK)
+        else:
+            # Create a new review
+            return super().create(request)
+        
 class ProductReviewListView(generics.ListCreateAPIView):
     queryset = ProductReview.objects.all()
     serializer_class = ProductReviewSerializer
 
 class ProductReviewDetailView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = ProductReview.objects.all()
     serializer_class = ProductReviewSerializer
+
+    def get_queryset(self):
+        product_id = self.kwargs.get("product_id")
+        product = Product.objects.get(id=product_id)
+        return ProductReview.objects.filter(product=product)
     
 class CategoryList(generics.ListCreateAPIView):
     queryset = Category.objects.all()

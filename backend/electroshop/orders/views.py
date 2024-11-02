@@ -49,7 +49,7 @@ class OrderListView(generics.ListAPIView):
         if user.role == 'admin':
             return Order.objects.all()  
         elif user.role == 'customer':
-            return Order.objects.filter(customer_name=user.username)  
+            return Order.objects.filter(user=user)  
         return Order.objects.none() 
 
     def get(self, request, *args, **kwargs):
