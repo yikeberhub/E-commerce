@@ -106,16 +106,20 @@ const FeaturedProducts = () => {
   if (error) return <div className="text-red-500 text-center">{error}</div>;
 
   return (
-    <div className="container mx-auto my-8 bg-gray-100 ">
-      <h2 className="text-2xl font-bold mb-4 text-black">Featured Products</h2>
-      <Slider {...settings}>
-        {featuredProducts.map((product) => (
-          <div key={product.id} className="p-4">
-            <Product product={product} />
-          </div>
-        ))}
-      </Slider>
-    </div>
+    featuredProducts && (
+      <div className="container mx-auto my-2 bg-gray-100 ">
+        <h2 className="text-2xl font-bold mb-4 text-black">
+          Featured Products
+        </h2>
+        <Slider {...settings}>
+          {featuredProducts.map((product) => (
+            <div key={product.id} className="p-4">
+              <Product product={product} />
+            </div>
+          ))}
+        </Slider>
+      </div>
+    )
   );
 };
 

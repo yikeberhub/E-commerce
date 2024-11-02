@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import WishlistItem from "../components/WishlistItem";
 import { useWishlist } from "../contexts/WishlistContext";
 import { useAuth } from "../contexts/AuthContext";
@@ -10,10 +10,9 @@ function Wishlist() {
   const { user } = useAuth();
 
   if (loading) return <div>Loading...</div>;
-  if (!user) return alert(message);
 
   return (
-    <div className="col-span-5 h-screen bg-bg_secondary text-gray_light grid grid-cols-6 border border-gray shadow-md ">
+    <div className="col-span-5 min-h-screen bg-bg_secondary text-gray_light grid grid-cols-6 border border-gray shadow-md ">
       <div className="col-span-4 px-2 sm:mx-2 sm:my-2">
         <h1 className="text-3xl mx-2 py-2 text-gray_lightest">
           Your Wishlists

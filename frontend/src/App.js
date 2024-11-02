@@ -7,7 +7,6 @@ import SignUp from "./pages/SignUp";
 import ForgotPassword from "./pages/ForgotPassword";
 import ProductDetail from "./pages/ProductDetail";
 import Products from "./pages/Products";
-// import ProductCategory from "./pages/ProductCategories";
 import Checkout from "./pages/Checkout";
 import SearchProduct from "./pages/SearchProduct";
 import Cart from "./pages/Cart";
@@ -54,6 +53,8 @@ import Vendors from "./pages/Vendors";
 import VendorDetail from "./pages/VendorDetail";
 import { VendorProvider } from "./contexts/VendorContext";
 import OrderChart from "./pages/dashbord/userDashboard/order/OrderChart";
+import ProtectedRoute from "./Routes/ProtectedRoute";
+import VendorRoutes from "./pages/vendorDashboard/VendorRoutes";
 
 function App() {
   return (
@@ -94,9 +95,12 @@ function App() {
                         />
                         <Route path="orders/:id" element={<OrderDetail />} />
                       </Route>
+
                       <Route
                         path="/admin-dashboard/"
-                        element={<AdminDashboard />}
+                        element={
+                          <ProtectedRoute element={<AdminDashboard />} />
+                        }
                       >
                         <Route index element={<OverviewPanel />} />
                         <Route
@@ -107,13 +111,8 @@ function App() {
                           path="product-management"
                           element={<ProductManagement />}
                         />
-
-                        <Route
-                          path="customer-management/"
-                          element={<CustomerManagement />}
-                        >
-                          <Route index element={<UserList />} />{" "}
-                          {/* Default route under customer management */}
+                        <Route path="customer-management/">
+                          <Route index element={<UserList />} />
                           <Route path="add-user" element={<AddUser />} />
                           <Route path="edit-user/:id" element={<EditUser />} />
                           <Route
@@ -121,7 +120,6 @@ function App() {
                             element={<UserDetail />}
                           />
                         </Route>
-
                         <Route
                           path="financial-overview"
                           element={<FinancialOverview />}
@@ -133,32 +131,9 @@ function App() {
                       </Route>
 
                       <Route
-                        path="/vendor-dashboard/"
+                        path="/vendor-dashboard/*"
                         element={<VendorAdminDashboard />}
-                      >
-                        <Route index element={<OverviewPanel />} />
-                        <Route
-                          path="order-management"
-                          element={<OrderManagement />}
-                        />
-                        <Route
-                          path="product-management"
-                          element={<ProductManagement />}
-                        />
-                        <Route
-                          path="customer-management"
-                          element={<CustomerManagement />}
-                        />
-                        <Route
-                          path="financial-overview"
-                          element={<FinancialOverview />}
-                        />
-                        <Route
-                          path="support-resources"
-                          element={<SupportResources />}
-                        />
-                      </Route>
-
+                      ></Route>
                       <Route
                         path="/payment/confirm"
                         element={<PaymentDetail />}

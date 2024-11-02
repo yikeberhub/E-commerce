@@ -13,16 +13,22 @@ export const AuthProvider = ({ children }) => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetchUserInfo();
-  }, []);
+    const fetchInitialUserInfo = async () => {
+      if (authTokens.access) {
+        await fetchUserInfo();
+      } else {
+        setLoading(false);
+      }
+    };
+    fetchInitialUserInfo();
+  }, [authTokens.access]);
 
-  // Function to set tokens and user information
   const setTokens = async (tokens, callback) => {
     setAuthTokens(tokens);
     localStorage.setItem("access", tokens.access);
     localStorage.setItem("refresh", tokens.refresh);
 
-    await fetchUserInfo();
+    await fetchUserInfo(); // Wait for user info to be fetched
     if (callback) {
       callback();
     }
@@ -39,7 +45,7 @@ export const AuthProvider = ({ children }) => {
     if (!authTokens.access) {
       setUser(null);
       setLoading(false);
-      return;
+      return; // Early return if no access token
     }
 
     try {
@@ -56,6 +62,9 @@ export const AuthProvider = ({ children }) => {
         setUser(data);
       } else if (response.status === 401) {
         await refreshTokens();
+      } else {
+        console.error("Failed to fetch user info:", response.statusText);
+        clearTokens();
       }
     } catch (error) {
       console.error("Failed to fetch user info:", error);
@@ -82,8 +91,8 @@ export const AuthProvider = ({ children }) => {
         const data = await response.json();
         setTokens(data);
       } else {
-        clearTokens();
-        navigate("/login");
+        clearTokens(); // Clear tokens if refresh fails
+        setTimeout(() => navigate("/login"), 0);
       }
     } catch (error) {
       console.error("Failed to refresh tokens:", error);
@@ -113,5 +122,4 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
-// Custom hook to use auth context
 export const useAuth = () => useContext(AuthContext);

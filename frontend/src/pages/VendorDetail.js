@@ -61,7 +61,7 @@ function VendorDetail() {
               <div className="flex items-center mb-4">
                 <div>
                   <img
-                    src={vendor.image}
+                    src={vendor.logo}
                     alt={vendor.title}
                     className="h-28 w-28 rounded-full border-2 border-blue-500"
                   />

@@ -1,23 +1,37 @@
+// VendorAdminDashboard.js
 import React from "react";
-import { Outlet } from "react-router-dom";
-import AdminNavbar from "../AdminDashboard/AdminComponent/AdminNavbar";
-import AdminSidebar from "../AdminDashboard/AdminComponent/AdminSideBar";
+import { Link, Outlet } from "react-router-dom";
+import "./VendorDashboard.css";
 
-function VendorDashboard() {
+const VendorAdminDashboard = () => {
   return (
-    <div className="flex min-h-screen bg-gray-100 py-2">
-      {/* <!-- Sidebar --> */}
-      <AdminSidebar type="vendor" />
-
-      {/* <!-- Main Content --> */}
-      <main className="flex-1 py-2 px-6">
-        <header className="bg-white shadow-md p-4 rounded-lg mb-6">
-          <AdminNavbar type="vendor" />
-        </header>
+    <div className="vendor-dashboard">
+      <nav className="sidebar">
+        <h2 className="sidebar-title">Vendor Dashboard</h2>
+        <ul className="sidebar-menu">
+          <li>
+            <Link to="products" className="sidebar-item">
+              Manage Products
+            </Link>
+          </li>
+          <li>
+            <Link to="orders" className="sidebar-item">
+              Manage Orders
+            </Link>
+          </li>
+          <li>
+            <Link to="customers" className="sidebar-item">
+              Manage Customers
+            </Link>
+          </li>
+        </ul>
+      </nav>
+      <div className="main-content">
+        <h1 className="main-title">Welcome to the Vendor Dashboard</h1>
         <Outlet />
-      </main>
+      </div>
     </div>
   );
-}
+};
 
-export default VendorDashboard;
+export default VendorAdminDashboard;

@@ -1,29 +1,28 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import loginIcons from "../assets/icons/images/signin.gif";
 import { useAuth } from "../contexts/AuthContext";
 import Spinner from "../common/Spinner";
 
 const Login = () => {
-  const { setTokens } = useAuth();
+  const { setTokens, user, fetchUserInfo } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
-  const [data, setData] = useState({
-    email: "",
-    password: "",
-  });
+  const [data, setData] = useState({ email: "", password: "" });
   const [messages, setMessages] = useState({ email: "", password: "" });
 
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    // Redirect if user is already logged in
+    if (user) {
+      navigate("/"); // redirect to home if user is authenticated
+    }
+  }, [user, navigate]);
+
   const handleOnChange = (e) => {
     const { name, value } = e.target;
-    setData((preve) => {
-      return {
-        ...preve,
-        [name]: value,
-      };
-    });
+    setData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e) => {
@@ -33,9 +32,7 @@ const Login = () => {
       setMessages({});
       const response = await fetch("http://127.0.0.1:8000/users/login/", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       });
 
@@ -44,7 +41,7 @@ const Login = () => {
         localStorage.setItem("access", data.access);
         localStorage.setItem("refresh", data.refresh);
         setTokens(data, () => {
-          navigate("/");
+          navigate("/"); // Redirect to home after setting tokens
         });
 
         alert("Login successful!");
@@ -53,20 +50,19 @@ const Login = () => {
         console.log("error:", errorData);
         setMessages({
           email:
-            errorData.errors[0]["field"] === "email"
-              ? errorData.errors[0]["message"]
+            errorData.errors[0]?.field === "email"
+              ? errorData.errors[0]?.message
               : "",
           password:
-            errorData.errors[0]["field"] === "password"
-              ? errorData.errors[0]["message"]
+            errorData.errors[0]?.field === "password"
+              ? errorData.errors[0]?.message
               : "",
         });
-        setLoading(false);
-        console.error("Login failed due to:", errorData.errors[0]["field"]);
       }
     } catch (error) {
-      setLoading(false);
       console.error("An error occurred:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -86,6 +82,7 @@ const Login = () => {
                 className="pt-6 flex flex-col gap-2"
                 onSubmit={handleSubmit}
               >
+                {/* Email Input */}
                 <div className="grid">
                   <label>Email : </label>
                   <div className="bg-slate-100 p-2">
@@ -103,6 +100,7 @@ const Login = () => {
                   </small>
                 </div>
 
+                {/* Password Input */}
                 <div>
                   <label>Password : </label>
                   <div className="bg-slate-100 p-2 flex">
@@ -114,10 +112,9 @@ const Login = () => {
                       onChange={handleOnChange}
                       className="w-full h-full outline-none bg-transparent"
                     />
-
                     <div
                       className="cursor-pointer text-xl"
-                      onClick={() => setShowPassword((preve) => !preve)}
+                      onClick={() => setShowPassword((prev) => !prev)}
                     >
                       <span>🔑</span>
                     </div>
@@ -140,10 +137,10 @@ const Login = () => {
               </form>
 
               <p className="my-5">
-                Don't have account ?{" "}
+                Don't have an account?{" "}
                 <Link
                   to={"/signup/"}
-                  className=" text-red-600 hover:text-red-700 hover:underline"
+                  className="text-red-600 hover:text-red-700 hover:underline"
                 >
                   Sign up
                 </Link>

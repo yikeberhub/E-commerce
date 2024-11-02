@@ -26,7 +26,6 @@ function Home() {
       fetchUserInfo();
     }
   }, [authTokens]);
-  console.log("home page");
 
   if (loading) {
     return <div>Loading...</div>;

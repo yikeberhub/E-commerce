@@ -29,38 +29,58 @@ function RightContent() {
         <small className="bottom-5 left-6 absolute text-xs px-1 rounded-full  bg-green-500">
           {cart?.items?.length}
         </small>
-        <Link to={`cart/`}>
-          <p>
-            <img src={AddCartIcon} alt="cart_icon" className="w-7 h-7" />
-          </p>
-        </Link>
+        {!user ? (
+          <Link to={`/login`}>
+            <p>
+              <img src={AddCartIcon} alt="cart_icon" className="w-7 h-7" />
+            </p>
+          </Link>
+        ) : (
+          <Link to={`cart/`}>
+            <p>
+              <img src={AddCartIcon} alt="cart_icon" className="w-7 h-7" />
+            </p>
+          </Link>
+        )}
       </div>
       <div className=" bg-white border  border-gray_lighter px-2 rounded py-1  shadow-md  relative">
         <small className="bottom-5 left-6 absolute text-xs px-1 rounded-full  bg-red-500">
           {wishlist?.items?.length}
         </small>{" "}
-        <Link to={`wishlist/`}>
-          <p>
-            <img
-              src={AddWishlistIcon}
-              alt="wishlist_icon"
-              className="w-7 h-7 "
-            />
-          </p>
-        </Link>
+        {!user ? (
+          <Link to={`/login`}>
+            <p>
+              <img
+                src={AddWishlistIcon}
+                alt="wishlist_icon"
+                className="w-7 h-7 "
+              />
+            </p>
+          </Link>
+        ) : (
+          <Link to={`wishlist/`}>
+            <p>
+              <img
+                src={AddWishlistIcon}
+                alt="wishlist_icon"
+                className="w-7 h-7 "
+              />
+            </p>
+          </Link>
+        )}
       </div>
-      <Link to={`/dashboard/`}>
-        <div className="bg-white border border-gray_lighter sm:px-2 rounded  py-1 shadow-md flex flex-row items-center gap-2">
-          <img
-            src={user ? user.profile_image : AccountIcon}
-            alt="accountIcon"
-            className="w-6 h-6 rounded-md"
-          />
-          <p className="font-sans text-gray">
-            {user ? user.username : "Account"}
-          </p>
-        </div>
-      </Link>
+      {user && (
+        <Link to={`/dashboard/`}>
+          <div className="bg-white border border-gray_lighter sm:px-2 rounded  py-1 shadow-md flex flex-row items-center gap-2">
+            <img
+              src={user ? user.profile_image : AccountIcon}
+              alt="accountIcon"
+              className="w-6 h-6 rounded-md"
+            />
+            <p className="font-sans text-gray">{user && user.first_name}</p>
+          </div>
+        </Link>
+      )}
       <LogButton />
     </div>
   );

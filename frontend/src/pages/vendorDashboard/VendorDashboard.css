@@ -1,0 +1,46 @@
+/* VendorDashboard.css */
+.vendor-dashboard {
+  display: flex;
+  height: 100vh; /* Full viewport height */
+}
+
+.sidebar {
+  width: 250px; /* Fixed width for sidebar */
+  background-color: #f7f7f7; /* Light gray background */
+  padding: 20px; /* Padding around sidebar */
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1); /* Shadow effect */
+}
+
+.sidebar-title {
+  font-size: 1.5rem; /* Title size */
+  margin-bottom: 20px; /* Space below title */
+}
+
+.sidebar-menu {
+  list-style: none; /* Remove list style */
+  padding: 0; /* Remove padding */
+}
+
+.sidebar-item {
+  display: block; /* Block display for full width */
+  padding: 10px; /* Padding for items */
+  text-decoration: none; /* Remove underline */
+  color: #333; /* Text color */
+  border-radius: 4px; /* Rounded corners */
+  transition: background-color 0.2s; /* Smooth background transition */
+}
+
+.sidebar-item:hover {
+  background-color: #e0e0e0; /* Highlight on hover */
+}
+
+.main-content {
+  flex: 1;
+  padding: 20px;
+  background-color: #ffffff;
+  overflow-y: auto;
+}
+.main-title {
+  font-size: 2rem;
+  margin-bottom: 20px;
+}

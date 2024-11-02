@@ -111,7 +111,7 @@ const Vendors = () => {
             <div className="flex items-center mb-4">
               <div>
                 <img
-                  src={vendor.image}
+                  src={vendor.logo}
                   alt={vendor.title}
                   className="h-24 w-24 rounded-full border-2 border-blue-500"
                 />

@@ -7,25 +7,24 @@ function HomeNavLink() {
 
   console.log("categories home nav", categories);
 
-  // Fetch categories from the backend
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const response = await fetch(
-          "http://localhost:8000/products/categories/"
-        ); // Adjust the URL as needed
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
-        }
-        const data = await response.json();
-        setCategories(data);
-      } catch (error) {
-        console.error("Error fetching categories:", error);
-      }
-    };
+  // useEffect(() => {
+  //   const fetchCategories = async () => {
+  //     try {
+  //       const response = await fetch(
+  //         "http://localhost:8000/products/categories/"
+  //       ); // Adjust the URL as needed
+  //       if (!response.ok) {
+  //         throw new Error("Network response was not ok");
+  //       }
+  //       const data = await response.json();
+  //       setCategories(data);
+  //     } catch (error) {
+  //       console.error("Error fetching categories:", error);
+  //     }
+  //   };
 
-    fetchCategories();
-  }, []);
+  //   fetchCategories();
+  // }, []);
 
   const handleCategoryClick = (category) => {
     if (category === "All") {

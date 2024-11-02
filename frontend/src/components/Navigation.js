@@ -17,9 +17,10 @@ const Navigation = () => {
   const search = location.pathname.includes("products");
   const home = location.pathname === "/";
 
+  // Fetch categories only when the component mounts
   useEffect(() => {
     fetchCategories();
-  }, [selectedCategory]);
+  }, []); // Empty dependency array means this effect runs once on mount
 
   const handleCategoryChange = (category) => {
     setSelectedCategory(category);
@@ -71,7 +72,7 @@ const Navigation = () => {
           </ul>
         </div>
         <hr className="border-gray" />
-        {(home || search) && <Header />}
+        <Header />
       </div>
 
       <nav className="max-w-screen-lg px-4 py-2 mb-2">
@@ -100,7 +101,6 @@ const Navigation = () => {
             <li>
               <PagesSelect />
             </li>
-
             <li>
               <Link
                 to="/contact"

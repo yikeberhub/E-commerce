@@ -1,6 +1,12 @@
 import { React, useEffect } from "react";
 import { Link, Outlet } from "react-router-dom";
-import { FaUser, FaChartLine, FaShoppingCart, FaShippingFast, FaAddressCard } from "react-icons/fa";
+import {
+  FaUser,
+  FaChartLine,
+  FaShoppingCart,
+  FaShippingFast,
+  FaAddressCard,
+} from "react-icons/fa";
 
 import { useAuth } from "../../../contexts/AuthContext";
 import { useBreadcrumb } from "../../../contexts/BreadCrumbContext";
@@ -31,7 +37,9 @@ function UserDashboard() {
           <ul className="px-2 py-1 shadow-md shadow-gray-400 z-20 align-middle items-center mx-10 mt-2">
             <Link to={`profile/`}>
               <li className="w-64 bg-green-600 py-2 mr-5 text-white text-sm font-semibold text-start ps-2 rounded-md">
-                <h2><FaUser className="inline mr-2" /> Profile</h2>
+                <h2>
+                  <FaUser className="inline mr-2" /> Profile
+                </h2>
               </li>
             </Link>
             <Link to={`order-chart/`}>
@@ -46,12 +54,12 @@ function UserDashboard() {
                 <h2>Orders</h2>
               </li>
             </Link>
-            <Link to={`track`}>
+            {/* <Link to={`track`}>
               <li className="flex items-center w-64 py-2 my-2 border border-gray-300 text-gray-600 text-sm font-semibold text-start ps-2 pr-5 rounded-md">
                 <FaShippingFast className="w-4 h-4 inline mr-2" />
                 <h2>Track your Order</h2>
               </li>
-            </Link>
+            </Link> */}
             <Link to={`address/`}>
               <li className="flex items-center w-64 py-2 my-2 border border-gray-300 text-gray-600 text-sm font-semibold text-start ps-2 pr-5 rounded-md">
                 <FaAddressCard className="w-4 h-4 inline mr-2" />

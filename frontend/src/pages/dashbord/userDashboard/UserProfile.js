@@ -8,10 +8,6 @@ function UserProfile() {
   const { user, fetchUserInfo } = useAuth();
   const [openEditProfile, setOpenEditProfile] = useState(false);
 
-  if (!user) {
-    console.log("user is not fetched yet");
-  }
-
   return (
     <div>
       <h2 className="font-bold text-gray-600 py-1 ms-6">My Profile</h2>

@@ -15,8 +15,6 @@ const Header = () => {
   useEffect(() => {
     if (searchedValue) {
       handleSearch();
-    } else {
-      navigate("/");
     }
   }, [searchedValue]);
 
