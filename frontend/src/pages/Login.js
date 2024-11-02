@@ -5,18 +5,17 @@ import { useAuth } from "../contexts/AuthContext";
 import Spinner from "../common/Spinner";
 
 const Login = () => {
-  const { setTokens, user, fetchUserInfo } = useAuth();
+  const { setTokens, user } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [data, setData] = useState({ email: "", password: "" });
   const [messages, setMessages] = useState({ email: "", password: "" });
-
-  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
 
+  const navigate = useNavigate();
+
   useEffect(() => {
-    // Redirect if user is already logged in
     if (user) {
-      navigate("/"); // redirect to home if user is authenticated
+      navigate("/"); // Redirect to home if user is already authenticated
     }
   }, [user, navigate]);
 
@@ -40,14 +39,11 @@ const Login = () => {
         const data = await response.json();
         localStorage.setItem("access", data.access);
         localStorage.setItem("refresh", data.refresh);
-        setTokens(data, () => {
-          navigate("/"); // Redirect to home after setting tokens
-        });
+        setTokens(data); // Role-based redirect handled in setTokens
 
         alert("Login successful!");
       } else {
         const errorData = await response.json();
-        console.log("error:", errorData);
         setMessages({
           email:
             errorData.errors[0]?.field === "email"

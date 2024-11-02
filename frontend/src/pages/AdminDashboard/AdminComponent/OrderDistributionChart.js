@@ -1,7 +1,5 @@
 import React from "react";
-import { Pie } from "react-chartjs-2";
-import { Bar } from "react-chartjs-2";
-
+import { Pie, Bar } from "react-chartjs-2";
 import {
   Chart as ChartJS,
   ArcElement,
@@ -42,6 +40,7 @@ const OrderDistributionChart = ({ orderData }) => {
 
   const options = {
     responsive: true,
+    maintainAspectRatio: false, // Adjusts chart to fit container
     scales: {
       x: {
         type: "category",
@@ -53,12 +52,15 @@ const OrderDistributionChart = ({ orderData }) => {
   };
 
   return (
-    <div className="w-full max-w-xl h-72 mx-auto">
-      <div className="flex flex-row items-center justify-center space-x-2 h-full">
-        <div className="h-auto">
-          <Pie data={data} />
+    <div className="w-full max-w-4xl mx-auto px-4">
+      <div className="flex flex-col md:flex-row items-center justify-center md:space-x-6 space-y-4 md:space-y-0">
+        {/* Pie Chart */}
+        <div className="w-full md:w-1/2 aspect-w-1 aspect-h-1">
+          <Pie data={data} options={options} />
         </div>
-        <div className="h-auto">
+
+        {/* Bar Chart */}
+        <div className="w-full md:w-1/2 aspect-w-1 aspect-h-1">
           <Bar data={data} options={options} />
         </div>
       </div>

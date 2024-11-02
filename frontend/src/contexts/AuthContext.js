@@ -23,15 +23,12 @@ export const AuthProvider = ({ children }) => {
     fetchInitialUserInfo();
   }, [authTokens.access]);
 
-  const setTokens = async (tokens, callback) => {
+  const setTokens = async (tokens) => {
     setAuthTokens(tokens);
     localStorage.setItem("access", tokens.access);
     localStorage.setItem("refresh", tokens.refresh);
 
-    await fetchUserInfo(); // Wait for user info to be fetched
-    if (callback) {
-      callback();
-    }
+    await fetchUserInfo(); // Fetch user info and handle role-based redirection
   };
 
   const clearTokens = () => {
@@ -45,7 +42,7 @@ export const AuthProvider = ({ children }) => {
     if (!authTokens.access) {
       setUser(null);
       setLoading(false);
-      return; // Early return if no access token
+      return;
     }
 
     try {
@@ -60,6 +57,16 @@ export const AuthProvider = ({ children }) => {
       if (response.ok) {
         const data = await response.json();
         setUser(data);
+        console.log("role is", data.role);
+
+        // Redirect based on role
+        if (data.role === "admin") {
+          navigate("/admin-dashboard");
+        } else if (data.role === "vendor") {
+          navigate("/vendor-dashboard");
+        } else {
+          navigate("/");
+        }
       } else if (response.status === 401) {
         await refreshTokens();
       } else {
@@ -91,7 +98,7 @@ export const AuthProvider = ({ children }) => {
         const data = await response.json();
         setTokens(data);
       } else {
-        clearTokens(); // Clear tokens if refresh fails
+        clearTokens();
         setTimeout(() => navigate("/login"), 0);
       }
     } catch (error) {

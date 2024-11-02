@@ -71,13 +71,12 @@ const OrderManagement = () => {
     }
     // Filter by user email
     if (filter.email) {
-      console.log("email", filter.email);
       updatedOrders = updatedOrders.filter((order) =>
         order.user?.email?.includes(filter.email)
       );
     }
 
-    // Filter by user email
+    // Filter by user address
     if (filter.address) {
       updatedOrders = updatedOrders.filter(
         (order) =>
@@ -112,17 +111,16 @@ const OrderManagement = () => {
   }
 
   return (
-    <div className="flex bg-gray-50">
+    <div className="flex bg-gradient-to-r from-blue-50 to-blue-100 min-h-screen">
       {/* Sidebar Navigation */}
-      <nav className="w-64  h-screen p-4">
+      <nav className="w-64 h-full p-4 bg-white shadow-lg rounded-lg">
         <h2 className="text-lg font-semibold mb-4">Order Actions</h2>
         <ul className="space-y-2">
           <li>
             <button
               onClick={() => handleActiveSection("orders")}
-              className="flex items-center w-full text-left py-2 px-4 rounded hover:bg-green-400"
+              className="flex items-center w-full text-left py-2 px-4 rounded hover:bg-green-400 transition-colors duration-200"
             >
-              {" "}
               <FaListAlt className="mr-2" />
               <span>View Orders</span>
             </button>
@@ -130,7 +128,7 @@ const OrderManagement = () => {
           <li>
             <button
               onClick={() => handleActiveSection("create")}
-              className="flex items-center w-full text-left py-2 px-4 rounded hover:bg-green-400"
+              className="flex items-center w-full text-left py-2 px-4 rounded hover:bg-green-400 transition-colors duration-200"
             >
               <FaPlusCircle className="mr-2" /> Create Order
             </button>
@@ -138,7 +136,7 @@ const OrderManagement = () => {
           <li>
             <button
               onClick={() => handleActiveSection("filter")}
-              className="flex items-center w-full text-left py-2 px-4 rounded hover:bg-yellow-400"
+              className="flex items-center w-full text-left py-2 px-4 rounded hover:bg-yellow-400 transition-colors duration-200"
             >
               <FaFilter className="mr-2" /> Filter Orders
             </button>
@@ -146,7 +144,7 @@ const OrderManagement = () => {
           <li>
             <button
               onClick={() => handleActiveSection("search")}
-              className="flex items-center w-full text-left py-2 px-4 rounded hover:bg-orange-400"
+              className="flex items-center w-full text-left py-2 px-4 rounded hover:bg-orange-400 transition-colors duration-200"
             >
               <FaSearch className="mr-2" /> Search Orders
             </button>
@@ -154,7 +152,7 @@ const OrderManagement = () => {
           <li>
             <button
               onClick={() => handleActiveSection("invoices")}
-              className="flex items-center w-full text-left py-2 px-4 rounded hover:bg-purple-400"
+              className="flex items-center w-full text-left py-2 px-4 rounded hover:bg-purple-400 transition-colors duration-200"
             >
               <FaFileInvoice className="mr-2" /> Print Invoices
             </button>
@@ -162,7 +160,7 @@ const OrderManagement = () => {
           <li>
             <button
               onClick={() => handleActiveSection("manageReturns")}
-              className="flex items-center w-full text-left py-2 px-4 rounded hover:bg-red-400"
+              className="flex items-center w-full text-left py-2 px-4 rounded hover:bg-red-400 transition-colors duration-200"
             >
               <FaUndo className="mr-2" /> Manage Returns
             </button>
@@ -170,7 +168,7 @@ const OrderManagement = () => {
           <li>
             <button
               onClick={() => handleActiveSection("edit")}
-              className="flex items-center w-full text-left py-2 px-4 rounded hover:bg-teal-400"
+              className="flex items-center w-full text-left py-2 px-4 rounded hover:bg-teal-400 transition-colors duration-200"
             >
               <FaRegEdit className="mr-2" /> Edit Order
             </button>

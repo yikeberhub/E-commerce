@@ -11,7 +11,7 @@ import {
 
 const AdminSidebar = ({ type }) => {
   return (
-    <aside className="w-64 bg-white shadow-md p-6">
+    <aside className="w-64 bg-white shadow-md p-6 border-r border-gray-200">
       {type === "admin" && (
         <h2 className="text-xl font-bold mb-6">Admin Dashboard</h2>
       )}
@@ -29,7 +29,7 @@ const AdminSidebar = ({ type }) => {
             }
             end
           >
-            <FaTachometerAlt className="mr-3" />
+            <FaTachometerAlt className="mr-3 text-xl" />
             Overview
           </NavLink>
         </li>
@@ -42,7 +42,7 @@ const AdminSidebar = ({ type }) => {
               }`
             }
           >
-            <FaBox className="mr-3" />
+            <FaBox className="mr-3 text-xl" />
             Order Management
           </NavLink>
         </li>
@@ -55,7 +55,7 @@ const AdminSidebar = ({ type }) => {
               }`
             }
           >
-            <FaChartLine className="mr-3" />
+            <FaChartLine className="mr-3 text-xl" />
             Product Management
           </NavLink>
         </li>
@@ -68,7 +68,7 @@ const AdminSidebar = ({ type }) => {
               }`
             }
           >
-            <FaUsers className="mr-3" />
+            <FaUsers className="mr-3 text-xl" />
             Customer Management
           </NavLink>
         </li>
@@ -81,7 +81,7 @@ const AdminSidebar = ({ type }) => {
               }`
             }
           >
-            <FaDollarSign className="mr-3" />
+            <FaDollarSign className="mr-3 text-xl" />
             Financial Overview
           </NavLink>
         </li>
@@ -94,8 +94,21 @@ const AdminSidebar = ({ type }) => {
               }`
             }
           >
-            <FaHeadset className="mr-3" />
+            <FaHeadset className="mr-3 text-xl" />
             Support
+          </NavLink>
+        </li>
+        <li className="mb-4">
+          <NavLink
+            to="vendor-management"
+            className={({ isActive }) =>
+              `flex items-center text-gray-800 ${
+                isActive ? "text-blue-500 font-bold" : "hover:text-blue-500"
+              }`
+            }
+          >
+            <FaUsers className="mr-3 text-xl" />
+            Vendor Management
           </NavLink>
         </li>
       </ul>

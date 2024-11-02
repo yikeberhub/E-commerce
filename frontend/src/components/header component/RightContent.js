@@ -70,7 +70,7 @@ function RightContent() {
         )}
       </div>
       {user && (
-        <Link to={`/dashboard/`}>
+        <Link to={`/user-dashboard/`}>
           <div className="bg-white border border-gray_lighter sm:px-2 rounded  py-1 shadow-md flex flex-row items-center gap-2">
             <img
               src={user ? user.profile_image : AccountIcon}
