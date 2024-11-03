@@ -12,6 +12,7 @@ from .models import Payment
 from .serializers import PaymentSerializer
 from chapa import Chapa 
 from .check_payment import verify_payment
+
 # Initialize Chapa with your secret key
 chapa = Chapa(settings.CHAPA_SECRET_KEY)
 
@@ -70,24 +71,29 @@ def chapa_callback(request, order_id):
             'payment_status': payment_status,
         })
 
+        order = get_object_or_404(Order, id=order_id)
         if payment_status == "success":
-            order = get_object_or_404(Order, id=order_id)
-            order.status = 'processing' 
-            order.save()
-
-            # Get or create the payment record
+            # Check if the payment already exists
             payment, created = Payment.objects.get_or_create(
                 transaction_id=tx_ref,
                 defaults={
                     'order': order,
-                    'payment_status': 'pending', 
+                    'payment_status': 'completed',  # Set to completed upon success
+                    'amount': order.total_amount,  # Assuming you have a total_amount field in your Order model
+                    'currency': 'ETB',  # Adjust based on your currency logic
+                    'payment_gateway': 'chapa',
+                    'chapa_sub_method': 'cbe',  # Or whatever method you are using
                 }
             )
 
-            # Optionally update existing payment status
             if not created:
-                payment.payment_status = 'completed'  # Update to 'completed' if already exists
+                print('Payment already exists, updating status.')
+                payment.payment_status = 'completed'
                 payment.save()
+
+            # Update order status if needed
+            order.status = 'processing'  # Adjust based on your flow
+            order.save()
 
             print('Payment Info:', payment)
             return Response({"message": "Payment recorded successfully", "trx_ref": tx_ref}, status=200)
@@ -96,6 +102,7 @@ def chapa_callback(request, order_id):
         return Response({"message": "Payment failed or event not processed"}, status=status.HTTP_400_BAD_REQUEST)
 
     return Response({"error": "Invalid request method"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
 
 @api_view(['GET'])
 def check_payment_status(request):
@@ -110,17 +117,17 @@ def check_payment_status(request):
             response = verify_payment(transaction_id)
 
             if response and response.get('status') == 'success':
-                payment.payment_status = 'completed' 
-                payment.currency = response['data']['currency'] 
-                payment.amount = response['data']['amount']      
+                payment.payment_status = 'completed'
+                payment.currency = response['data']['currency']
+                payment.amount = response['data']['amount']
                 payment.payment_gateway = 'chapa'
-                payment.chapa_sub_method = 'cbe'
+                payment.chapa_sub_method = 'cbe'  # Adjust based on the actual sub-method used
                 payment.save()
 
-
-                serializer = PaymentSerializer(payment, many=False)
-                print('data',serializer.data)
+                serializer = PaymentSerializer(payment)
+                print('data', serializer.data)
                 return Response({"payment": serializer.data}, status=200)
+
             else:
                 print("Verification response:")
                 return Response({"error": "Payment verification failed."}, status=400)

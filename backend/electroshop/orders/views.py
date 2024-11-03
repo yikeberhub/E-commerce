@@ -6,6 +6,8 @@ from django.db.models.functions import TruncMonth
 from django.shortcuts import get_object_or_404
 from django.db.models import Count,Sum
 from rest_framework.views import APIView
+from collections import defaultdict
+
 
 
 
@@ -19,42 +21,69 @@ from payments.serializers import PaymentSerializer
 from payments.models import Payment
 
 # Create your views here.
-
 class CheckoutView(generics.CreateAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = OrderSerializer
-    def post(self,request,*args,**kwargs):
+
+    def post(self, request, *args, **kwargs):
         try:
-            total_price = request.data['total_price']
-            cart = Cart.objects.get(user = request.user)
-            order= Order.objects.create(user = request.user,total_price=total_price)
+            total_price = request.data.get('total_price')
+            if total_price is None:
+                return Response({"error": "Total price is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+            cart = Cart.objects.get(user=request.user)
+            vendor_orders = defaultdict(list)
+
+            # Group items by vendor
             for item in cart.items.all():
-               print('for loop')
-               OrderItem.objects.create(order=order,product=item.product,quantity = item.quantity)
-            serializer = self.get_serializer(order)
-            return Response(serializer.data,status=status.HTTP_201_CREATED)
+                vendor_orders[item.product.vendor].append(item)  # Assuming each product has a 'vendor' attribute
+
+            # Process each vendor separately
+            orders = []
+            for vendor, items in vendor_orders.items():
+                # Calculate vendor-specific total
+                vendor_total = sum(item.product.price * item.quantity for item in items)
+                
+                # Create a separate order for each vendor
+                order = Order.objects.create(
+                    user=request.user, 
+                    total_price=vendor_total, 
+                    vendor=vendor  
+                )
+                for item in items:
+                    OrderItem.objects.create(order=order, product=item.product, quantity=item.quantity)
+
+                # Create a payment record associated with the vendor’s order
+                Payment.objects.create(order=order, amount=vendor_total, payment_status='pending')
+                orders.append(order)
+
+            # Serialize orders for response
+            serializer = self.get_serializer(orders, many=True)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
         except Cart.DoesNotExist:
-            return Response({"error":"Cart doesn't exist"},status=status.HTTP_404_NOT_FOUND)
-        
-    
+            return Response({"error": "Cart doesn't exist."}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class OrderListView(generics.ListAPIView):
     serializer_class = OrderSerializer
     permission_classes = [IsAuthenticated]  
 
     def get_queryset(self):
-        print('user is ',self.request.user)
         user = self.request.user
         
         if user.role == 'admin':
             return Order.objects.all()  
         elif user.role == 'customer':
             return Order.objects.filter(user=user)  
-        return Order.objects.none() 
-
+        else:
+            return Order.objects.none() 
+        
     def get(self, request, *args, **kwargs):
         print('hello i am called')
         orders = self.get_queryset()
+        print('orders',orders)
         serializer = self.get_serializer(orders, many=True)
         return Response(serializer.data)
 
@@ -129,6 +158,7 @@ class UserSalesChartView(APIView):
             })
 
         return Response(result) 
+    
 
 class OrderDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = OrderSerializer
@@ -137,18 +167,18 @@ class OrderDetailView(generics.RetrieveUpdateDestroyAPIView):
 
     def get_object(self):
         try:
-            print('order id',self.kwargs['order_id'])
-            print('object is called')
-            return Order.objects.get(id=self.kwargs['order_id'])
+            order_id = self.kwargs['order_id']
+            print('Order ID:', order_id)
+            order = Order.objects.get(id=order_id)
+            self.check_object_permissions(self.request, order)
+            return order
         except Order.DoesNotExist:
-            return Response({'error': 'Order Not found'}, status=status.HTTP_404_NOT_FOUND)
+            raise Response({'error': 'Order not found'}, status=status.HTTP_404_NOT_FOUND)
 
     def get(self, request, *args, **kwargs):
-            order = self.get_object()
-            print('order is',order)
-            serializer = self.get_serializer(order)
-            return Response(serializer.data)
-        
+        order = self.get_object()
+        serializer = self.get_serializer(order)
+        return Response(serializer.data)    
 
 class OrderUpdateView(generics.UpdateAPIView):
     queryset = Order.objects.all()

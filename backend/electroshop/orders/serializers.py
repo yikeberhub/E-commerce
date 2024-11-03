@@ -1,34 +1,40 @@
 from rest_framework import serializers
-from users.serializers import UserSerializer, AddressSerializer
-from products.serializers import ProductSerializer
-from payments.serializers import PaymentSerializer  # Import the serializer
 from .models import Order, OrderItem
+from vendors.serializer import VendorSerializer
 
 class OrderItemSerializer(serializers.ModelSerializer):
-    product = ProductSerializer()
+    product = serializers.SerializerMethodField()  # Placeholder for ProductSerializer
 
     class Meta:
         model = OrderItem
         fields = ['id', 'product', 'quantity']
 
-    def validate_quantity(self, value):
-        if value < 0:
-            raise serializers.ValidationError("Quantity must be a positive integer.")
-        return value
+    def get_product(self, obj):
+        from products.serializers import ProductSerializer  # Lazy import
+        return ProductSerializer(obj.product).data
 
 class OrderSerializer(serializers.ModelSerializer):
-    payment = serializers.SerializerMethodField()
-    address = AddressSerializer()
-    user = UserSerializer() 
+    vendor =VendorSerializer()
+    payment = serializers.SerializerMethodField()  # Placeholder for PaymentSerializer
+    address = serializers.SerializerMethodField()  # Placeholder for AddressSerializer
+    user = serializers.SerializerMethodField()     # Placeholder for UserSerializer
     items = OrderItemSerializer(many=True, read_only=True)
 
     class Meta:
         model = Order
         fields = '__all__'
-        read_only_fields = ['user', 'created_at', 'updated_at', 'status', 'paid']
+        read_only_fields = ['user', 'created_at', 'updated_at', 'status', 'payment']
 
     def get_payment(self, obj):
-        from payments.serializers import PaymentSerializer 
+        from payments.serializers import PaymentSerializer  
         if hasattr(obj, 'payment'):
-            return PaymentSerializer(obj.payment).data 
-        return None  
+            return PaymentSerializer(obj.payment).data
+        return None
+
+    def get_address(self, obj):
+        from users.serializers import AddressSerializer  
+        return AddressSerializer(obj.address).data
+
+    def get_user(self, obj):
+        from users.serializers import UserSerializer 
+        return UserSerializer(obj.user).data

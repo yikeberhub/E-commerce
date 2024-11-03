@@ -2,7 +2,7 @@ from django.db import models
 from users.models import CustomUser,Address
 from cart.models import Cart
 from products.models import Product
-
+from vendors.models import Vendor
 
 ORDER_STATUS = [
     ('pending', 'Pending'),             # Order created, awaiting payment
@@ -20,8 +20,8 @@ ORDER_STATUS = [
 
 class Order(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    vendor = models.ForeignKey(Vendor, on_delete=models.CASCADE, related_name="orders")
     address = models.ForeignKey(Address, on_delete=models.SET_NULL, null=True, related_name='orders')
-    payment = models.OneToOneField('payments.Payment', on_delete=models.SET_NULL, null=True, related_name='order_payment')  
     total_price = models.DecimalField(max_digits=10, decimal_places=2)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

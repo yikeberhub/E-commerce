@@ -30,7 +30,7 @@ def set_default_address(id,user):
                 print('def add',def_address)
         return def_address
        
-         
+
 
 class UserSerializer(serializers.ModelSerializer):
     addresses = AddressSerializer(many=True,read_only=True)

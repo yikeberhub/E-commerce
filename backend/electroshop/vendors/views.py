@@ -9,6 +9,11 @@ from rest_framework.response import Response
 from rest_framework import status
 from .models import Vendor
 from .serializer import VendorSerializer
+from orders.models import Order,OrderItem
+from orders.serializers import OrderSerializer
+from products.serializers import ProductSerializer
+from products.models import Product
+
 
 # List and Create Vendors
 class VendorListView(generics.ListCreateAPIView):
@@ -41,3 +46,43 @@ class VendorRegistrationView(generics.CreateAPIView):
         
         # Return a successful response
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+    
+    
+class VendorOrdersView(generics.ListAPIView):
+    serializer_class = OrderSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        vendor_id = self.kwargs['vendor_id']
+        print('vendor id is',vendor_id)
+        return Order.objects.filter(id=vendor_id)
+
+    def list(self, request, *args, **kwargs):
+        vendor = generics.get_object_or_404(Vendor, id=self.kwargs['vendor_id'])
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(queryset, many=True)
+        return Response({
+            "vendor": vendor.title,
+            "orders": serializer.data
+        })
+
+
+
+class VendorProductsView(generics.ListAPIView):
+    serializer_class = ProductSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        vendor_id = self.kwargs['vendor_id']
+        print('vendor id is ',vendor_id)
+        return Product.objects.filter(vendor=vendor_id)
+
+    def list(self, request, *args, **kwargs):
+        vendor = generics.get_object_or_404(Vendor, id=self.kwargs['vendor_id'])
+        queryset = self.get_queryset()
+        print('query set is ',queryset)
+        serializer = self.get_serializer(queryset, many=True)
+        return Response({
+            "vendor": vendor.title,
+            "products": serializer.data
+        })

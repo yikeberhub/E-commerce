@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import Payment,Transaction
+from orders.serializers import OrderSerializer
 
 from users.models import CustomUser
 from users.serializers import UserSerializer
@@ -26,20 +27,12 @@ class TransactionSerializer(serializers.ModelSerializer):
         return instance
 
 class PaymentSerializer(serializers.ModelSerializer):
-    order = serializers.SerializerMethodField()
-                    
     class Meta:
         model = Payment
-        fields ='__all__'
-        # fields = ['id', 'order', 'payment_status','currency','charge','payment_gateway','payment_method', 'transaction_id', 'created_at']
-        read_only_fields = ['id', 'order', 'created_at']
-
-    def get_order(self, obj):
-        from orders.serializers import OrderSerializer  
-        if hasattr(obj, 'order'):
-            return OrderSerializer(obj.order).data
-        return None
-
+        fields = ['order', 'payment_status', 'transaction_id', 'amount', 'currency', 'payment_method', 
+                  'chapa_sub_method', 'charge', 'payment_gateway', 'created_at', 'updated_at']
+        
+   
     def create(self, validated_data):
         return Payment.objects.create(**validated_data)
 
