@@ -9,7 +9,7 @@ function FilterByVendor() {
 
   useEffect(() => {
     const vendors = [
-      ...new Set(products.map((product) => product.vendor.title)),
+      ...new Set(products.map((product) => product?.vendor?.title)),
     ];
 
     // Initialize checked vendors state

@@ -2,6 +2,14 @@ import { useState, useEffect } from "react";
 import Spinner from "../../common/Spinner";
 import OrderDistributionChart from "./AdminComponent/OrderDistributionChart";
 import SalesTrendsChart from "./AdminComponent/SalesTrendsChart";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faDollarSign,
+  faShoppingCart,
+  faUserTie,
+  faUsers,
+  faBox,
+} from "@fortawesome/free-solid-svg-icons";
 
 const OverviewPanel = () => {
   const [data, setData] = useState({
@@ -55,46 +63,46 @@ const OverviewPanel = () => {
   }
 
   return (
-    <div className=" space-y-6">
+    <div className="space-y-6">
       {/* Overview Metrics */}
       <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {[
           {
             title: "Total Sales",
             value: `$${data.totalSales}`,
-            icon: "fa-dollar-sign",
+            icon: faDollarSign,
             color: "text-green-600",
           },
           {
             title: "Total Orders",
             value: `#${data.totalOrders}`,
-            icon: "fa-shopping-cart",
+            icon: faShoppingCart,
             color: "text-blue-600",
+          },
+          {
+            title: "Total Products",
+            value: `#${data.totalProducts}`,
+            icon: faBox,
+            color: "text-teal-600",
           },
           {
             title: "Total Vendors",
             value: `#${data.totalVendors}`,
-            icon: "fa-user-tie",
+            icon: faUserTie,
             color: "text-orange-500",
           },
           {
             title: "Total Users",
             value: `#${data.totalUsers}`,
-            icon: "fa-users",
+            icon: faUsers,
             color: "text-purple-600",
-          },
-          {
-            title: "Total Products",
-            value: `#${data.totalProducts}`,
-            icon: "fa-box",
-            color: "text-teal-600",
           },
         ].map((item, index) => (
           <div
             key={index}
             className={`bg-white shadow-md p-4 rounded-lg flex items-center hover:shadow-lg transition-shadow duration-300 ${item.color}`}
           >
-            <i className={`fa ${item.icon} text-3xl mr-3`}></i>
+            <FontAwesomeIcon icon={item.icon} className="text-3xl mr-3" />
             <div>
               <h2 className="font-semibold text-lg">{item.title}</h2>
               <p className="text-2xl font-bold">{item.value}</p>

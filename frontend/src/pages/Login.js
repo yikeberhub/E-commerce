@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import loginIcons from "../assets/icons/images/signin.gif";
 import { useAuth } from "../contexts/AuthContext";
 import Spinner from "../common/Spinner";
+import AlertModal from "../common/AlertModal"; // adjust the import path if needed
 
 const Login = () => {
   const { setTokens, user } = useAuth();
@@ -10,6 +11,11 @@ const Login = () => {
   const [data, setData] = useState({ email: "", password: "" });
   const [messages, setMessages] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
+
+  // State for AlertModal
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
+  const [alertType, setAlertType] = useState("success");
 
   const navigate = useNavigate();
 
@@ -41,7 +47,10 @@ const Login = () => {
         localStorage.setItem("refresh", data.refresh);
         setTokens(data); // Role-based redirect handled in setTokens
 
-        alert("Login successful!");
+        // Show success message in AlertModal
+        setAlertMessage("Login successful!");
+        setAlertType("success");
+        setAlertVisible(true);
       } else {
         const errorData = await response.json();
         setMessages({
@@ -54,9 +63,19 @@ const Login = () => {
               ? errorData.errors[0]?.message
               : "",
         });
+
+        // Show error message in AlertModal
+        setAlertMessage("Login failed. Please check your credentials.");
+        setAlertType("error");
+        setAlertVisible(true);
       }
     } catch (error) {
       console.error("An error occurred:", error);
+
+      // Show error message in AlertModal
+      setAlertMessage("An unexpected error occurred. Please try again later.");
+      setAlertType("error");
+      setAlertVisible(true);
     } finally {
       setLoading(false);
     }
@@ -144,6 +163,16 @@ const Login = () => {
             </div>
           </div>
         </section>
+      )}
+
+      {/* Render AlertModal */}
+      {alertVisible && (
+        <AlertModal
+          message={alertMessage}
+          type={alertType}
+          isVisible={alertVisible}
+          onClose={() => setAlertVisible(false)}
+        />
       )}
     </>
   );

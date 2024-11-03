@@ -9,6 +9,7 @@ const OrderDetailAdmin = ({ order, onClose }) => {
   const handleStatusChange = () => {
     console.log("Updated Order Status:", status);
   };
+  console.log("order detail is", order);
 
   const calculateTotal = (price, quantity) => {
     return price * quantity;
@@ -63,7 +64,7 @@ const OrderDetailAdmin = ({ order, onClose }) => {
           <h3 className="text-lg font-semibold mb-2">Payment Status:</h3>
           <p className="text-sm">
             <strong className="font-medium">Status:</strong>{" "}
-            {order.payment.payment_status || "Not available"}
+            {order.payment.status || "Not available"}
           </p>
           <p className="text-sm">
             <strong className="font-medium">Payment Method:</strong>{" "}

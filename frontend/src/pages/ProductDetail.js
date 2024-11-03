@@ -308,7 +308,7 @@ const ProductDetail = () => {
                 By{" "}
                 <span className="text-blue-600 font-bold text-lg">
                   {" "}
-                  {product.vendor.title}
+                  {product?.vendor?.title}
                 </span>
               </p>
 

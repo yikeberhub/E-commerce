@@ -10,7 +10,6 @@ const AdminDashboard = () => {
 
   return (
     <div className="flex min-h-screen bg-white text-black relative">
-      {/* Sidebar */}
       <div
         className={`fixed inset-y-0 left-0 transform ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
@@ -19,7 +18,6 @@ const AdminDashboard = () => {
         <AdminSidebar type="admin" closeSidebar={() => setSidebarOpen(false)} />
       </div>
 
-      {/* Overlay for sidebar on small screens */}
       {sidebarOpen && (
         <div
           className="fixed inset-0 bg-black opacity-50 z-10 lg:hidden"

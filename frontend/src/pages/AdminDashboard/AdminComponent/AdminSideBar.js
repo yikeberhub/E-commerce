@@ -69,7 +69,7 @@ const AdminSidebar = ({ type }) => {
             }
           >
             <FaUsers className="mr-3 text-xl" />
-            Customer Management
+            User Management
           </NavLink>
         </li>
         <li className="mb-4">
@@ -85,19 +85,7 @@ const AdminSidebar = ({ type }) => {
             Financial Overview
           </NavLink>
         </li>
-        <li className="mb-4">
-          <NavLink
-            to="support-resources"
-            className={({ isActive }) =>
-              `flex items-center text-gray-800 ${
-                isActive ? "text-blue-500 font-bold" : "hover:text-blue-500"
-              }`
-            }
-          >
-            <FaHeadset className="mr-3 text-xl" />
-            Support
-          </NavLink>
-        </li>
+
         <li className="mb-4">
           <NavLink
             to="vendor-management"
