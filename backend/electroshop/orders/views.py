@@ -7,11 +7,8 @@ from django.shortcuts import get_object_or_404
 from django.db.models import Count,Sum
 from rest_framework.views import APIView
 from collections import defaultdict
-
-
-
-
-
+import logging
+import uuid
 from .models import Order,OrderItem
 from cart.models import Cart
 from users.models import CustomUser,Address
@@ -19,8 +16,9 @@ from users.models import CustomUser,Address
 from .serializers import OrderSerializer
 from payments.serializers import PaymentSerializer
 from payments.models import Payment
+logger = logging.getLogger(__name__)
 
-# Create your views here.
+
 class CheckoutView(generics.CreateAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = OrderSerializer
@@ -31,54 +29,79 @@ class CheckoutView(generics.CreateAPIView):
             if total_price is None:
                 return Response({"error": "Total price is required."}, status=status.HTTP_400_BAD_REQUEST)
 
+            # Check if cart exists for the user
             cart = Cart.objects.get(user=request.user)
             vendor_orders = defaultdict(list)
 
-            # Group items by vendor
+            # Group cart items by vendor
             for item in cart.items.all():
-                vendor_orders[item.product.vendor].append(item)  # Assuming each product has a 'vendor' attribute
+                vendor_orders[item.product.vendor].append(item)
 
-            # Process each vendor separately
             orders = []
+            order_ids = []
+
             for vendor, items in vendor_orders.items():
-                # Calculate vendor-specific total
                 vendor_total = sum(item.product.price * item.quantity for item in items)
-                
-                # Create a separate order for each vendor
+
+                # Create an order for each vendor
                 order = Order.objects.create(
-                    user=request.user, 
-                    total_price=vendor_total, 
-                    vendor=vendor  
+                    user=request.user,
+                    total_price=vendor_total,
+                    vendor=vendor
                 )
+                print('order is', order)
+
+                # Add items to the order
                 for item in items:
                     OrderItem.objects.create(order=order, product=item.product, quantity=item.quantity)
 
-                # Create a payment record associated with the vendor’s order
-                Payment.objects.create(order=order, amount=vendor_total, payment_status='pending')
-                orders.append(order)
+                # Generate a unique transaction ID
+                transaction_id = str(uuid.uuid4())
+                print('transaction_id:', transaction_id)
 
-            # Serialize orders for response
+                # Create a Payment record for the order
+                Payment.objects.create(
+                    order=order,
+                    amount=vendor_total,
+                    payment_status='pending',
+                    transaction_id=transaction_id
+                )
+
+                orders.append(order)
+                order_ids.append(order.id)
+                print('vendor total:', vendor_total)
+                print('success')
+
+            # Serialize orders and return the order IDs
             serializer = self.get_serializer(orders, many=True)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            print('serializer data:', serializer.data)
+            return Response({
+                "orders": serializer.data,
+                "order_ids": order_ids
+            }, status=status.HTTP_201_CREATED)
 
         except Cart.DoesNotExist:
             return Response({"error": "Cart doesn't exist."}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
+        
 class OrderListView(generics.ListAPIView):
     serializer_class = OrderSerializer
-    permission_classes = [IsAuthenticated]  
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         user = self.request.user
-        
+
         if user.role == 'admin':
-            return Order.objects.all()  
+            return Order.objects.all()
+        elif user.role == 'vendor':
+            return Order.objects.filter(vendor=user.vendor)
         elif user.role == 'customer':
-            return Order.objects.filter(user=user)  
+            print('it is user')
+            return Order.objects.filter(user=user)
         else:
-            return Order.objects.none() 
+            return Order.objects.none()
+
         
     def get(self, request, *args, **kwargs):
         print('hello i am called')

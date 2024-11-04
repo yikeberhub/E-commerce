@@ -15,125 +15,116 @@ from .check_payment import verify_payment
 
 # Initialize Chapa with your secret key
 chapa = Chapa(settings.CHAPA_SECRET_KEY)
-
 class CreatePaymentView(APIView):
     def post(self, request):
-        order_id = request.data.get('order_id')
-        amount = request.data.get('amount')
+        amount = request.data.get('total_amount')
         email = request.data.get('email')
         first_name = request.data.get('first_name')
         last_name = request.data.get('last_name')
         phone_number = request.data.get('phone_number')
 
-        if not all([amount, email, order_id]):
-            return Response({"error": "Amount, email, and order_id are required."}, status=status.HTTP_400_BAD_REQUEST)
+        if not all([amount, email,first_name]):
+            print('not get email,amount,firstname')
+            return Response({"error": "Amount, email, and first name are required."}, status=status.HTTP_400_BAD_REQUEST)
 
-        tx_ref = f"txn-{uuid.uuid4().hex[:8]}"
-
+        # Unique reference for the entire payment session
+        payment_ref = f"multi-txn-{uuid.uuid4().hex[:8]}"
+        print('payment ref',payment_ref)
         # Prepare data for payment initialization
         payment_data = {
-            "amount": float(amount),
+            "amount": amount,
             "currency": "ETB",
             "email": email,
-            "callback_url": f'http://localhost:8000/payments/callback/{order_id}/',
             "first_name": first_name,
             "last_name": last_name,
             "phone_number": phone_number,
-            "tx_ref": tx_ref,
-            "return_url": f"http://localhost:3000/payment/confirm?trx_ref={tx_ref}"
+            "tx_ref": payment_ref,  
+            "return_url": f"http://localhost:3000/payment/confirm?txt_ref={payment_ref}"
         }
 
-        # Initialize payment via SDK
+        # Initialize payment
         try:
+            print('try block')
             response = chapa.initialize(**payment_data)
             if response['status'] == 'success':
                 checkout_url = response['data']['checkout_url']
-                return Response({"data": {"checkout_url": checkout_url}}, status=status.HTTP_200_OK)
+                
+                print('success full initiation')
+                return Response({"data": {"checkout_url": checkout_url, "payment_ref": payment_ref}}, status=status.HTTP_200_OK)
 
             return Response(response, status=status.HTTP_400_BAD_REQUEST)
 
         except Exception as e:
             return Response({"error": "Payment initialization failed."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
 @csrf_exempt
 @api_view(['GET'])
-def chapa_callback(request, order_id):
-    if request.method == 'GET':
-        print('Callback is called')
+def chapa_callback(request):
+    pass
+    # payment_ref = request.GET.get('txt_ref')
 
-        # Extract relevant parameters from the request
-        tx_ref = request.GET.get('trx_ref')
-        payment_status = request.GET.get('status')
+    # if payment_status == "success" and transaction_ids:
+    #     return Response({"message": "All payments recorded successfully"}, status=status.HTTP_200_OK)
 
-        print('Webhook data:', {
-            'tx_ref': tx_ref,
-            'payment_status': payment_status,
-        })
+    # return Response({"message": "Payment failed or not processed"}, status=status.HTTP_400_BAD_REQUEST)
 
-        order = get_object_or_404(Order, id=order_id)
-        if payment_status == "success":
-            # Check if the payment already exists
-            payment, created = Payment.objects.get_or_create(
-                transaction_id=tx_ref,
-                defaults={
-                    'order': order,
-                    'payment_status': 'completed',  # Set to completed upon success
-                    'amount': order.total_amount,  # Assuming you have a total_amount field in your Order model
-                    'currency': 'ETB',  # Adjust based on your currency logic
-                    'payment_gateway': 'chapa',
-                    'chapa_sub_method': 'cbe',  # Or whatever method you are using
-                }
-            )
-
-            if not created:
-                print('Payment already exists, updating status.')
-                payment.payment_status = 'completed'
-                payment.save()
-
-            # Update order status if needed
-            order.status = 'processing'  # Adjust based on your flow
-            order.save()
-
-            print('Payment Info:', payment)
-            return Response({"message": "Payment recorded successfully", "trx_ref": tx_ref}, status=200)
-
-        print(f"Payment failed or event not processed: {payment_status}")
-        return Response({"message": "Payment failed or event not processed"}, status=status.HTTP_400_BAD_REQUEST)
-
-    return Response({"error": "Invalid request method"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
 @api_view(['GET'])
-def check_payment_status(request):
-    transaction_id = request.GET.get('transaction_id')
+def check_payment_status(request,payment_reference):
+    
+    transaction_ids = request.GET.get('transaction_ids')  
+    if not transaction_ids:
+        return Response({"error": "transaction_ids are required."}, status=status.HTTP_400_BAD_REQUEST)
 
-    if not transaction_id:
-        return Response({"error": "transaction_id is required."}, status=400)
+    transaction_ids = transaction_ids.split(",")  
+    total_amount = 0
+    user = None  
+    payment_responses = []
 
-    try:
-        payment = Payment.objects.filter(transaction_id=transaction_id).first()
-        if payment:
-            response = verify_payment(transaction_id)
+    for tx_ref in transaction_ids:
+        payment = Payment.objects.filter(transaction_id=tx_ref).first()
 
+        if not payment:
+            payment_responses.append({"transaction_id": tx_ref, "status": "error", "message": "Payment not found"})
+            continue
+
+        try:
+            # Verify payment with Chapa
+            response = verify_payment(payment_reference)
             if response and response.get('status') == 'success':
                 payment.payment_status = 'completed'
-                payment.currency = response['data']['currency']
-                payment.amount = response['data']['amount']
-                payment.payment_gateway = 'chapa'
-                payment.chapa_sub_method = 'cbe'  # Adjust based on the actual sub-method used
                 payment.save()
 
-                serializer = PaymentSerializer(payment)
-                print('data', serializer.data)
-                return Response({"payment": serializer.data}, status=200)
+                # Update associated order status
+                order = payment.order
+                order.status = 'completed'
+                order.save()
 
+                # Update vendor balance
+                vendor = order.vendor
+                vendor.balance += payment.amount
+                vendor.save()
+
+                # Track total amount for deduction from user balance
+                total_amount += payment.amount
+                if not user:
+                    user = order.user
+
+
+                # Serialize payment response for frontend
+                payment_responses.append({"transaction_id": tx_ref, "status": "completed", "payment": PaymentSerializer(payment).data})
             else:
-                print("Verification response:")
-                return Response({"error": "Payment verification failed."}, status=400)
-        else:
-            return Response({"error": "Payment not found."}, status=404)
+                # If verification fails, mark as failed
+                payment.payment_status = 'failed'
+                payment.save()
+                payment_responses.append({"transaction_id": tx_ref, "status": "failed", "message": "Payment verification failed"})
 
-    except Exception as e:
-        print("Error occurred:", str(e))
-        return Response({"error": "An error occurred: " + str(e)}, status=500)
+        except Exception as e:
+            payment_responses.append({"transaction_id": tx_ref, "status": "error", "message": f"An error occurred: {str(e)}"})
+
+    # Deduct the total amount from the user's balance after successful payments
+    if user:
+        user.balance -= total_amount
+        user.save()
+
+    return Response({"payments": payment_responses}, status=status.HTTP_200_OK)

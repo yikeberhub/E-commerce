@@ -20,7 +20,7 @@ ORDER_STATUS = [
 
 class Order(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
-    vendor = models.ForeignKey(Vendor, on_delete=models.CASCADE, related_name="orders")
+    vendor = models.ForeignKey(Vendor,null=True, on_delete=models.CASCADE, related_name="orders")
     address = models.ForeignKey(Address, on_delete=models.SET_NULL, null=True, related_name='orders')
     total_price = models.DecimalField(max_digits=10, decimal_places=2)
     created_at = models.DateTimeField(auto_now_add=True)

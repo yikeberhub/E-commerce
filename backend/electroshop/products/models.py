@@ -80,10 +80,7 @@ class Product(models.Model):
             return ((self.old_price - self.price) / self.old_price) * 100
         return 0
 
-    # def average_rating(self):
-    #     ratings = self.ratings.all()  
-    #     return ratings.aggregate(models.Avg('score'))['score__avg'] or 0
-    
+   
     
     def average_rating(self):
         ratings = self.reviews.all()  # Get all related reviews
