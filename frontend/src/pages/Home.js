@@ -21,11 +21,11 @@ function Home() {
     getProducts();
   }, []);
 
-  useEffect(() => {
-    if (authTokens.access) {
-      fetchUserInfo();
-    }
-  }, [authTokens]);
+  // useEffect(() => {
+  //   if (authTokens.access) {
+  //     fetchUserInfo();
+  //   }
+  // }, [authTokens]);
 
   if (loading) {
     return <div>Loading...</div>;

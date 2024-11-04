@@ -14,7 +14,7 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     const fetchInitialUserInfo = async () => {
-      if (authTokens.access) {
+      if (authTokens.access && !user) {
         await fetchUserInfo();
       } else {
         setLoading(false);
@@ -59,7 +59,6 @@ export const AuthProvider = ({ children }) => {
         setUser(data);
         console.log("role is", data.role);
 
-        // Redirect based on role
         if (data.role === "admin") {
           navigate("/admin-dashboard");
         } else if (data.role === "vendor") {

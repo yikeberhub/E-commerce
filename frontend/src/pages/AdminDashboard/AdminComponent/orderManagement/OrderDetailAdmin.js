@@ -60,35 +60,38 @@ const OrderDetailAdmin = ({ order, onClose }) => {
         </div>
 
         {/* Payment Details Section */}
-        <div className="bg-white p-4 rounded shadow-md">
-          <h3 className="text-lg font-semibold mb-2">Payment Status:</h3>
-          <p className="text-sm">
-            <strong className="font-medium">Status:</strong>{" "}
-            {order.payment.status || "Not available"}
-          </p>
-          <p className="text-sm">
-            <strong className="font-medium">Payment Method:</strong>{" "}
-            {order.payment.payment_method || "Not available"}
-          </p>
-          <p className="text-sm">
-            <strong className="font-medium">Transaction ID:</strong>{" "}
-            {order.payment.transaction_id || "N/A"}
-          </p>
-          <p className="text-sm">
-            <strong className="font-medium">Charge:</strong> $
-            {order.payment.charge || "0.00"}
-          </p>
-          <p className="text-sm">
-            <strong className="font-medium">Created At:</strong>{" "}
-            {new Date(order.payment.created_at).toLocaleString() ||
-              "Not available"}
-          </p>
-          <p className="text-sm">
-            <strong className="font-medium">Updated At:</strong>{" "}
-            {new Date(order.payment.updated_at).toLocaleString() ||
-              "Not available"}
-          </p>
-        </div>
+
+        {order.payment && (
+          <div className="bg-white p-4 rounded shadow-md">
+            <h3 className="text-lg font-semibold mb-2">Payment Status:</h3>
+            <p className="text-sm">
+              <strong className="font-medium">Status:</strong>{" "}
+              {order.payment.status || "Not available"}
+            </p>
+            <p className="text-sm">
+              <strong className="font-medium">Payment Method:</strong>{" "}
+              {order.payment.payment_method || "Not available"}
+            </p>
+            <p className="text-sm">
+              <strong className="font-medium">Transaction ID:</strong>{" "}
+              {order.payment.transaction_id || "N/A"}
+            </p>
+            <p className="text-sm">
+              <strong className="font-medium">Charge:</strong> $
+              {order.payment.charge || "0.00"}
+            </p>
+            <p className="text-sm">
+              <strong className="font-medium">Created At:</strong>{" "}
+              {new Date(order.payment.created_at).toLocaleString() ||
+                "Not available"}
+            </p>
+            <p className="text-sm">
+              <strong className="font-medium">Updated At:</strong>{" "}
+              {new Date(order.payment.updated_at).toLocaleString() ||
+                "Not available"}
+            </p>
+          </div>
+        )}
 
         {/* Customer Information Section */}
         <div className="bg-white p-4 rounded shadow-md">

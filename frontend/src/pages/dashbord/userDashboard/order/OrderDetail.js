@@ -52,7 +52,7 @@ const OrderDetail = () => {
         <h2 className="text-2xl font-bold mb-4">
           Order Details for Order ID: {order.id}{" "}
         </h2>
-        <Link to={`/checkout/${order.id}/`}>
+        <Link to={`/checkout/summary/?order_id=${order.id}`}>
           <button className="bg-green-600 text-white hover:bg-purple-600 rounded-md py-2 px-2">
             Go to checkout
           </button>

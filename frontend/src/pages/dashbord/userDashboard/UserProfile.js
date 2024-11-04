@@ -52,6 +52,12 @@ function UserProfile() {
                 Verified <span className="rounded-full">✅</span>
               </h3>
             </li>
+            <li className="lg-w-64 py-2 my-2 border border-gray-300 text-gray-600 text-sm font-semibold text-start ps-2 pr-5 rounded-sm">
+              <h3>
+                Balance{" "}
+                <span className="rounded-full">{user.balance} Birr</span>
+              </h3>
+            </li>
           </ul>
           {!openEditProfile && (
             <button

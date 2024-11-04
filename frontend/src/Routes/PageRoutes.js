@@ -31,12 +31,12 @@ const PageRoutes = () => {
       <Route path="/vendors/:id" element={<VendorDetail />} />
       <Route path="/products" element={<Products />} />
       <Route path="/product/:id" element={<ProductDetail />} />
-      <Route path="/checkout/:orderId" element={<Checkout />} />
+      <Route path="/checkout/summary" element={<Checkout />} />
+      <Route path="/payment/confirm" element={<PaymentDetail />} />
       <Route path="/search-product" element={<SearchProduct />} />
       <Route path="/about" element={<AboutUs />} />
       <Route path="/contact" element={<ContactUs />} />
       <Route path="/wishlist" element={<Wishlist />} />
-      <Route path="/payment/confirm" element={<PaymentDetail />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

@@ -60,18 +60,23 @@ const PaymentDetail = () => {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
   const receiptRef = useRef(null); // Reference for the receipt component
-
   useEffect(() => {
     const fetchPaymentDetail = async () => {
-      if (!transactionId) {
-        setError("Transaction ID is required.");
+      const storedTransactionIds = localStorage.getItem("transaction_ids");
+      const transactionIds = storedTransactionIds
+        ? JSON.parse(storedTransactionIds)
+        : [];
+
+      if (!transactionIds.length) {
+        setError("No transaction IDs found.");
         setLoading(false);
         return;
       }
 
       try {
+        const transactionIdsString = transactionIds.join(",");
         const response = await fetch(
-          `http://localhost:8000/payments/check_payment_status?transaction_id=${transactionId}`
+          `http://localhost:8000/payments/check_payment_status/${transactionId}/?transaction_ids=${transactionIdsString}`
         );
 
         if (!response.ok) {
@@ -80,20 +85,30 @@ const PaymentDetail = () => {
 
         const data = await response.json();
 
-        if (data.error) {
-          setError(data.error);
+        if (data.payments && data.payments.length) {
+          const successfulPayments = data.payments.filter(
+            (payment) => payment.status === "completed"
+          );
+          if (successfulPayments.length > 0) {
+            setPaymentDetail(
+              successfulPayments.map((payment) => payment.payment)
+            );
+          } else {
+            setError("No successful payment details found.");
+          }
         } else {
-          setPaymentDetail(data.payment);
+          setError("No payment details found in the response.");
         }
       } catch (err) {
         setError(err.message);
       } finally {
         setLoading(false);
+        localStorage.removeItem("transaction_ids");
       }
     };
 
     fetchPaymentDetail();
-  }, [transactionId]);
+  }, []);
 
   const handlePrint = () => {
     const printWindow = window.open("", "_blank");
