@@ -26,7 +26,7 @@ class CreatePaymentView(APIView):
         if not all([amount, email,first_name]):
             print('not get email,amount,firstname')
             return Response({"error": "Amount, email, and first name are required."}, status=status.HTTP_400_BAD_REQUEST)
-
+      
         # Unique reference for the entire payment session
         payment_ref = f"multi-txn-{uuid.uuid4().hex[:8]}"
         print('payment ref',payment_ref)

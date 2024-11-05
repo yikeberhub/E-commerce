@@ -6,15 +6,17 @@ from .views import (
     ProductReviewListView,
     ProductReviewDetailView,
     ProductReviewCreateUpdateView,
+    add_product,
 FeaturedProductsView,CategoryList,CategoryDetail,TagList
 )
 
 urlpatterns = [
     # Product URLs
-    path('', ProductListView.as_view(), name='product-list'),  # List/Create
-    path('<int:pk>/', ProductDetailView.as_view(), name='product-detail'),  # Retrieve/Update/Delete
+    path('', ProductListView.as_view(), name='product-list'),  
+    path('<int:pk>/', ProductDetailView.as_view(), name='product-detail'),  
     path('featured/', FeaturedProductsView.as_view(), name='featured-products'),
-    
+     path('add/', add_product, name='add_product'),
+
     #tags
     path('tags/', TagList.as_view(), name='tag-list'),  # List and create tags
 

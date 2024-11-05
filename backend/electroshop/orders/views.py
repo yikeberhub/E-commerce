@@ -39,6 +39,7 @@ class CheckoutView(generics.CreateAPIView):
 
             orders = []
             order_ids = []
+            print('printed here')
 
             for vendor, items in vendor_orders.items():
                 vendor_total = sum(item.product.price * item.quantity for item in items)
@@ -49,7 +50,7 @@ class CheckoutView(generics.CreateAPIView):
                     total_price=vendor_total,
                     vendor=vendor
                 )
-                print('order is', order)
+                print('Order created:', order)
 
                 # Add items to the order
                 for item in items:
@@ -60,30 +61,39 @@ class CheckoutView(generics.CreateAPIView):
                 print('transaction_id:', transaction_id)
 
                 # Create a Payment record for the order
-                Payment.objects.create(
-                    order=order,
-                    amount=vendor_total,
-                    payment_status='pending',
-                    transaction_id=transaction_id
-                )
+                try:
+                    Payment.objects.create(
+                        order=order,
+                        amount=vendor_total,
+                        payment_status='pending',
+                        transaction_id=transaction_id
+                    )
+                    print('Payment created for order:', order)
+                except Exception as payment_error:
+                    print('Payment creation failed:', payment_error)
+                    return Response({"error": "Payment creation failed."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
                 orders.append(order)
                 order_ids.append(order.id)
-                print('vendor total:', vendor_total)
+                print('Vendor total:', vendor_total)
                 print('success')
 
-            # Serialize orders and return the order IDs
-            serializer = self.get_serializer(orders, many=True)
-            print('serializer data:', serializer.data)
+            print('Orders before serialization:', orders)
+
+            # Serialize orders
+            serialized_orders = [OrderSerializer(order).data for order in orders]
             return Response({
-                "orders": serializer.data,
+                "orders": serialized_orders,
                 "order_ids": order_ids
             }, status=status.HTTP_201_CREATED)
 
         except Cart.DoesNotExist:
+            print('Cart does not exist for user:', request.user)
             return Response({"error": "Cart doesn't exist."}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
+            print('Exception occurred:', str(e))
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
         
 class OrderListView(generics.ListAPIView):
     serializer_class = OrderSerializer

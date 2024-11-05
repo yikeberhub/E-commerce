@@ -28,7 +28,7 @@ class Payment(models.Model):
     payment_method = models.CharField(max_length=100,choices=PAYMENT_METHODS, default='chapa')  
     chapa_sub_method = models.CharField(max_length=50, choices=CHAPA_SUB_METHODS, null=True, blank=True) 
     charge = models.DecimalField(max_digits=10, decimal_places=2,default=0)  
-    payment_gateway = models.CharField(max_length=100, null=True, blank=True)  
+    payment_gateway = models.CharField(max_length=100, default='CBE')  
     created_at = models.DateTimeField(auto_now_add=True)  
     updated_at = models.DateTimeField(auto_now=True)    
 
