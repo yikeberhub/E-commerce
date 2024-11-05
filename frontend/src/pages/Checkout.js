@@ -7,11 +7,6 @@ import EditAddress from "./dashbord/userDashboard/address/EditAddress";
 import { useAuth } from "../contexts/AuthContext";
 import Spinner from "../common/Spinner";
 
-import { processPayment } from "../api/payment";
-import { updateOrderStatus } from "../api/orders";
-import { updateVendorPayment } from "../api/vendors";
-import { generateReceipt } from "../api/receipts";
-
 const PreviewOrder = ({
   updatedOrder,
   paymentGateway,
@@ -199,8 +194,17 @@ const Checkout = () => {
 
     orderDetails.forEach((order) => {
       if (order && order.total_price) {
-        totalAmount += order.total_price;
-        transactionIds.push(order.payment.transaction_id);
+        // Convert order.total_price to a number before adding it to totalAmount
+        const orderTotalPrice = parseFloat(order.total_price);
+
+        if (!isNaN(orderTotalPrice)) {
+          totalAmount += orderTotalPrice; // Add to totalAmount
+          transactionIds.push(order.payment.transaction_id); // Add transaction ID
+        } else {
+          console.error(
+            `Order ID ${order.id} has an invalid total_price: ${order.total_price}`
+          );
+        }
       } else {
         console.error(`Order ID ${order.id} is missing total_price`);
       }
@@ -243,6 +247,7 @@ const Checkout = () => {
     }
   };
 
+  console.log("order ids are", orderIds);
   const fetchOrderDetails = async () => {
     try {
       const fetchedOrders = await Promise.all(
@@ -302,48 +307,7 @@ const Checkout = () => {
   const handlePaymentMethodChange = (e) => setPaymentMethod(e.target.value);
   const handlePaymentGatewayChange = (e) => setPaymentGateway(e.target.value);
 
-  const handleCheckout = async () => {
-    const orderIds = orderDetails.map((order) => order.id);
-    const totalAmount = orderDetails.reduce(
-      (sum, order) => sum + order.total_price,
-      0
-    );
-
-    try {
-      const paymentResponse = await processPayment(totalAmount);
-
-      if (paymentResponse.success) {
-        await Promise.all(
-          orderDetails.map((order) =>
-            updateOrderStatus(order.id, "paid", paymentResponse.transaction_id)
-          )
-        );
-        await Promise.all(
-          orderDetails.map((order) =>
-            updateVendorPayment(order.vendor.id, order.total_price)
-          )
-        );
-        orderDetails.forEach((order) =>
-          generateReceipt(
-            order.id,
-            order.vendor.id,
-            paymentResponse.transaction_id
-          )
-        );
-
-        alert(
-          "Payment successful! Receipts have been generated for each vendor."
-        );
-      } else {
-        alert("Payment failed. Please try again.");
-      }
-    } catch (error) {
-      console.error("Error during checkout:", error);
-      alert("An error occurred during checkout. Please try again.");
-    }
-  };
-
-  if (!orderDetails.length) return <Spinner />;
+  // if (!orderDetails.length) return <Spinner />;
 
   return (
     <div className="flex flex-col lg:flex-row m-auto mb-28 space-y-4 lg:space-y-0 lg:space-x-8">

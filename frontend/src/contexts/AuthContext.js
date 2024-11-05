@@ -58,13 +58,21 @@ export const AuthProvider = ({ children }) => {
         const data = await response.json();
         setUser(data);
         console.log("role is", data.role);
-
-        if (data.role === "admin") {
-          navigate("/admin-dashboard");
-        } else if (data.role === "vendor") {
-          navigate("/vendor-dashboard");
-        } else {
-          navigate("/");
+        console.log("window path name", window.location.pathname);
+        if (window.location.pathname === "/login") {
+          if (
+            data.role === "admin" &&
+            window.location.pathname !== "/admin-dashboard"
+          ) {
+            navigate("/admin-dashboard");
+          } else if (
+            data.role === "vendor" &&
+            window.location.pathname !== "/vendor-dashboard"
+          ) {
+            navigate("/vendor-dashboard");
+          } else if (data.role === "user" && window.location.pathname !== "/") {
+            navigate("/");
+          }
         }
       } else if (response.status === 401) {
         await refreshTokens();

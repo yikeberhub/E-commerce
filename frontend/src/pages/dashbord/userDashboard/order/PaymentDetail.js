@@ -4,49 +4,77 @@ import { FaHome } from "react-icons/fa"; // Import the home icon
 
 import ShopLogoImg from "../../../../assets/icons/shopLogo/shop_logo.jpg";
 const PrintableReceipt = ({ paymentDetail }) => {
-  console.log("payment detail", paymentDetail);
+  console.log("payment detail in printable component", paymentDetail);
+  if (!paymentDetail || paymentDetail.length === 0) {
+    return <p>No payment details available.</p>;
+  }
+
+  console.log("map started");
+  paymentDetail?.map((paymentResponse, index) => {
+    const paymentDetail = paymentResponse.payment;
+    console.log("payment mapped is  is", index, paymentDetail.order);
+  });
+  console.log("map finished");
+
   return (
-    <div className="max-w-lg mx-auto p-6 bg-white shadow-lg rounded-lg relative overflow-hidden">
-      <div className="absolute inset-0 opacity-30 flex items-center justify-center">
-        <span className="text-2xl text-green-300 font-bold">
-          Paid with {paymentDetail.payment_gateway}
-        </span>
-      </div>
+    <div className="max-w-lg mx-auto p-6 bg-white shadow-lg rounded-lg">
       <img
         src={ShopLogoImg}
         alt="Logo"
         className="w-32 mx-auto mb-4 rounded-full"
       />
-      <h1 className="text-3xl font-bold text-center text-blue-600">
-        Payment Receipt
+      <h1 className="text-3xl font-bold text-center text-blue-600 mb-6">
+        Payment Receipts{" "}
+        <span>TransactionId {paymentDetail.transaction_id}</span>
       </h1>
-      <h2 className="text-xl font-semibold mt-4 text-gray-800">
-        Transaction ID: {paymentDetail.transaction_id}
-      </h2>
-      <p className="mt-2 text-gray-700">
-        <strong>User:</strong> {paymentDetail.order?.user.username || "N/A"}
-      </p>
-      <p className="mt-2 text-gray-700">
-        <strong>Amount:</strong> ${paymentDetail.amount || "0.00"}
-      </p>
-      <p className="mt-2 text-gray-700">
-        <strong>Payment Method:</strong> {paymentDetail.payment_method}
-      </p>
-      <p className="mt-2 text-gray-700">
-        <strong>Payment Gateway:</strong> {paymentDetail.payment_gateway}
-      </p>
-      <p className="mt-2 text-gray-700">
-        <strong>Status:</strong> {paymentDetail.payment_status}
-      </p>
-      <p className="mt-2 text-gray-700">
-        <strong>Date:</strong>{" "}
-        {new Date(paymentDetail.created_at).toLocaleString() || "N/A"}
-      </p>
-      <div className="mt-4 text-center">
-        <p className="font-medium text-lg text-blue-600">
-          Thank you for your payment!
-        </p>
-      </div>
+      {paymentDetail?.map((paymentResponse, index) => {
+        const paymentDetail = paymentResponse.payment;
+
+        return (
+          <div
+            key={paymentResponse.payment.transaction_id}
+            className="relative overflow-hidden mb-8 p-4 bg-gray-50 rounded-lg shadow-md"
+          >
+            <div className="absolute inset-0 opacity-30 flex items-center justify-center">
+              <span className="text-2xl text-green-300 font-bold">
+                Paid with {paymentDetail.payment?.payment_gateway || "N/A"}
+              </span>
+            </div>
+
+            <h2 className="text-xl font-semibold mt-4 text-gray-800">
+              PaymentId ID: {paymentResponse.transaction_id}
+            </h2>
+            <p className="mt-2 text-gray-700">
+              <strong>User:</strong> {paymentDetail.order?.user?.email || "N/A"}
+            </p>
+            <p className="mt-2 text-gray-700">
+              <strong>Amount:</strong> ${paymentDetail?.amount || "0.00"}
+            </p>
+            <p className="mt-2 text-gray-700">
+              <strong>Payment Method:</strong>{" "}
+              {paymentDetail.payment_method || "N/A"}
+            </p>
+            <p className="mt-2 text-gray-700">
+              <strong>Payment Gateway:</strong>{" "}
+              {paymentDetail.payment_gateway || "N/A"}
+            </p>
+            <p className="mt-2 text-gray-700">
+              <strong>Status:</strong>{" "}
+              {paymentDetail.payment_status || paymentResponse.status}
+            </p>
+            <p className="mt-2 text-gray-700">
+              <strong>Date:</strong>{" "}
+              {new Date(paymentDetail.created_at).toLocaleString() || "N/A"}
+            </p>
+
+            <div className="mt-4 text-center">
+              <p className="font-medium text-lg text-blue-600">
+                Thank you for your payment!
+              </p>
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 };
@@ -54,15 +82,22 @@ const PrintableReceipt = ({ paymentDetail }) => {
 const PaymentDetail = () => {
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
-  const transactionId = queryParams.get("trx_ref");
+  const transactionId = queryParams.get("txt_ref");
+  console.log("transaction id is:", transactionId);
 
   const [paymentDetail, setPaymentDetail] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
   const receiptRef = useRef(null); // Reference for the receipt component
+  const storedTransactionIds = localStorage.getItem("transaction_ids");
+  console.log(
+    "stored transaction_ids are  in payment detai is ",
+    storedTransactionIds
+  );
   useEffect(() => {
     const fetchPaymentDetail = async () => {
       const storedTransactionIds = localStorage.getItem("transaction_ids");
+      console.log("transaction_ids are ", storedTransactionIds);
       const transactionIds = storedTransactionIds
         ? JSON.parse(storedTransactionIds)
         : [];
@@ -83,16 +118,14 @@ const PaymentDetail = () => {
           throw new Error("Failed to fetch payment details.");
         }
 
-        const data = await response.json();
-
-        if (data.payments && data.payments.length) {
-          const successfulPayments = data.payments.filter(
+        const paymentResponses = await response.json();
+        console.log("payment responses length", paymentResponses.length);
+        if (paymentResponses.payments && paymentResponses.payments.length) {
+          const successfulPayments = paymentResponses.payments.filter(
             (payment) => payment.status === "completed"
           );
           if (successfulPayments.length > 0) {
-            setPaymentDetail(
-              successfulPayments.map((payment) => payment.payment)
-            );
+            setPaymentDetail(successfulPayments.map((payment) => payment));
           } else {
             setError("No successful payment details found.");
           }

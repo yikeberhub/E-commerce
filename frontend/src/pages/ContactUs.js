@@ -87,15 +87,15 @@ const ContactUs = () => {
           <h2 className="text-2xl font-semibold mb-4">Contact Information</h2>
           <div className="flex items-center mb-4">
             <FaMapMarkerAlt className="text-blue-500 mr-2" />
-            <p>123 E-commerce St, Suite 100, City, Country</p>
+            <p>123 Shopify , Ethiopia City, Bahirdar</p>
           </div>
           <div className="flex items-center mb-4">
             <FaPhone className="text-blue-500 mr-2" />
-            <p>(123) 456-7890</p>
+            <p>(+251) 946472687</p>
           </div>
           <div className="flex items-center mb-4">
             <FaEnvelope className="text-blue-500 mr-2" />
-            <p>support@example.com</p>
+            <p>shopify@gmail.com</p>
           </div>
           <div className="mt-6">
             <h3 className="text-lg font-semibold">Follow Us</h3>

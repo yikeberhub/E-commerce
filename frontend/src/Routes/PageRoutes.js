@@ -17,6 +17,7 @@ import ContactUs from "../pages/ContactUs";
 import Wishlist from "../pages/Wishlist";
 import PageNotFound from "../pages/PageNotFound";
 import PaymentDetail from "../pages/dashbord/userDashboard/order/PaymentDetail";
+import ProductCategory from "../pages/ProductCategory";
 
 const PageRoutes = () => {
   return (
@@ -26,6 +27,7 @@ const PageRoutes = () => {
       <Route path="/signup" element={<SignUp />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/categories" element={<Categories />} />
+      <Route path="/categories/:id" element={<ProductCategory />} />
       <Route path="/cart" element={<Cart />} />
       <Route path="/vendors" element={<Vendors />} />
       <Route path="/vendors/:id" element={<VendorDetail />} />

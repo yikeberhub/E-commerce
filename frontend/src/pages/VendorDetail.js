@@ -25,10 +25,15 @@ function VendorDetail() {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
-    const filteredProducts = products.filter(
-      (product) => product.vendor.id === Number(id)
-    );
-    onFilterProducts(filteredProducts);
+    console.log("id in useEffect is ", products);
+    if (id) {
+      const filteredProducts = products.filter(
+        (product) => product.vendor?.id === Number(id)
+      );
+      if (filteredProducts) {
+        onFilterProducts(filteredProducts);
+      }
+    }
   }, [id, products, onFilterProducts]);
 
   useEffect(() => {
@@ -43,7 +48,8 @@ function VendorDetail() {
   }, [id]);
 
   const vendor = vendors.find((vendor) => vendor.id === Number(id));
-  if (!vendor) return <div>Vendor not found</div>;
+
+  if (!vendor || !id) return <div>Vendor not found</div>;
 
   return (
     <div className="container mx-auto my-6 px-4 min-h-screen">
@@ -65,7 +71,7 @@ function VendorDetail() {
                     alt={vendor.title}
                     className="h-28 w-28 rounded-full border-2 border-blue-500"
                   />
-                  <p className="text-sm text-gray-500">7 products</p>
+                  <p className="text-sm text-gray-500"> products</p>
                 </div>
                 <div className="ml-4">
                   <h2 className="text-2xl font-semibold text-gray-800 hover:text-blue-600 transition-colors duration-200">
