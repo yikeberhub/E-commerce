@@ -1,2 +1,4 @@
 myenv/
 /electroshop/.env
+__pycache__/
+*.pyc
