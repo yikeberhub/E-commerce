@@ -1,11 +1,14 @@
-// EditUser.js
-
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 
 const EditUser = () => {
   const { id } = useParams();
-  const [user, setUser] = useState({});
+  const [user, setUser] = useState({
+    username: "",
+    email: "",
+    phone_number: "",
+    role: "",
+  });
   const navigator = useNavigate();
 
   console.log("id is", id);
@@ -23,17 +26,34 @@ const EditUser = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await fetch(
+    const token = localStorage.getItem("access");
+    const userData = {
+      username: user.username,
+      email: user.email,
+      phone_number: user.phone_number,
+      role: user.role,
+    };
+
+    console.log("Sending data:", userData);
+
+    const response = await fetch(
       `http://localhost:8000/admin_api/super-admin-dashboard/users/${id}/`,
       {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(user),
+        body: JSON.stringify(userData),
       }
     );
-    navigator("/admin-dashboard/customer-management/");
+
+    if (response.ok) {
+      navigator("/admin-dashboard/customer-management/");
+    } else {
+      const errorData = await response.json();
+      console.error("Error updating user:", errorData);
+    }
   };
 
   return (
@@ -66,6 +86,16 @@ const EditUser = () => {
           onChange={(e) => setUser({ ...user, phone_number: e.target.value })}
           className="w-full border border-gray-300 rounded p-2 mb-4"
         />
+        <select
+          value={user.role || ""}
+          onChange={(e) => setUser({ ...user, role: e.target.value })}
+          className="w-full border border-gray-300 rounded p-2 mb-4"
+          required
+        >
+          <option value="">Select Role</option>
+          <option value="customer">Customer</option>
+          <option value="admin">Admin</option>
+        </select>
         <button
           type="submit"
           className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"

@@ -12,6 +12,7 @@ function UpdateUserProfile({ setOpenEditProfile }) {
         username: user.username,
         bio: user.bio,
         phone_number: user.phone_number,
+        balance: user.balance,
       });
     }
   }, [user]);
@@ -59,6 +60,7 @@ function UpdateUserProfile({ setOpenEditProfile }) {
     formData.append("email", data.email);
     formData.append("bio", data.bio);
     formData.append("phone_number", data.phone_number);
+    formData.append("balance", data.balance);
 
     data.profile_image && formData.append("profile_image", data.profile_image);
 
@@ -217,6 +219,20 @@ function UpdateUserProfile({ setOpenEditProfile }) {
                 {message.email_error && (
                   <p className="text-red-600 mt-1">{message.email_error}</p>
                 )}
+              </div>
+            </div>
+            <div className="ml-2">
+              <div className="grid">
+                <label>Deposit Balance:</label>
+                <div className="bg-slate-100 p-2">
+                  <input
+                    type="Number"
+                    value={data.balance}
+                    name="balance"
+                    onChange={(e) => handleOnChange(e)}
+                    className="w-full h-full outline-none bg-transparent"
+                  />
+                </div>
               </div>
             </div>
           </div>

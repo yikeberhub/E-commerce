@@ -28,6 +28,7 @@ def cartAddView(request):
     user = request.user
     print('user:',user,'product:',product)
     cart = Cart.objects.get(user = user)
+    print('cart',cart)
     cart_item = CartItem.objects.get_or_create(cart= cart,product = product,quantity = request.data['quantity'])
     serializer = CartSerializer(instance=cart)
     if serializer.data:

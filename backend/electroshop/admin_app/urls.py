@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import SuperAdminDashboardView, VendorAdminDashboardView, UserViewSet
+from .views import SuperAdminDashboardView, VendorAdminDashboardView, UserViewSet,UserDetailView
 
 # Define user list and detail views
 user_list = UserViewSet.as_view({'get': 'list', 'post': 'create'})
@@ -11,7 +11,7 @@ urlpatterns = [
     
     # User management endpoints
     path('super-admin-dashboard/users/', user_list, name='user-list'),
-    path('super-admin-dashboard/users/<int:pk>/', user_detail, name='user-detail'),
+    path('super-admin-dashboard/users/<int:pk>/', UserDetailView.as_view(), name='user-detail'),
     
     # path('super-admin-dashboard/order/', order, name='user-detail'),
     # path('super-admin-dashboard/users/<int:pk>/', user_detail, name='user-detail'),

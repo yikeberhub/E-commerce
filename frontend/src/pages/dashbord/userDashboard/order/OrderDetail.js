@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import OrderComponent from "./OrderComponent";
 
 const OrderDetail = () => {
   const { id } = useParams();
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
   const [error, setError] = useState(null);
 
   useEffect(() => {
@@ -35,6 +36,13 @@ const OrderDetail = () => {
       setLoading(false);
     }
   };
+  const handleNavigate = () => {
+    console.log("i am called");
+    const transactionId = order.payment.transaction_id;
+    console.log("trid", transactionId);
+    localStorage.setItem("transaction_ids", transactionId);
+    navigate(`/checkout/summary/?order_id=${order.id}`);
+  };
 
   if (loading) {
     return <div>Loading...</div>;
@@ -52,11 +60,14 @@ const OrderDetail = () => {
         <h2 className="text-2xl font-bold mb-4">
           Order Details for Order ID: {order.id}{" "}
         </h2>
-        <Link to={`/checkout/${order.id}/`}>
-          <button className="bg-green-600 text-white hover:bg-purple-600 rounded-md py-2 px-2">
-            Go to checkout
-          </button>
-        </Link>
+        {/* <Link to={`/checkout/summary/?order_id=${order.id}`}> */}
+        <button
+          className="bg-green-600 text-white hover:bg-purple-600 rounded-md py-2 px-2"
+          onClick={() => handleNavigate()}
+        >
+          Go to checkout
+        </button>
+        {/* </Link> */}
       </div>
 
       <OrderComponent order={order} calculateTotal={calculateTotal} />

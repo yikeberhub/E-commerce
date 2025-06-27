@@ -9,35 +9,43 @@ from users.models import CustomUser
 from products.models import Product
 from .serializers import WishlistItemSerializer, WishlistSerializer
 
+
 @api_view(['GET', 'PUT'])
 @permission_classes([IsAuthenticated])
 def wishlist_view(request):
-    print('user:',request.user)
-    wishlist = Wishlist.objects.get(user=request.user)
+    print('user:', request.user)
+    
+    # Unpack the wishlist instance from get_or_create
+    wishlist, created = Wishlist.objects.get_or_create(user=request.user)
 
     if request.method == 'GET':
-        serializer = WishlistSerializer(wishlist)
+        # Pass only the wishlist instance to the serializer
+        serializer = WishlistSerializer(instance=wishlist)
         return Response(serializer.data)
+
     return Response(status=status.HTTP_400_BAD_REQUEST)
 
-    
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def wishlist_add(request):  
-    product_id = request.data['product_id']
-    product = Product.objects.get(id = product_id)
+    try:
+        product_id = request.data['product_id']
+        product = Product.objects.get(id=product_id)
+    except Product.DoesNotExist:
+        return Response({"error": "Product not found."}, status=404)
+
     user = request.user
-    
-    wishlist = Wishlist.objects.get(user=user)
-    wishlist_item,created = WishlistItem.objects.get_or_create(wishlist = wishlist,product = product)
-    wishlist_item.quantity = request.data['quantity']
-    wishlist_item.save()
-    
+
+    # Retrieve or create wishlist for the user
+    wishlist, created = Wishlist.objects.get_or_create(user=user)
+
+    # Retrieve or create the WishlistItem for the product
+    wishlist_item, _ = WishlistItem.objects.get_or_create(wishlist=wishlist, product=product)
+
+    # Serialize the wishlist with updated items
     serializer = WishlistSerializer(instance=wishlist)
-    if serializer.data:
-       print('serialized',serializer.data)
-       return Response({'data':serializer.data})
-    return Response({'errors':serializer.errors})
+
+    return Response({'data': serializer.data})
 
 
 @api_view(['PUT'])

@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'orders',
     'payments',
     'promotions',
+    'chapa',
     'analytics',
     'notifications',
     'cart',

@@ -1,149 +1,130 @@
-# views.py
-
 import uuid
-import requests
-import json
 from django.shortcuts import get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
 from rest_framework.decorators import api_view
-
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status,generics
+from rest_framework import status
 
 from orders.models import Order
-from .models import Payment,Transaction
-from .serializers import PaymentSerializer,TransactionSerializer
+from .models import Payment
+from .serializers import PaymentSerializer
+from chapa import Chapa 
+from .check_payment import verify_payment
 
+# Initialize Chapa with your secret key
+chapa = Chapa(settings.CHAPA_SECRET_KEY)
 class CreatePaymentView(APIView):
     def post(self, request):
-        order_id = request.data.get('order_id')
-        amount = request.data.get('amount')
-        # payment_gateway = request.data.get('payment_gateway')
-        # payment_method = request.data.get('payment_method')
+        amount = request.data.get('total_amount')
         email = request.data.get('email')
         first_name = request.data.get('first_name')
         last_name = request.data.get('last_name')
         phone_number = request.data.get('phone_number')
-        print('hello yike')
 
-        if not all([amount, email, order_id]):
-            print('not all send')
-            return Response({"error": "Amount, email, and order_id are required."}, status=status.HTTP_400_BAD_REQUEST)
-
-        tx_ref = f"txn-{uuid.uuid4().hex[:8]}"
-
-       
-        headers = {
-            'Authorization': f'Bearer {settings.CHAPA_SECRET_KEY}',
-            'Content-Type': 'application/json'
-        }
+        if not all([amount, email,first_name]):
+            print('not get email,amount,firstname')
+            return Response({"error": "Amount, email, and first name are required."}, status=status.HTTP_400_BAD_REQUEST)
+      
+        # Unique reference for the entire payment session
+        payment_ref = f"multi-txn-{uuid.uuid4().hex[:8]}"
+        print('payment ref',payment_ref)
+        # Prepare data for payment initialization
         payment_data = {
-            "amount": float(amount),
+            "amount": amount,
             "currency": "ETB",
             "email": email,
-            "callback_url": f'http://localhost:8000/payments/callback/{order_id}/',
             "first_name": first_name,
             "last_name": last_name,
             "phone_number": phone_number,
-            "tx_ref": tx_ref,
-            "return_url": f"http://localhost:3000/payment/confirm?trx_ref={tx_ref}"
+            "tx_ref": payment_ref,  
+            "return_url": f"http://localhost:3000/payment/confirm?txt_ref={payment_ref}"
         }
 
-        # Initialize payment via API
+        # Initialize payment
         try:
             print('try block')
-            response = requests.post(settings.CHAPA_API_URL, json=payment_data, headers=headers)
-            print('hay yike')
-            response_data = response.json()
-            print('response',response_data)
-
-            if response.ok and response_data.get('status') == 'success':
-                checkout_url = response_data['data']['checkout_url']
-                print('url',checkout_url)
-                return Response({"data": {"checkout_url": checkout_url}}, status=status.HTTP_200_OK)
-
-            return Response(response_data, status=response.status_code)
-
-        except requests.exceptions.RequestException as e:
-            print('error is ,',str(e))
-            return Response({"error": "Payment initialization failed."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        
-
-@csrf_exempt
-@api_view(['POST'])
-def chapa_callback(request, order_id):
-    if request.method == 'POST':
-        print('callback is called')
-        try:
-            webhook_data = json.loads(request.body)
-            event = webhook_data.get('event')
-            tx_ref = webhook_data.get('tx_ref')
-            payment_status = webhook_data.get('status')
-            amount = webhook_data.get('amount')
-            currency = webhook_data.get('currency')
-            charge = webhook_data.get('charge')
-            payment_method = webhook_data.get('payment_method')
-            
-            print('wabehook body',webhook_data)
-
-            if event == "charge.success" and payment_status == "success":
-                order = get_object_or_404(Order, id=order_id)
-                order.status = 'processing'
-                order.save()
-
-                chapa_sub_method = payment_method if payment_method in ['telebirr', 'cbe'] else None
+            response = chapa.initialize(**payment_data)
+            if response['status'] == 'success':
+                checkout_url = response['data']['checkout_url']
                 
-                payment = Payment.objects.create(
-                    order=order,
-                    transaction_id=tx_ref,
-                    amount=float(amount),
-                    currency=currency,
-                    charge=float(charge),
-                    payment_method='chapa',
-                    chapa_sub_method=chapa_sub_method, 
-                    payment_status='completed',
-                    
-                )
+                print('success full initiation')
+                return Response({"data": {"checkout_url": checkout_url, "payment_ref": payment_ref}}, status=status.HTTP_200_OK)
 
-                print('Payment Info:', payment)
-                return Response({"message": "Payment recorded successfully", "trx_ref": tx_ref, "status": payment_status}, status=200)
+            return Response(response, status=status.HTTP_400_BAD_REQUEST)
 
-            print(f"Payment failed or event not processed: {payment_status}")
-            return Response({"message": "Payment failed or event not processed"}, status=status.HTTP_400_BAD_REQUEST)
-
-        except json.JSONDecodeError:
-            return Response({"error": "Invalid JSON"}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
-            print("Error processing webhook:", str(e))
-            return Response({"error": "Internal server error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({"error": "Payment initialization failed."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+@csrf_exempt
+@api_view(['GET'])
+def chapa_callback(request):
+    pass
+    # payment_ref = request.GET.get('txt_ref')
 
-    return Response({"error": "Invalid request method"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+    # if payment_status == "success" and transaction_ids:
+    #     return Response({"message": "All payments recorded successfully"}, status=status.HTTP_200_OK)
+
+    # return Response({"message": "Payment failed or not processed"}, status=status.HTTP_400_BAD_REQUEST)
+
 
 
 @api_view(['GET'])
-def check_payment_status(request):
-    transaction_id = request.GET.get('transaction_id')
-    print('id',transaction_id)
-
-    if not transaction_id:
-        return Response({"error": "transaction_id is required."}, status=400)
-
-    try:
-        print('try block')
-        payment = Payment.objects.filter(transaction_id=transaction_id).first()
-        print('payment',payment)
-        serializer =PaymentSerializer(payment,many=False)
-        return Response({"payment": serializer.data}, status=200)
-    except Payment.DoesNotExist:
-        return Response({"error": "Payment not found."}, status=404)
+def check_payment_status(request,payment_reference):
     
-    
-class TransactionListCreateView(generics.ListCreateAPIView):
-    queryset = Transaction.objects.all()
-    serializer_class = TransactionSerializer
+    transaction_ids = request.GET.get('transaction_ids')  
+    if not transaction_ids:
+        return Response({"error": "transaction_ids are required."}, status=status.HTTP_400_BAD_REQUEST)
 
-class TransactionDetailView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Transaction.objects.all()
-    serializer_class = TransactionSerializer
+    transaction_ids = transaction_ids.split(",")  
+    total_amount = 0
+    user = None  
+    payment_responses = []
+
+    for tx_ref in transaction_ids:
+        payment = Payment.objects.filter(transaction_id=tx_ref).first()
+
+        if not payment:
+            payment_responses.append({"transaction_id": tx_ref, "status": "error", "message": "Payment not found"})
+            continue
+
+        try:
+            # Verify payment with Chapa
+            response = verify_payment(payment_reference)
+            if response and response.get('status') == 'success':
+                payment.payment_status = 'completed'
+                payment.save()
+
+                # Update associated order status
+                order = payment.order
+                order.status = 'completed'
+                order.save()
+
+                # Update vendor balance
+                vendor = order.vendor
+                vendor.balance += payment.amount
+                vendor.save()
+
+                # Track total amount for deduction from user balance
+                total_amount += payment.amount
+                if not user:
+                    user = order.user
+
+
+                # Serialize payment response for frontend
+                payment_responses.append({"transaction_id": tx_ref, "status": "completed", "payment": PaymentSerializer(payment).data})
+            else:
+                # If verification fails, mark as failed
+                payment.payment_status = 'failed'
+                payment.save()
+                payment_responses.append({"transaction_id": tx_ref, "status": "failed", "message": "Payment verification failed"})
+
+        except Exception as e:
+            payment_responses.append({"transaction_id": tx_ref, "status": "error", "message": f"An error occurred: {str(e)}"})
+
+    # Deduct the total amount from the user's balance after successful payments
+    if user:
+        user.balance -= total_amount
+        user.save()
+
+    return Response({"payments": payment_responses}, status=status.HTTP_200_OK)

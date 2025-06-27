@@ -1,6 +1,6 @@
 import React from "react";
 
-function OrderComponent({ order, calculateTotal }) {
+function OrderComponent({ order }) {
   return (
     <div className="p-6">
       <table className="min-w-full bg-white border border-gray-200">
@@ -26,9 +26,7 @@ function OrderComponent({ order, calculateTotal }) {
               <td className="py-2 px-4 border-b">{item.product.title}</td>
               <td className="py-2 px-4 border-b">${item.product.price}</td>
               <td className="py-2 px-4 border-b">{item.quantity}</td>
-              <td className="py-2 px-4 border-b">
-                ${calculateTotal(item.product.price, item.quantity)}
-              </td>
+              <td className="py-2 px-4 border-b">${order.total_price}</td>
             </tr>
           ))}
         </tbody>

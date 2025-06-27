@@ -43,15 +43,16 @@ function Orders() {
   }
 
   return (
-    <div>
+    <div className="absolute max-h-screen overflow-y-scroll">
       <div className="overflow-x-auto">
         <h1 className="text-start text-xl font-semibold font-sans  py-2 text-gray-600">
           Your Orders
         </h1>
-        <table className="min-w-full bg-white border border-gray-200 ">
+        <table className="min-w-full max-h-screen overflow-y-scroll bg-white border border-gray-200 ">
           <thead>
             <tr className="bg-gray-100 text-gray-600 uppercase text-sm leading-normal">
               <th className="py-3 px-6 text-left">Order</th>
+              <th className="py-3 px-6 text-left">vendor</th>
               <th className="py-3 px-6 text-left">Date</th>
               <th className="py-3 px-6 text-left">Status</th>
               <th className="py-3 px-6 text-left">Paid Status</th>
@@ -66,6 +67,7 @@ function Orders() {
                 className="border-b border-gray-200 hover:bg-green-300"
               >
                 <td className="py-3 px-6"> {order.id}</td>
+                <td className="py-3 px-6"> {order.vendor?.title}</td>
                 <td className="py-3 px-6">
                   {" "}
                   {new Date(order.created_at).toLocaleString()}

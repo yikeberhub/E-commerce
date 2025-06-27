@@ -13,19 +13,22 @@ export const AuthProvider = ({ children }) => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetchUserInfo();
-  }, []);
+    const fetchInitialUserInfo = async () => {
+      if (authTokens.access && !user) {
+        await fetchUserInfo();
+      } else {
+        setLoading(false);
+      }
+    };
+    fetchInitialUserInfo();
+  }, [authTokens.access]);
 
-  // Function to set tokens and user information
-  const setTokens = async (tokens, callback) => {
+  const setTokens = async (tokens) => {
     setAuthTokens(tokens);
     localStorage.setItem("access", tokens.access);
     localStorage.setItem("refresh", tokens.refresh);
 
-    await fetchUserInfo();
-    if (callback) {
-      callback();
-    }
+    await fetchUserInfo(); // Fetch user info and handle role-based redirection
   };
 
   const clearTokens = () => {
@@ -54,8 +57,28 @@ export const AuthProvider = ({ children }) => {
       if (response.ok) {
         const data = await response.json();
         setUser(data);
+        console.log("role is", data.role);
+        console.log("window path name", window.location.pathname);
+        if (window.location.pathname === "/login") {
+          if (
+            data.role === "admin" &&
+            window.location.pathname !== "/admin-dashboard"
+          ) {
+            navigate("/admin-dashboard");
+          } else if (
+            data.role === "vendor" &&
+            window.location.pathname !== "/vendor-dashboard"
+          ) {
+            navigate("/vendor-dashboard");
+          } else if (data.role === "user" && window.location.pathname !== "/") {
+            navigate("/");
+          }
+        }
       } else if (response.status === 401) {
         await refreshTokens();
+      } else {
+        console.error("Failed to fetch user info:", response.statusText);
+        clearTokens();
       }
     } catch (error) {
       console.error("Failed to fetch user info:", error);
@@ -83,7 +106,7 @@ export const AuthProvider = ({ children }) => {
         setTokens(data);
       } else {
         clearTokens();
-        navigate("/login");
+        setTimeout(() => navigate("/login"), 0);
       }
     } catch (error) {
       console.error("Failed to refresh tokens:", error);
@@ -113,5 +136,4 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
-// Custom hook to use auth context
 export const useAuth = () => useContext(AuthContext);

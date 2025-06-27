@@ -2,7 +2,9 @@
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import viewsets
+from rest_framework import viewsets,generics,serializers
+from rest_framework import status  
+
 from rest_framework.permissions import IsAuthenticated
 from django.db.models import Sum,Count
 from orders.models import Order
@@ -11,7 +13,29 @@ from vendors.models import Vendor
 from users.models import CustomUser 
 
 from users.serializers import UserSerializer
+from users.models import CustomUser
 
+
+
+
+class UserDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = CustomUser.objects.all()
+    serializer_class = UserSerializer
+    
+    def update(self, request, *args, **kwargs):
+        try:
+            print('data:', request.data)
+            instance = self.get_object()
+            serializer = self.get_serializer(instance, data=request.data, partial=True)
+            serializer.is_valid(raise_exception=True) 
+            self.perform_update(serializer)  
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except serializers.ValidationError as e:
+            return Response({"errors": e.detail}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+        
 class SuperAdminDashboardView(APIView):
     permission_classes = [IsAuthenticated]
 

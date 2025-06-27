@@ -5,9 +5,8 @@ import {
   FaFilter,
   FaSearch,
   FaFileInvoice,
-  FaClipboardCheck,
-  FaRegEdit,
   FaUndo,
+  FaRegEdit,
 } from "react-icons/fa"; // Import icons
 
 import OrderList from "./AdminComponent/orderManagement/OrderList";
@@ -69,15 +68,15 @@ const OrderManagement = () => {
         (order) => order.status === filter.status
       );
     }
+
     // Filter by user email
     if (filter.email) {
-      console.log("email", filter.email);
       updatedOrders = updatedOrders.filter((order) =>
         order.user?.email?.includes(filter.email)
       );
     }
 
-    // Filter by user email
+    // Filter by user address
     if (filter.address) {
       updatedOrders = updatedOrders.filter(
         (order) =>
@@ -97,6 +96,7 @@ const OrderManagement = () => {
     setSelectedOrder(null);
     setActiveSection(section);
   };
+
   const handleSelectOrder = (order) => {
     setSelectedOrder(order);
     setActiveSection("details");
@@ -112,67 +112,46 @@ const OrderManagement = () => {
   }
 
   return (
-    <div className="flex bg-gray-50">
-      {/* Sidebar Navigation */}
-      <nav className="w-64  h-screen p-4">
-        <h2 className="text-lg font-semibold mb-4">Order Actions</h2>
-        <ul className="space-y-2">
+    <div className="flex flex-col bg-gradient-to-r from-blue-50 to-blue-100 min-h-screen">
+      {/* Horizontal Navigation */}
+      <nav className="flex justify-between items-center p-4 bg-white shadow-md rounded-lg mb-4">
+        <h2 className="text-lg font-semibold">Order Management</h2>
+        <ul className="flex space-x-4">
           <li>
             <button
               onClick={() => handleActiveSection("orders")}
-              className="flex items-center w-full text-left py-2 px-4 rounded hover:bg-green-400"
+              className="flex items-center text-gray-700 hover:text-green-600 transition-colors duration-200"
             >
-              {" "}
               <FaListAlt className="mr-2" />
-              <span>View Orders</span>
+              View Orders
             </button>
           </li>
           <li>
             <button
               onClick={() => handleActiveSection("create")}
-              className="flex items-center w-full text-left py-2 px-4 rounded hover:bg-green-400"
+              className="flex items-center text-gray-700 hover:text-green-600 transition-colors duration-200"
             >
-              <FaPlusCircle className="mr-2" /> Create Order
+              <FaPlusCircle className="mr-2" />
+              Create Order
             </button>
           </li>
           <li>
             <button
               onClick={() => handleActiveSection("filter")}
-              className="flex items-center w-full text-left py-2 px-4 rounded hover:bg-yellow-400"
+              className="flex items-center text-gray-700 hover:text-yellow-600 transition-colors duration-200"
             >
-              <FaFilter className="mr-2" /> Filter Orders
+              <FaFilter className="mr-2" />
+              Filter Orders
             </button>
           </li>
-          <li>
-            <button
-              onClick={() => handleActiveSection("search")}
-              className="flex items-center w-full text-left py-2 px-4 rounded hover:bg-orange-400"
-            >
-              <FaSearch className="mr-2" /> Search Orders
-            </button>
-          </li>
+
           <li>
             <button
               onClick={() => handleActiveSection("invoices")}
-              className="flex items-center w-full text-left py-2 px-4 rounded hover:bg-purple-400"
+              className="flex items-center text-gray-700 hover:text-purple-600 transition-colors duration-200"
             >
-              <FaFileInvoice className="mr-2" /> Print Invoices
-            </button>
-          </li>
-          <li>
-            <button
-              onClick={() => handleActiveSection("manageReturns")}
-              className="flex items-center w-full text-left py-2 px-4 rounded hover:bg-red-400"
-            >
-              <FaUndo className="mr-2" /> Manage Returns
-            </button>
-          </li>
-          <li>
-            <button
-              onClick={() => handleActiveSection("edit")}
-              className="flex items-center w-full text-left py-2 px-4 rounded hover:bg-teal-400"
-            >
-              <FaRegEdit className="mr-2" /> Edit Order
+              <FaFileInvoice className="mr-2" />
+              Print Invoices
             </button>
           </li>
         </ul>
@@ -180,7 +159,6 @@ const OrderManagement = () => {
 
       {/* Main Content Area */}
       <div className="flex-1 p-6">
-        <h1 className="text-2xl font-bold mb-4">Order Management</h1>
         {activeSection === "orders" && !selectedOrder && (
           <OrderList orders={orders} onSelectOrder={handleSelectOrder} />
         )}

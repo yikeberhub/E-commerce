@@ -9,10 +9,9 @@ function FilterByVendor() {
 
   useEffect(() => {
     const vendors = [
-      ...new Set(products.map((product) => product.vendor.title)),
+      ...new Set(products.map((product) => product?.vendor?.title)),
     ];
-
-    // Initialize checked vendors state
+    console.log("checked vendors", checkedVendors);
     const initialChecked = vendors.reduce((acc, vendor) => {
       acc[vendor] = false;
       return acc;
@@ -35,12 +34,13 @@ function FilterByVendor() {
       (vendor) => checkedVendorsState[vendor]
     );
 
-    // Filter products based on selected vendors
+    console.log("selected vebdors,", selectedVendors);
+
     const filteredProducts =
       selectedVendors.length === 0
         ? products
-        : products.filter(
-            (product) => selectedVendors.includes(product.vendor.title) // Ensure you compare with vendor.title
+        : products.filter((product) =>
+            selectedVendors.includes(product?.vendor?.title)
           );
 
     handleFilter(filteredProducts);
@@ -60,7 +60,7 @@ function FilterByVendor() {
           >
             <input
               type="checkbox"
-              name={vendor}
+              name={vendor.title}
               checked={checkedVendors[vendor]}
               onChange={() => handleCheckboxChange(vendor)}
               className="h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"

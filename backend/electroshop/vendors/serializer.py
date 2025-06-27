@@ -1,6 +1,13 @@
 from rest_framework import serializers
+from .models import Vendor,VendorPayment
 from users.serializers import UserSerializer
-from .models import Vendor
+
+
+
+class VendorPaymentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = VendorPayment
+        fields = '__all__'
 
 class VendorSerializer(serializers.ModelSerializer):
     user = UserSerializer()
@@ -9,17 +16,6 @@ class VendorSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def create(self, validated_data):
-        vendor = Vendor(**validated_data)
-        vendor.user.set_password(validated_data['password'])  # Hash the password
+        vendor = Vendor(**validated_data)  
         vendor.save()
         return vendor
-
-    # def validate_email(self, value):
-    #     if CustomUser.objects.filter(email=value).exists():
-    #         raise serializers.ValidationError(_("This email is already in use."))
-    #     return value
-
-    # def validate_username(self, value):
-    #     if CustomUser.objects.filter(username=value).exists():
-    #         raise serializers.ValidationError(_("This username is already taken."))
-    #     return value

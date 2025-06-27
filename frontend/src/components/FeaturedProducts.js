@@ -80,8 +80,8 @@ const FeaturedProducts = () => {
     speed: 500,
     slidesToShow: 3,
     slidesToScroll: 1,
-    autoplay: true, // Enable autoplay
-    autoplaySpeed: 3000, // Time in milliseconds to wait before transitioning to the next slide
+    autoplay: true,
+    autoplaySpeed: 3000,
     nextArrow: <SampleNextArrow />,
     prevArrow: <SamplePrevArrow />,
     responsive: [
@@ -106,48 +106,20 @@ const FeaturedProducts = () => {
   if (error) return <div className="text-red-500 text-center">{error}</div>;
 
   return (
-    <div className="container mx-auto my-8 bg-gray-100 ">
-      <h2 className="text-2xl font-bold mb-4 text-black">Featured Products</h2>
-      <Slider {...settings}>
-        {featuredProducts.map((product) => (
-          <div key={product.id} className="p-4">
-            <Product product={product} />
-            {/* <div className="flex flex-col items-center p-4 w-full bg-white shadow-lg rounded-lg transition-transform hover:scale-105 duration-300 relative">
-              <Link to={`/product/${product.id}`} className="w-full">
-                <img
-                  src={product.image}
-                  className="h-40 w-full rounded-md object-cover mb-2"
-                  alt={product.title}
-                />
-                <h3 className="text-gray-900 text-lg font-semibold">
-                  {product.title}
-                </h3>
-                <p className="text-green-600 font-bold">${product.price}</p>
-                {product.discount_percentage > 0 && (
-                  <span className="text-red-500 text-sm">
-                    {product.discount_percentage}% off!
-                  </span>
-                )}
-              </Link>
-              <div className="flex justify-center mt-4 w-full space-x-4">
-                <button
-                  // onClick={handleAddToCart}
-                  className="flex items-center bg-blue-500 text-white p-2 rounded hover:bg-blue-600 transition duration-200"
-                >
-                  <FaShoppingCart className="mr-1" /> Add to Cart
-                </button>
-                <button
-                  // onClick={handleAddToWishlist}
-                  className="flex items-center bg-yellow-500 text-white p-2 rounded hover:bg-yellow-600 transition duration-200"
-                >
-                  <FaHeart className="mr-1" /> Wishlist
-                </button>
-              </div>
-            </div> */}
-          </div>
-        ))}
-      </Slider>
-    </div>
+    featuredProducts && (
+      <div className="container mx-auto my-2 bg-gray-100 ">
+        <h2 className="text-2xl font-bold mb-4 text-black">
+          Featured Products
+        </h2>
+        <Slider {...settings}>
+          {featuredProducts.map((product) => (
+            <div key={product.id} className="p-4">
+              <Product product={product} />
+            </div>
+          ))}
+        </Slider>
+      </div>
+    )
   );
 };
 

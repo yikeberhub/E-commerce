@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useLocation } from "react-router-dom";
 import OrderComponent from "./dashbord/userDashboard/order/OrderComponent";
 import PaypalImg from "../assets/icons/images/paypal_icon.png";
 import ChapaImg from "../assets/icons/images/chapa_logo.jpg";
@@ -7,58 +7,31 @@ import EditAddress from "./dashbord/userDashboard/address/EditAddress";
 import { useAuth } from "../contexts/AuthContext";
 import Spinner from "../common/Spinner";
 
-const PreviewOrder = ({ updatedOrder, paymentGateway, paymentMethod }) => {
+const PreviewOrder = ({
+  updatedOrder,
+  paymentGateway,
+  paymentMethod,
+  handlePayment,
+  onClose,
+}) => {
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
 
   console.log("order preview component:", updatedOrder);
   const token = localStorage.getItem("access");
 
-  const handlePayment = async () => {
-    console.log("i am called");
-    try {
-      const response = await fetch("http://localhost:8000/payments/create/", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          amount: 1000,
-          email: user.email,
-          order_id: updatedOrder.id,
-          payment_gateway: paymentGateway,
-          payment_method: paymentMethod,
-          first_name: updatedOrder.address.full_name,
-          last_name: "misganaw",
-          phone_number: "0946472687",
-        }),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        console.log(
-          "Payment initiated, redirecting to URL:",
-          data.data.checkout_url
-        );
-        console.log("sucessfull initiation datas:", data);
-        window.location.href = data.data.checkout_url;
-      } else {
-        console.error("Payment initiation failed:", data);
-      }
-    } catch (error) {
-      console.error("Unable to process payment", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   // if (loading) return <Spinner />;
+  if (!updatedOrder) return <div>loading</div>;
   return (
-    <div className="bg-white p-4 rounded-lg shadow-lg max-w-md mx-auto">
+    <div className=" absolute w-full r-4 t-6 bg-white p-4 rounded-lg shadow-lg max-w-md mx-auto">
       <h2 className="text-3xl font-bold text-gray-800 mb-4 text-center">
-        Order Preview
+        Order Preview{" "}
+        <sapn
+          className="hover:cursor-pointer hover:bg-white bg-gray-200 rounded-full"
+          onClick={() => onClose(false)}
+        >
+          ❌
+        </sapn>
       </h2>
 
       <div className="overflow-auto mb-4">
@@ -129,6 +102,7 @@ const PreviewOrder = ({ updatedOrder, paymentGateway, paymentMethod }) => {
               { label: "Kebele", value: updatedOrder.address.kebele },
               { label: "City", value: updatedOrder.address.city },
               { label: "Region", value: updatedOrder.address.region },
+              { label: "Kebele", value: updatedOrder.address.kebele },
               updatedOrder.address.postal_code && {
                 label: "Postal Code",
                 value: updatedOrder.address.postal_code,
@@ -140,7 +114,10 @@ const PreviewOrder = ({ updatedOrder, paymentGateway, paymentMethod }) => {
             ]
               .filter(Boolean)
               .map((address, index) => (
-                <div key={index} className="bg-white rounded-lg p-2">
+                <div
+                  key={index}
+                  className="bg-white rounded-lg p-2 grid grid-cols-3"
+                >
                   <p className="font-semibold text-sm text-gray-600">
                     {address.label}:
                   </p>
@@ -155,16 +132,20 @@ const PreviewOrder = ({ updatedOrder, paymentGateway, paymentMethod }) => {
         <h3 className="text-2xl font-semibold text-gray-700 mb-2">
           Payment Info
         </h3>
-        <div className="bg-gray-100 rounded-lg p-2">
-          <p className="font-semibold">Payment Method:</p>
-          <p>{updatedOrder.payment_method}</p>
-          <p className="font-semibold">Payment Gateway:</p>
-          <p>{updatedOrder.payment_gateway}</p>
+        <div className="bg-gray-100 rounded-lg p-2 flex flex-col space-y-2">
+          <div className="flex justify-between">
+            <p className="font-semibold">Payment Method:</p>
+            <p>{paymentMethod}</p>
+          </div>
+          <div className="flex justify-between">
+            <p className="font-semibold">Payment Gateway:</p>
+            <p>{paymentGateway}</p>
+          </div>
           {updatedOrder.payment && (
-            <>
+            <div className="flex justify-between">
               <p className="font-semibold">Payment ID:</p>
-              <p>{updatedOrder.payment.id}</p>
-            </>
+              <p>{updatedOrder.payment.transaction_id}</p>
+            </div>
           )}
         </div>
       </div>
@@ -183,41 +164,116 @@ const PreviewOrder = ({ updatedOrder, paymentGateway, paymentMethod }) => {
 
 const Checkout = () => {
   const { user } = useAuth();
-  const { orderId } = useParams();
-  const [orderDetails, setOrderDetails] = useState(null);
+  const location = useLocation();
+  const { orderIds } = location.state || {};
+  const [orderDetails, setOrderDetails] = useState([]);
   const [paymentMethod, setPaymentMethod] = useState("online");
-  const [paymentGateway, setPaymentGetway] = useState("chapa");
-  const [updatedOrder, setUpdatedOrder] = useState(null);
+  const [paymentGateway, setPaymentGateway] = useState("chapa");
+  const [updatedOrders, setUpdatedOrders] = useState([]);
   const [showPreview, setShowPreview] = useState(false);
+  const [selectedOrderId, setSelectedOrderId] = useState(null);
   const token = localStorage.getItem("access");
 
   useEffect(() => {
     fetchOrderDetails();
-  }, [orderId]);
+  }, [orderIds]);
 
+  const handlePayment = async () => {
+    if (orderDetails) {
+      initiatePayment();
+    }
+  };
+  const initiatePayment = async () => {
+    if (!orderDetails.length) {
+      console.error("No order details available for payment initiation.");
+      return;
+    }
+
+    let totalAmount = 0;
+    const transactionIds = [];
+
+    orderDetails.forEach((order) => {
+      if (order && order.total_price) {
+        // Convert order.total_price to a number before adding it to totalAmount
+        const orderTotalPrice = parseFloat(order.total_price);
+
+        if (!isNaN(orderTotalPrice)) {
+          totalAmount += orderTotalPrice; // Add to totalAmount
+          transactionIds.push(order.payment.transaction_id); // Add transaction ID
+        } else {
+          console.error(
+            `Order ID ${order.id} has an invalid total_price: ${order.total_price}`
+          );
+        }
+      } else {
+        console.error(`Order ID ${order.id} is missing total_price`);
+      }
+    });
+
+    const paymentData = {
+      total_amount: totalAmount,
+      first_name: user.first_name,
+      last_name: user.last_name,
+      email: user.email,
+      phone_number: user.addresses[0]["phone_number"],
+    };
+    console.log("payment data", paymentData);
+
+    try {
+      const response = await fetch("http://localhost:8000/payments/create/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(paymentData),
+      });
+
+      if (!response.ok) throw new Error("Failed to initiate payment.");
+
+      const paymentResponse = await response.json();
+      console.log("Payment initiated successfully:", paymentResponse);
+
+      // Make sure to check if the response contains the checkout_url
+      if (paymentResponse.data && paymentResponse.data.checkout_url) {
+        localStorage.setItem("transaction_ids", JSON.stringify(transactionIds));
+
+        window.location.href = paymentResponse.data.checkout_url;
+      } else {
+        console.error("Checkout URL not found in payment response.");
+      }
+    } catch (error) {
+      console.error("Error initiating payment:", error.message);
+    }
+  };
+
+  console.log("order ids are", orderIds);
   const fetchOrderDetails = async () => {
     try {
-      const response = await fetch(`http://localhost:8000/orders/${orderId}`, {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
-      if (!response.ok) {
-        throw new Error("Failed to fetch order details.");
-      }
-      const data = await response.json();
-      setOrderDetails(data);
-      console.log("Order data found:", data);
+      const fetchedOrders = await Promise.all(
+        orderIds.map(async (orderId) => {
+          const response = await fetch(
+            `http://localhost:8000/orders/${orderId}`,
+            {
+              method: "GET",
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+              },
+            }
+          );
+          if (!response.ok) throw new Error("Failed to fetch order details.");
+          return await response.json();
+        })
+      );
+      setOrderDetails(fetchedOrders);
     } catch (error) {
       console.error("Error:", error.message);
     }
   };
 
-  const updateOrder = async () => {
-    console.log("Order ID:", orderId);
-    const address = user.addresses.find((address) => address.is_default);
+  const updateOrder = async (orderId) => {
+    const address = user.addresses.find((addr) => addr.is_default);
     try {
       const response = await fetch(
         `http://localhost:8000/orders/${orderId}/update/`,
@@ -229,184 +285,149 @@ const Checkout = () => {
           },
           body: JSON.stringify({
             address_id: address.id,
-            amount: orderDetails.total_price,
+            amount: orderDetails.find((order) => order.id === orderId)
+              .total_price,
           }),
         }
       );
-      if (!response.ok) {
-        throw new Error("Failed to update order details.");
-      }
+      if (!response.ok) throw new Error("Failed to update order details.");
       const data = await response.json();
-      setUpdatedOrder(data);
+      setUpdatedOrders((prev) => [...prev, data]);
     } catch (error) {
       console.error("Error:", error.message);
     }
   };
-  const calculateTotal = (price, quantity) => price * quantity;
 
-  const handlePaymentMethodChange = (e) => {
-    setPaymentMethod(e.target.value);
+  const handlePreviewClick = async (orderId) => {
+    await updateOrder(orderId);
+    await setSelectedOrderId(orderId);
+    setShowPreview(true);
   };
 
-  const handlePaymentGatewayChange = (e) => {
-    setPaymentGetway(e.target.value);
-  };
+  const handlePaymentMethodChange = (e) => setPaymentMethod(e.target.value);
+  const handlePaymentGatewayChange = (e) => setPaymentGateway(e.target.value);
 
-  if (!orderDetails) return <Spinner />;
+  // if (!orderDetails.length) return <Spinner />;
 
   return (
-    <div className="container m-auto mb-28">
-      <h1 className="text-2xl font-mono font-bold py-2 mx-2">Checkout</h1>
-      <div className="flex flex-row min-w-full">
-        <div className="w-3/5 px-2 py-2">
-          <EditAddress
-            id={user.addresses.find((addr) => addr.is_default).id}
-            use={true}
-          />
+    <div className="flex flex-col lg:flex-row m-auto mb-28 space-y-4 lg:space-y-0 lg:space-x-8">
+      {/* Left Column */}
+      <div className="w-full lg:w-2/5 px-4 py-4">
+        <EditAddress
+          id={user.addresses.find((addr) => addr.is_default).id}
+          use={true}
+        />
 
-          <div className="mt-10 w-full shadow-md shadow-gray-400 rounded-md text-gray-600 font-serif mb-4">
-            <h2 className="text-xl ml-4 py-2 font-mono">
-              Select Payment Method
-            </h2>
-            <div className="flex flex-row gap-2">
-              <form className="flex flex-col gap-2 bg-gray-50 rounded-md shadow-red-400 px-2 mx-4 py-2 w-auto">
-                {/* Payment Method Radio Buttons */}
-                <div>
-                  <input
-                    type="radio"
-                    onChange={handlePaymentMethodChange}
-                    value="bank"
-                    checked={paymentMethod === "bank"}
-                    name="payment_method"
-                    className="mx-2"
-                  />
-                  <label>Direct Bank Transfer</label>
+        <div className="mt-10 shadow-md rounded-md text-gray-600 font-serif">
+          <h2 className="text-xl py-2 font-mono ml-4">Select Payment Method</h2>
+          <div className="flex flex-row space-x-4 bg-gray-50 px-4 py-4 rounded-md">
+            <form className="space-y-2">
+              <label className="flex items-center">
+                <input
+                  type="radio"
+                  onChange={handlePaymentMethodChange}
+                  value="cash"
+                  checked={paymentMethod === "cash"}
+                  name="payment_method"
+                  className="mr-2"
+                />
+                Cash on Delivery
+              </label>
+              <label className="flex items-center">
+                <input
+                  type="radio"
+                  onChange={handlePaymentMethodChange}
+                  value="online"
+                  checked={paymentMethod === "online"}
+                  name="payment_method"
+                  className="mr-2"
+                />
+                Online Gateway
+              </label>
+            </form>
+
+            {paymentMethod === "online" && (
+              <div className="mt-6">
+                <h3 className="text-lg font-semibold mb-2">
+                  Choose Payment Gateway
+                </h3>
+                <div className="space-y-4">
+                  <label className="flex items-center space-x-2">
+                    <input
+                      type="radio"
+                      id="chapa"
+                      checked={paymentGateway === "chapa"}
+                      onChange={handlePaymentGatewayChange}
+                      name="payment"
+                      value="chapa"
+                      className="form-radio text-blue-600 h-5 w-5"
+                    />
+                    <span>Chapa</span>
+                    <img
+                      src={ChapaImg}
+                      alt="Chapa Logo"
+                      className="h-8 rounded-sm"
+                    />
+                  </label>
+                  <label className="flex items-center space-x-2">
+                    <input
+                      type="radio"
+                      id="paypal"
+                      checked={paymentGateway === "paypal"}
+                      onChange={handlePaymentGatewayChange}
+                      name="payment"
+                      value="paypal"
+                      className="form-radio text-blue-600 h-5 w-5"
+                    />
+                    <span>PayPal</span>
+                    <img src={PaypalImg} alt="PayPal Logo" className="h-8" />
+                  </label>
                 </div>
-                <div>
-                  <input
-                    type="radio"
-                    name="payment_method"
-                    checked={paymentMethod === "cash"}
-                    className="mx-2"
-                    onChange={handlePaymentMethodChange}
-                    value="cash"
-                  />
-                  <label>Cash on Delivery</label>
-                </div>
-                <div>
-                  <input
-                    type="radio"
-                    name="payment_method"
-                    checked={paymentMethod === "online"}
-                    className="mx-2"
-                    onChange={handlePaymentMethodChange}
-                    value="online"
-                  />
-                  <label>Online Gateway</label>
-                </div>
-              </form>
-              <div className="bg-gray-50">
-                {paymentMethod === "cash" && (
-                  <h2 className="text-gray-700">Cash on Delivery</h2>
-                )}
-                {paymentMethod === "bank" && <div>Using Bank</div>}
-                {paymentMethod === "online" && (
-                  <div className="mt-6">
-                    <h3 className="text-lg font-semibold mb-2">
-                      Choose Payment Gateway
-                    </h3>
-                    <div className="flex flex-col items-center space-y-2 mb-4">
-                      {/* Payment Gateway Radio Buttons */}
-                      <div className="flex flex-row items-center space-x-2">
-                        <input
-                          type="radio"
-                          id="chapa"
-                          checked={paymentGateway === "chapa"}
-                          onChange={handlePaymentGatewayChange}
-                          name="payment"
-                          value="chapa"
-                          className="form-radio text-blue-600 h-5 w-5"
-                        />
-                        <label htmlFor="chapa" className="text-gray-700">
-                          Chapa
-                        </label>
-                        <img
-                          src={ChapaImg}
-                          alt="Chapa Logo"
-                          className="h-8 rounded-sm"
-                        />
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <input
-                          type="radio"
-                          checked={paymentGateway === "paypal"}
-                          onChange={handlePaymentGatewayChange}
-                          id="paypal"
-                          name="payment"
-                          value="paypal"
-                          className="form-radio text-blue-600 h-5 w-5"
-                        />
-                        <label htmlFor="paypal" className="text-gray-700">
-                          PayPal
-                        </label>
-                        <img
-                          src={PaypalImg}
-                          alt="PayPal Logo"
-                          className="h-8"
-                        />
-                      </div>
-                      <div className="flex flex-row items-center space-x-4 justify-between">
-                        <button className="mt-4 mb-4 bg-blue-600 text-white px-4 py-1 rounded hover:bg-green-600">
-                          Pay Now
-                        </button>
-                        <button
-                          className="mt-4 mb-4 bg-green-600 text-white px-4 py-1 rounded hover:bg-blue-600"
-                          onClick={() => {
-                            updateOrder();
-                            setShowPreview((prev) => !prev);
-                          }}
-                        >
-                          {showPreview ? (
-                            <span>Hide Order</span>
-                          ) : (
-                            <span>Preview</span>
-                          )}
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                )}
               </div>
-            </div>
+            )}
           </div>
         </div>
+      </div>
 
-        <div className="w-2/5 px-2 border border-gray-200 rounded-md shadow-md shadow-gray-600">
-          <div className="flex flex-row items-center justify-between text-gray-600 py-2 px-2 text-lg font-semibold">
-            <h1 className="font-mono text-xl text-gray-700">Your Order</h1>
-            <p>Total price: {orderDetails.total_price}</p>
+      {/* Right Column */}
+      <div className="flex flex-col w-full lg:w-3/5 px-4 border border-gray-200 rounded-md shadow-md">
+        <h1 className="font-mono text-xl text-gray-700 mb-4">
+          Your Orders from
+        </h1>
+        {orderDetails.map((order) => (
+          <div key={order.id} className="mb-4">
+            <h2 className="text-gray-700 text-lg">
+              <span>Order ID: {order.id} from </span>
+              <span className="text-blue-500">{order?.vendor?.title}</span>
+            </h2>
+            <p className="text-gray-600">Total price: {order.total_price}</p>
+            <OrderComponent order={order} />
+            <button
+              className="text-blue-500 underline"
+              onClick={() => {
+                handlePreviewClick(order.id);
+              }}
+            >
+              {showPreview && selectedOrderId === order.id
+                ? "Hide Order"
+                : "Preview Order"}
+            </button>
           </div>
-          <Link to={"/cart/"}>
-            <button className="btn-primary">Go Back to Cart</button>
-          </Link>
-          {orderDetails && !showPreview && (
-            <div>
-              <OrderComponent
-                order={orderDetails}
-                calculateTotal={calculateTotal}
-              />
-            </div>
-          )}
-          {orderDetails && updatedOrder && showPreview && (
-            <div>
-              <PreviewOrder
-                updatedOrder={updatedOrder}
-                paymentGateway={paymentGateway}
-                paymentMethod={paymentMethod}
-              />
-            </div>
-          )}
-        </div>
+        ))}
+
+        {showPreview && selectedOrderId && (
+          <PreviewOrder
+            updatedOrder={
+              updatedOrders.find(
+                (updOrder) => updOrder.id === selectedOrderId
+              ) || orderDetails.find((order) => order.id === selectedOrderId)
+            }
+            onClose={setShowPreview}
+            handlePayment={handlePayment}
+            paymentGateway={paymentGateway}
+            paymentMethod={paymentMethod}
+          />
+        )}
       </div>
     </div>
   );

@@ -20,8 +20,8 @@ const ProceedCheckout = ({ itemsTotalPrice, shipingPrice, cart }) => {
         throw new Error("Network response was not ok!");
       }
       const data = await response.json();
-      console.log("checkout successfull!", data.id);
-      navigate(`/checkout/${data.id}`);
+      console.log("checkout successfull!", data);
+      navigate("/checkout/summary", { state: { orderIds: data.order_ids } });
     } catch (error) {
       console.error("Error during checkout:", error.message);
     }
