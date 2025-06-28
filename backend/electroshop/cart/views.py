@@ -7,7 +7,7 @@ from rest_framework.decorators import api_view, permission_classes
 from .models import Cart, CartItem
 from users.models import CustomUser
 from products.models import Product
-from .serializers import CartSerializer, CartItemSerializer
+from .serializers import CartSerializer,CartDetailSerializer, CartItemSerializer,CartItemDetailSerializer
 
 @api_view(['GET', 'PUT'])
 @permission_classes([IsAuthenticated])
@@ -15,7 +15,7 @@ def cart_view(request):
     cart,created = Cart.objects.get_or_create(user=request.user)
 
     if request.method == 'GET':
-        serializer = CartSerializer(cart)
+        serializer = CartDetailSerializer(cart,context={'request':request})
         return Response(serializer.data)
     return Response({'errors':serializer.errors},status=status.HTTP_400_BAD_REQUEST)
 

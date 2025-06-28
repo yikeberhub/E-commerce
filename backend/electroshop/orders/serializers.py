@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Order, OrderItem
+from .models import Order, OrderItem,OrderItem
 from vendors.serializer import VendorSerializer
 
 class OrderItemSerializer(serializers.ModelSerializer):
@@ -12,13 +12,31 @@ class OrderItemSerializer(serializers.ModelSerializer):
     def get_product(self, obj):
         from products.serializers import ProductSerializer  # Lazy import
         return ProductSerializer(obj.product).data
+    
+class OrderItemDetailSerializer(serializers.ModelSerializer):
+    product = serializers.SerializerMethodField()  
+
+    class Meta:
+        model = OrderItem
+        fields = ['id', 'product', 'quantity']
+
+    def get_product(self, obj):
+        from products.serializers import ProductSerializer  # Lazy import
+        return ProductSerializer(obj.product).data
 
 class OrderSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Order
+        fields = '__all__'
+        read_only_fields = ['created_at', 'updated_at', 'status', 'payment']
+    
+class OrderDetailSerializer(serializers.ModelSerializer):
     vendor =VendorSerializer()
-    payment = serializers.SerializerMethodField()  # Placeholder for PaymentSerializer
-    address = serializers.SerializerMethodField()  # Placeholder for AddressSerializer
-    user = serializers.SerializerMethodField()     # Placeholder for UserSerializer
-    items = OrderItemSerializer(many=True, read_only=True)
+    payment = serializers.SerializerMethodField()  
+    address = serializers.SerializerMethodField()  
+    user = serializers.SerializerMethodField()     
+    items = OrderItemDetailSerializer(many=True, read_only=True)
 
     class Meta:
         model = Order

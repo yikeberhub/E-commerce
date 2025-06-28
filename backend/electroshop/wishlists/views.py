@@ -7,7 +7,7 @@ from rest_framework.decorators import api_view, permission_classes
 from .models import Wishlist, WishlistItem
 from users.models import CustomUser
 from products.models import Product
-from .serializers import WishlistItemSerializer, WishlistSerializer
+from .serializers import WishlistItemSerializer,WishlistDetailSerializer,WishlistDetailSerializer, WishlistSerializer
 
 
 @api_view(['GET', 'PUT'])
@@ -20,7 +20,7 @@ def wishlist_view(request):
 
     if request.method == 'GET':
         # Pass only the wishlist instance to the serializer
-        serializer = WishlistSerializer(instance=wishlist)
+        serializer = WishlistDetailSerializer(instance=wishlist,context={'request':request})
         return Response(serializer.data)
 
     return Response(status=status.HTTP_400_BAD_REQUEST)

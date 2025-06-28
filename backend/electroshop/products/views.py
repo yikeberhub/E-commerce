@@ -6,7 +6,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 from .models import Product, ProductReview,Category,Tag
-from .serializers import ProductSerializer, ProductReviewSerializer,CategorySerializer,TagSerializer
+from .serializers import ProductSerializer,ProductDetailSerializer, ProductReviewSerializer,CategorySerializer,TagSerializer
 from rest_framework.decorators import api_view, parser_classes
 from rest_framework.parsers import MultiPartParser, FormParser
 
@@ -17,7 +17,7 @@ class ProductListView(generics.ListCreateAPIView):
 
 class ProductDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Product.objects.all()
-    serializer_class = ProductSerializer
+    serializer_class = ProductDetailSerializer
     
 class ProductReviewCreateUpdateView(generics.CreateAPIView):
     serializer_class = ProductReviewSerializer

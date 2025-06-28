@@ -13,7 +13,7 @@ from .models import Order,OrderItem
 from cart.models import Cart
 from users.models import CustomUser,Address
 
-from .serializers import OrderSerializer
+from .serializers import OrderSerializer,OrderDetailSerializer
 from payments.serializers import PaymentSerializer
 from payments.models import Payment
 logger = logging.getLogger(__name__)
@@ -96,7 +96,7 @@ class CheckoutView(generics.CreateAPIView):
 
         
 class OrderListView(generics.ListAPIView):
-    serializer_class = OrderSerializer
+    serializer_class = OrderDetailSerializer
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
@@ -117,7 +117,7 @@ class OrderListView(generics.ListAPIView):
         print('hello i am called')
         orders = self.get_queryset()
         print('orders',orders)
-        serializer = self.get_serializer(orders, many=True)
+        serializer = self.get_serializer(orders, many=True,context={'request':request})
         return Response(serializer.data)
 
 
@@ -194,7 +194,7 @@ class UserSalesChartView(APIView):
     
 
 class OrderDetailView(generics.RetrieveUpdateDestroyAPIView):
-    serializer_class = OrderSerializer
+    serializer_class = OrderDetailSerializer
     permission_classes = [IsAuthenticated]
     queryset = Order.objects.all()
 

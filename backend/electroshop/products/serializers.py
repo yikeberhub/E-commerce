@@ -34,10 +34,25 @@ class ProductReviewSerializer(serializers.ModelSerializer):
         return super().create(validated_data)
 
 
-class ProductImagesSerializer(ModelSerializer):    
+class ProductImagesSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductImages
-        fields = ['id','image']
+        fields = ['id', 'image']
+
+    
+
+class ProductImagesDetailSerializer(serializers.ModelSerializer):
+    image = serializers.SerializerMethodField()
+
+    class Meta:
+        model = ProductImages
+        fields = ['id', 'image']
+
+    def get_image(self, obj):
+        request = self.context.get('request')
+        if request:
+            return request.build_absolute_uri(obj.image.url)
+        return obj.image.url
  
 class ProductSerializer(serializers.ModelSerializer):
     reviews = ProductReviewSerializer(many=True, read_only=True)  
@@ -62,3 +77,32 @@ class ProductSerializer(serializers.ModelSerializer):
     def get_number_of_reviews(self, obj):
         return obj.number_of_reviews()
     
+class ProductDetailSerializer(serializers.ModelSerializer):
+    reviews = ProductReviewSerializer(many=True, read_only=True)  
+    tags = TagSerializer(many=True)  
+    vendor = VendorSerializer()
+    category = CategorySerializer(read_only=True)
+    images = ProductImagesDetailSerializer(many=True, required=False)  # updated
+    image = serializers.SerializerMethodField(read_only=True)  # added
+    discount_percentage = serializers.SerializerMethodField()
+    average_rating = serializers.SerializerMethodField()
+    number_of_reviews = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Product
+        fields = '__all__'
+
+    def get_discount_percentage(self, obj):
+        return obj.calculate_discount_percentage()  
+
+    def get_average_rating(self, obj):
+        return obj.average_rating()
+
+    def get_number_of_reviews(self, obj):
+        return obj.number_of_reviews()
+
+    def get_image(self, obj):
+        request = self.context.get('request')
+        if request and obj.image:
+            return request.build_absolute_uri(obj.image.url)
+        return obj.image.url if obj.image else None
