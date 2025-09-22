@@ -91,7 +91,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "electroshop.wsgi.application"
 
-# Database (SQLite for local, PostgreSQL for production)
 DATABASES = {
     "default": {
         "ENGINE": config("DB_ENGINE", default="django.db.backends.sqlite3"),

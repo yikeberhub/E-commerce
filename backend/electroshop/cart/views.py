@@ -19,22 +19,42 @@ def cart_view(request):
         return Response(serializer.data)
     return Response({'errors':serializer.errors},status=status.HTTP_400_BAD_REQUEST)
 
-    
+
+
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from .models import Cart, CartItem, Product
+from .serializers import CartSerializer
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def cartAddView(request):  
-    product_id = request.data['product_id']
-    product = Product.objects.get(id = product_id)
-    user = request.user
-    print('user:',user,'product:',product)
-    cart = Cart.objects.get(user = user)
-    print('cart',cart)
-    cart_item = CartItem.objects.get_or_create(cart= cart,product = product,quantity = request.data['quantity'])
-    serializer = CartSerializer(instance=cart)
-    if serializer.data:
-       return Response({'data':serializer.data})
-    return Response({'errors':serializer.errors})
+    try:
+        product_id = request.data['product_id']
+        quantity = int(request.data.get('quantity', 1))  
+        product = Product.objects.get(id=product_id)
+        user = request.user
+        cart, created = Cart.objects.get_or_create(user=user) 
 
+        cart_item, created_item = CartItem.objects.get_or_create(
+            cart=cart,
+            product=product,
+            defaults={'quantity': quantity}
+        )
+
+        if not created_item:
+            cart_item.quantity += quantity
+            cart_item.save()
+
+        serializer = CartSerializer(cart, context={'request': request})
+        return Response({'data': serializer.data})
+
+    except Product.DoesNotExist:
+        return Response({'error': 'Product not found'}, status=404)
+    except Exception as e:
+        return Response({'error': str(e)}, status=400)
+    
 
 @api_view(['PUT'])
 @permission_classes([IsAuthenticated])
