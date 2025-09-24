@@ -18,7 +18,7 @@ function OrderComponent({ order }) {
             <tr key={item.id} className="hover:bg-gray-50">
               <td className="py-2 px-4 border-b">
                 <img
-                  src={item.product.image}
+                  src={`https://extract-id-bot.onrender.com`+item.product.image}
                   alt={item.title}
                   className="w-10 h-10"
                 />

@@ -12,6 +12,9 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
+  const API_URL = process.env.REACT_APP_API_URL;
+
+
   useEffect(() => {
     const fetchInitialUserInfo = async () => {
       if (authTokens.access && !user) {
@@ -28,7 +31,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.setItem("access", tokens.access);
     localStorage.setItem("refresh", tokens.refresh);
 
-    await fetchUserInfo(); // Fetch user info and handle role-based redirection
+    await fetchUserInfo();
   };
 
   const clearTokens = () => {
@@ -46,7 +49,7 @@ export const AuthProvider = ({ children }) => {
     }
 
     try {
-      const response = await fetch("http://localhost:8000/users/", {
+      const response = await fetch(`${API_URL}users/`, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${authTokens.access}`,
@@ -90,16 +93,13 @@ export const AuthProvider = ({ children }) => {
 
   const refreshTokens = async () => {
     try {
-      const response = await fetch(
-        "http://localhost:8000/users/token/refresh/",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ refresh: authTokens.refresh }),
-        }
-      );
+      const response = await fetch(`${API_URL}/users/token/refresh/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ refresh: authTokens.refresh }),
+      });
 
       if (response.ok) {
         const data = await response.json();

@@ -21,7 +21,7 @@ const ReviewSection = () => {
   const fetchReviews = async () => {
     try {
       const response = await fetch(
-        `http://localhost:8000/products/${id}/reviews/`
+        `https://extract-id-bot.onrender.com/products/${id}/reviews/`
       );
       if (!response.ok) throw new Error("Failed to fetch reviews");
       const data = await response.json();
@@ -50,7 +50,7 @@ const ReviewSection = () => {
       const token = localStorage.getItem("access");
       setLoading(true);
       const response = await fetch(
-        `http://localhost:8000/products/${id}/reviews/add/`,
+        `https://extract-id-bot.onrender.com/products/${id}/reviews/add/`,
         {
           method: "POST",
           headers: {

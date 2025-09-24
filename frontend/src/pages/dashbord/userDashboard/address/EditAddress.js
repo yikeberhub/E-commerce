@@ -57,11 +57,11 @@ function EditAddress({
   const handleSubmit = async (e) => {
     e.preventDefault();
     const token = localStorage.getItem("access");
-    let url = "http://localhost:8000/users/address/create/";
+    let url = "https://extract-id-bot.onrender.com/users/address/create/";
     let method = "POST";
 
     if (edit) {
-      url = `http://localhost:8000/users/address/${address.id}/update/`;
+      url = `https://extract-id-bot.onrender.com/users/address/${address.id}/update/`;
       method = "PUT";
     }
 

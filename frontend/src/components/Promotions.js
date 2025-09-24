@@ -97,7 +97,7 @@ const Promotions = () => {
   useEffect(() => {
     const fetchPromotions = async () => {
       try {
-        const response = await fetch("http://localhost:8000/promotions/");
+        const response = await fetch("https://extract-id-bot.onrender.com/promotions/");
         if (!response.ok) {
           throw new Error("Network response was not ok");
         }

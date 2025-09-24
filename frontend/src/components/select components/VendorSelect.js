@@ -10,7 +10,7 @@ const VendorSelect = () => {
   useEffect(() => {
     const fetchVendors = async () => {
       try {
-        const response = await fetch("http://localhost:8000/vendors/");
+        const response = await fetch("https://extract-id-bot.onrender.com/vendors/");
         if (!response.ok) {
           throw new Error("Failed to fetch vendors");
         }

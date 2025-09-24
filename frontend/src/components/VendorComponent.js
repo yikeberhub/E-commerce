@@ -29,7 +29,7 @@ const VendorRegistrationModal = ({ isOpen, onClose }) => {
       data.append(key, formData[key]);
     });
     try {
-      const response = await fetch("http://localhost:8000/vendors/register/", {
+      const response = await fetch("https://extract-id-bot.onrender.com/vendors/register/", {
         method: "POST",
         body: data,
         headers: {

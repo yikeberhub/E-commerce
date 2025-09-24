@@ -28,17 +28,19 @@ const OverviewPanel = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch("/admin_api/super-admin-dashboard/", {
+        const response = await fetch("http://localhost:8000/admin_api/super-admin-dashboard/", {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
         });
+        
         if (!response.ok) {
           throw new Error("Network response was not ok");
         }
         const result = await response.json();
+        console.log("result is ",result);
         setData(result);
       } catch (error) {
         console.error("Error fetching data:", error);

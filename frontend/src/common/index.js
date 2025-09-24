@@ -1,92 +1,92 @@
-const backendDomin = "http://localhost:8000";
+const backendDomain = process.env.REACT_APP_API_URL; 
+console.log('backend domain is',backendDomain);
 
 const SummaryApi = {
   home: {
-    url: `${backendDomin}/products/`,
+    url: `${backendDomain}products/`,
   },
   getUser: {
-    url: `${backendDomin}/users/get-user/`,
+    url: `${backendDomain}users/get-user/`,
     method: "post",
   },
-
   signUp: {
-    url: `${backendDomin}/users/register/`,
+    url: `${backendDomain}users/register/`,
     method: "post",
   },
   signIn: {
-    url: `${backendDomin}/users/token/`,
+    url: `${backendDomain}users/token/`,
     method: "post",
   },
   current_user: {
-    url: `${backendDomin}/users/user-details`,
+    url: `${backendDomain}users/user-details`,
     method: "get",
   },
   logout_user: {
-    url: `${backendDomin}/users/userLogout`,
+    url: `${backendDomain}users/userLogout`,
     method: "get",
   },
   allUser: {
-    url: `${backendDomin}/users/all-user`,
+    url: `${backendDomain}users/all-user`,
     method: "get",
   },
   updateUser: {
-    url: `${backendDomin}/users/update-user`,
+    url: `${backendDomain}users/update-user`,
     method: "post",
   },
   uploadProduct: {
-    url: `${backendDomin}/products/upload-product`,
+    url: `${backendDomain}products/upload-product`,
     method: "post",
   },
   allProduct: {
-    url: `${backendDomin}/products/`,
+    url: `${backendDomain}products/`,
     method: "get",
   },
   updateProduct: {
-    url: `${backendDomin}/products/update-product`,
+    url: `${backendDomain}products/update-product`,
     method: "post",
   },
   categoryProduct: {
-    url: `${backendDomin}/products/get-categoryProduct`,
+    url: `${backendDomain}products/get-categoryProduct`,
     method: "get",
   },
   categoryWiseProduct: {
-    url: `${backendDomin}/products/category-product`,
+    url: `${backendDomain}products/category-product`,
     method: "post",
   },
   productDetail: {
-    url: `${backendDomin}/products`,
+    url: `${backendDomain}products`,
     method: "get",
   },
   fetchCart: {
-    url: `${backendDomin}/cart/`,
+    url: `${backendDomain}cart/`,
     method: "get",
   },
   addToCartProduct: {
-    url: `${backendDomin}/cart/addtocart`,
+    url: `${backendDomain}cart/addtocart`,
     method: "post",
   },
   addToCartProductCount: {
-    url: `${backendDomin}/cart/countAddToCartProduct`,
+    url: `${backendDomain}cart/countAddToCartProduct`,
     method: "get",
   },
   addToCartProductView: {
-    url: `${backendDomin}/cart/view-card-product`,
+    url: `${backendDomain}cart/view-card-product`,
     method: "get",
   },
   updateCartProduct: {
-    url: `${backendDomin}/cart/update-cart-product`,
+    url: `${backendDomain}cart/update-cart-product`,
     method: "post",
   },
   deleteCartProduct: {
-    url: `${backendDomin}/cart/delete-cart-product`,
+    url: `${backendDomain}cart/delete-cart-product`,
     method: "post",
   },
   searchProduct: {
-    url: `${backendDomin}/products/search`,
+    url: `${backendDomain}products/search`,
     method: "get",
   },
   filterProduct: {
-    url: `${backendDomin}/products/filter-product`,
+    url: `${backendDomain}products/filter-product`,
     method: "post",
   },
 };

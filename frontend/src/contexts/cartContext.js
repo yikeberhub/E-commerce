@@ -64,7 +64,7 @@ export const CartProvider = ({ children }) => {
 
   const addCartItem = async (itemId, quantity) => {
     try {
-      const response = await fetch("http://localhost:8000/cart/add/", {
+      const response = await fetch("https://extract-id-bot.onrender.com/cart/add/", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -89,7 +89,7 @@ export const CartProvider = ({ children }) => {
   const updateCartItem = async (itemId, newQunatity) => {
     try {
       const response = await fetch(
-        `http://localhost:8000/cart/update/${itemId}/`,
+        `https://extract-id-bot.onrender.com/cart/update/${itemId}/`,
         {
           method: "PUT",
           headers: {
@@ -113,7 +113,7 @@ export const CartProvider = ({ children }) => {
   const removeCartItem = async (itemId) => {
     try {
       const response = await fetch(
-        `http://localhost:8000/cart/remove/${itemId}/`,
+        `https://extract-id-bot.onrender.com/cart/remove/${itemId}/`,
         {
           method: "DELETE",
           headers: {
@@ -134,7 +134,7 @@ export const CartProvider = ({ children }) => {
 
   const clearCart = async () => {
     try {
-      const response = await fetch("http://localhost:8000/cart/clear/", {
+      const response = await fetch("https://extract-id-bot.onrender.com/cart/clear/", {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,

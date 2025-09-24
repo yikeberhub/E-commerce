@@ -11,7 +11,7 @@ function Logo({ logo }) {
         alt="logo"
       />
       <h1 className="text-4xl font-mono font-semibold text-blue-700 tracking-wide transition-colors duration-300 hover:text-blue-600">
-        SHOPIFY
+        ጣና ገበያ
       </h1>
     </div>
   );

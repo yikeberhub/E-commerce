@@ -62,15 +62,15 @@ const Footer = () => {
             <p className="mb-2">
               Email:{" "}
               <a
-                href="mailto:support@example.com"
+                href="mailto:yikeber50@gmail.com"
                 className="hover:text-blue-600"
               >
                 support@example.com
               </a>
             </p>
-            <p className="mb-2">Phone: (123) 456-7890</p>
+            <p className="mb-2">Phone: +251946472687</p>
             <p className="mb-2">
-              Address: 123 E-commerce St, Suite 100, City, Country
+              Address: Bahir Dar,Ethiopia
             </p>
           </div>
 
@@ -82,7 +82,7 @@ const Footer = () => {
             </p>
             <input
               type="email"
-              placeholder="Your Email"
+              placeholder="Email"
               className="p-2 rounded bg-white border border-gray-300 w-full mb-2"
             />
             <button className="bg-blue-500 text-white p-2 rounded hover:bg-blue-600 transition duration-200 w-full">

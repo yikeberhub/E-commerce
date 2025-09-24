@@ -28,7 +28,7 @@ function ProductProvider({ children }) {
   const fetchCategories = async () => {
     try {
       const response = await fetch(
-        "http://localhost:8000/products/categories/"
+        "https://extract-id-bot.onrender.com/products/categories/"
       );
       if (!response.ok) {
         throw new Error("Network response was not ok");

@@ -8,7 +8,7 @@ const ProceedCheckout = ({ itemsTotalPrice, shipingPrice, cart }) => {
 
   const handleCheckout = async () => {
     try {
-      const response = await fetch("http://localhost:8000/orders/checkout/", {
+      const response = await fetch("https://extract-id-bot.onrender.com/orders/checkout/", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -33,19 +33,19 @@ const ProceedCheckout = ({ itemsTotalPrice, shipingPrice, cart }) => {
         <div className="w-full px-auto mx-auto">
           <div className="border border-gray rounded-t  py-2 px-4 flex flex-row  justify-between">
             <span className="text-gray_lighter">Subtotal</span>
-            <span className="text-green-400">${itemsTotalPrice}.00</span>
+            <span className="text-green-400">{itemsTotalPrice}.00 Birr</span>
           </div>
           <div className="border border-gray   py-2 px-4 flex flex-row justify-between">
             <span className="text-gray_lighter">Shiping</span>
             {shipingPrice === 0 ? (
               <span className="text-purple-500">free</span>
             ) : (
-              <span className="text-yellow">$ {shipingPrice}</span>
+              <span className="text-yellow">{shipingPrice} Birr</span>
             )}
           </div>
           <div className="border border-gray rounded-b shadow-lg py-2 px-4 flex flex-row justify-between">
             <span className="">Total</span>
-            <span className="text-blue-700">${totalPrice}.00</span>
+            <span className="text-blue-700">{totalPrice}.00 Birr</span>
           </div>
           <div className="w-auto">
             <button

@@ -14,7 +14,7 @@ function Address() {
     const token = localStorage.getItem("access");
     try {
       const response = await fetch(
-        `http://localhost:8000/users/address/${id}/set-default/`,
+        `https://extract-id-bot.onrender.com/users/address/${id}/set-default/`,
         {
           method: "PUT",
           headers: {
@@ -40,7 +40,7 @@ function Address() {
     console.log("address id", addressId);
     try {
       const response = await fetch(
-        `http://localhost:8000/users/address/${addressId}/delete/`,
+        `https://extract-id-bot.onrender.com/users/address/${addressId}/delete/`,
         {
           method: "DELETE",
           headers: {

@@ -111,7 +111,7 @@ const PaymentDetail = () => {
       try {
         const transactionIdsString = transactionIds.join(",");
         const response = await fetch(
-          `http://localhost:8000/payments/check_payment_status/${transactionId}/?transaction_ids=${transactionIdsString}`
+          `https://extract-id-bot.onrender.com/payments/check_payment_status/${transactionId}/?transaction_ids=${transactionIdsString}`
         );
 
         if (!response.ok) {

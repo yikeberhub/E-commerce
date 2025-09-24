@@ -12,7 +12,7 @@ function FilterByTag() {
   useEffect(() => {
     const fetchTags = async () => {
       try {
-        const response = await fetch("http://localhost:8000/products/tags/"); // Adjust the URL as needed
+        const response = await fetch("https://extract-id-bot.onrender.com/products/tags/"); // Adjust the URL as needed
         if (!response.ok) {
           throw new Error("Network response was not ok");
         }

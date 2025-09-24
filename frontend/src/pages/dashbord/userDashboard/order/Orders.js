@@ -15,7 +15,7 @@ function Orders() {
     console.log("token", token);
 
     try {
-      const response = await fetch(`http://localhost:8000/orders/`, {
+      const response = await fetch(`https://extract-id-bot.onrender.com/orders/`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",

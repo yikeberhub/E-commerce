@@ -42,7 +42,7 @@ export const WishlistProvider = ({ children }) => {
 
   const fetchWishlist = async () => {
     try {
-      const response = await fetch("http://localhost:8000/wishlist/", {
+      const response = await fetch("https://extract-id-bot.onrender.com/wishlist/", {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -66,7 +66,7 @@ export const WishlistProvider = ({ children }) => {
 
   const addWishlistItem = async (itemId, quantity) => {
     try {
-      const response = await fetch("http://localhost:8000/wishlist/add/", {
+      const response = await fetch("https://extract-id-bot.onrender.com/wishlist/add/", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -91,7 +91,7 @@ export const WishlistProvider = ({ children }) => {
   const updateWishlistItem = async (itemId, newQunatity) => {
     try {
       const response = await fetch(
-        `http://localhost:8000/wishlist/update/${itemId}/`,
+        `https://extract-id-bot.onrender.com/wishlist/update/${itemId}/`,
         {
           method: "PUT",
           headers: {
@@ -115,7 +115,7 @@ export const WishlistProvider = ({ children }) => {
   const removeWishlistItem = async (itemId) => {
     try {
       const response = await fetch(
-        `http://localhost:8000/wishlist/remove/${itemId}/`,
+        `https://extract-id-bot.onrender.com/wishlist/remove/${itemId}/`,
         {
           method: "DELETE",
           headers: {
@@ -136,7 +136,7 @@ export const WishlistProvider = ({ children }) => {
 
   const clearWishlist = async () => {
     try {
-      const response = await fetch("http://localhost:8000/wishlist/clear/", {
+      const response = await fetch("https://extract-id-bot.onrender.com/wishlist/clear/", {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,

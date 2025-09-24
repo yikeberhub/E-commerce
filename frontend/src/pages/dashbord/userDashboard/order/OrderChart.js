@@ -33,7 +33,7 @@ const OrderChart = () => {
     const fetchOrders = async () => {
       try {
         const response = await fetch(
-          `http://localhost:8000/orders/status-chart/?user_id=${user.id}`,
+          `https://extract-id-bot.onrender.com/orders/status-chart/?user_id=${user.id}`,
           {
             method: "GET",
             headers: {
@@ -59,7 +59,7 @@ const OrderChart = () => {
     const fetchSales = async () => {
       try {
         const response = await fetch(
-          `http://localhost:8000/orders/sales-chart/?user_id=${user.id}`,
+          `https://extract-id-bot.onrender.com/orders/sales-chart/?user_id=${user.id}`,
           {
             method: "GET",
             headers: {

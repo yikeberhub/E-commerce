@@ -11,7 +11,7 @@ const UserList = () => {
   useEffect(() => {
     const fetchUsers = async () => {
       const response = await fetch(
-        "http://localhost:8000/admin_api/super-admin-dashboard/users/"
+        "https://extract-id-bot.onrender.com/admin_api/super-admin-dashboard/users/"
       );
       const data = await response.json();
       setUsers(data);
@@ -30,7 +30,7 @@ const UserList = () => {
 
   const handleDelete = async (id) => {
     await fetch(
-      `http://localhost:8000/admin_api/super-admin-dashboard/users/${id}/`,
+      `https://extract-id-bot.onrender.com/admin_api/super-admin-dashboard/users/${id}/`,
       {
         method: "DELETE",
       }
@@ -42,7 +42,7 @@ const UserList = () => {
   const handleRoleChange = async (id, newRole) => {
     const token = localStorage.getItem("access");
     const response = await fetch(
-      `http://localhost:8000/admin_api/super-admin-dashboard/users/${id}/`,
+      `https://extract-id-bot.onrender.com/admin_api/super-admin-dashboard/users/${id}/`,
       {
         method: "PUT",
         headers: {

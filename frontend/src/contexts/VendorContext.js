@@ -18,7 +18,7 @@ export const VendorProvider = ({ children }) => {
   const loadVendors = async () => {
     setLoading(true);
     try {
-      const response = await fetch("http://localhost:8000/vendors/");
+      const response = await fetch("https://extract-id-bot.onrender.com/vendors/");
       if (!response.ok) {
         throw new Error("Network response was not ok");
       }
@@ -35,7 +35,7 @@ export const VendorProvider = ({ children }) => {
   const loadVendorOrders = async (vendorId) => {
     try {
       const response = await fetch(
-        `http://localhost:8000/vendors/${vendorId}/orders/`,
+        `https://extract-id-bot.onrender.com/vendors/${vendorId}/orders/`,
         {
           method: "GET",
           headers: {
@@ -61,7 +61,7 @@ export const VendorProvider = ({ children }) => {
     console.log("token is ", token);
     try {
       const response = await fetch(
-        `http://localhost:8000/vendors/${vendorId}/products/`,
+        `https://extract-id-bot.onrender.com/vendors/${vendorId}/products/`,
         {
           method: "GET",
           headers: {
@@ -85,7 +85,7 @@ export const VendorProvider = ({ children }) => {
   const addVendor = async (vendorData) => {
     const token = localStorage.getItem("access");
     try {
-      const response = await fetch("http://localhost:8000/vendors/", {
+      const response = await fetch("https://extract-id-bot.onrender.com/vendors/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -107,7 +107,7 @@ export const VendorProvider = ({ children }) => {
   const updateVendor = async (vendorId, updatedData) => {
     try {
       const response = await fetch(
-        `http://localhost:8000/vendors/${vendorId}/`,
+        `https://extract-id-bot.onrender.com/vendors/${vendorId}/`,
         {
           method: "PUT",
           headers: {
@@ -132,7 +132,7 @@ export const VendorProvider = ({ children }) => {
   const deleteVendor = async (vendorId) => {
     try {
       const response = await fetch(
-        `http://localhost:8000/vendors/${vendorId}/`,
+        `https://extract-id-bot.onrender.com/vendors/${vendorId}/`,
         {
           method: "DELETE",
         }

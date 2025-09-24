@@ -220,7 +220,7 @@ const Checkout = () => {
     console.log("payment data", paymentData);
 
     try {
-      const response = await fetch("http://localhost:8000/payments/create/", {
+      const response = await fetch("https://extract-id-bot.onrender.com/payments/create/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -253,7 +253,7 @@ const Checkout = () => {
       const fetchedOrders = await Promise.all(
         orderIds.map(async (orderId) => {
           const response = await fetch(
-            `http://localhost:8000/orders/${orderId}`,
+            `https://extract-id-bot.onrender.com/orders/${orderId}`,
             {
               method: "GET",
               headers: {
@@ -276,7 +276,7 @@ const Checkout = () => {
     const address = user.addresses.find((addr) => addr.is_default);
     try {
       const response = await fetch(
-        `http://localhost:8000/orders/${orderId}/update/`,
+        `https://extract-id-bot.onrender.com/orders/${orderId}/update/`,
         {
           method: "PUT",
           headers: {
@@ -311,7 +311,6 @@ const Checkout = () => {
 
   return (
     <div className="flex flex-col lg:flex-row m-auto mb-28 space-y-4 lg:space-y-0 lg:space-x-8">
-      {/* Left Column */}
       <div className="w-full lg:w-2/5 px-4 py-4">
         <EditAddress
           id={user.addresses.find((addr) => addr.is_default).id}

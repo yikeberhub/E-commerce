@@ -20,7 +20,7 @@ const UserDetail = () => {
     const fetchUserDetails = async () => {
       try {
         const response = await fetch(
-          `http://localhost:8000/admin_api/super-admin-dashboard/users/${id}/`
+          `https://extract-id-bot.onrender.com/admin_api/super-admin-dashboard/users/${id}/`
         );
         if (!response.ok) {
           throw new Error("Failed to fetch user details");

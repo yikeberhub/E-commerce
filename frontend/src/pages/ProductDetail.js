@@ -117,11 +117,11 @@ const ProductImageZoom = ({ product }) => {
   const handleMouseMove = (e) => {
     const image = zoomRef.current;
     const bounds = image.getBoundingClientRect();
-    const x = e.clientX - bounds.left; // Get x position of mouse
-    const y = e.clientY - bounds.top; // Get y position of mouse
+    const x = e.clientX - bounds.left; 
+    const y = e.clientY - bounds.top; 
 
-    // Calculate the position and size of the zoom lens
-    const lensSize = 100; // Size of the zoom lens
+    
+    const lensSize = 100;
     const left = Math.max(
       0,
       Math.min(x - lensSize / 2, bounds.width - lensSize)
@@ -141,14 +141,14 @@ const ProductImageZoom = ({ product }) => {
   };
 
   const handleThumbnailClick = (image) => {
-    setCurrentImage(image); // Update the current image to zoom
+    setCurrentImage(image);
   };
 
   return (
     <div className="relative shadow-md rounded-md w-full md:w-2/5">
       <img
         ref={zoomRef}
-        src={currentImage} // Use the current image for the zoom effect
+        src={currentImage}
         className="w-full sm:h-60 h-full object-cover rounded-md"
         alt={product?.title}
         onMouseEnter={handleMouseEnter}
@@ -171,9 +171,9 @@ const ProductImageZoom = ({ product }) => {
           <img
             key={image?.id}
             src={image?.image}
-            className="h-24 object-cover rounded-md mx-1 cursor-pointer" // Add cursor-pointer
+            className="h-24 object-cover rounded-md mx-1 cursor-pointer"
             alt="product_img"
-            onClick={() => handleThumbnailClick(image.image)} // Update current image on click
+            onClick={() => handleThumbnailClick(image.image)}
           />
         ))}
       </div>

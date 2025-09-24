@@ -16,7 +16,7 @@ const EditUser = () => {
   useEffect(() => {
     const fetchUser = async () => {
       const response = await fetch(
-        `http://localhost:8000/admin_api/super-admin-dashboard/users/${id}/`
+        `https://extract-id-bot.onrender.com/admin_api/super-admin-dashboard/users/${id}/`
       );
       const data = await response.json();
       setUser(data);
@@ -37,7 +37,7 @@ const EditUser = () => {
     console.log("Sending data:", userData);
 
     const response = await fetch(
-      `http://localhost:8000/admin_api/super-admin-dashboard/users/${id}/`,
+      `https://extract-id-bot.onrender.com/admin_api/super-admin-dashboard/users/${id}/`,
       {
         method: "PUT",
         headers: {

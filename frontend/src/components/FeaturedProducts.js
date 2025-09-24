@@ -17,7 +17,7 @@ const FeaturedProducts = () => {
     const fetchFeaturedProducts = async () => {
       try {
         const response = await fetch(
-          "http://localhost:8000/products/featured/"
+          "https://extract-id-bot.onrender.com/products/featured/"
         );
         if (!response.ok) {
           throw new Error("Failed to fetch featured products");

@@ -5,10 +5,10 @@
 }
 
 .sidebar {
-  width: 250px; /* Fixed width for sidebar */
-  background-color: #f7f7f7; /* Light gray background */
+  width: 250px; 
+  background-color: #f7f7f7; 
   padding: 20px; /* Padding around sidebar */
-  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1); /* Shadow effect */
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1); 
 }
 
 .sidebar-title {
