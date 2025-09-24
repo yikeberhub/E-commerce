@@ -3,90 +3,90 @@ console.log('backend domain is',backendDomain);
 
 const SummaryApi = {
   home: {
-    url: `${backendDomain}products/`,
+    url: `${backendDomain}/products/`,
   },
   getUser: {
-    url: `${backendDomain}users/get-user/`,
+    url: `${backendDomain}/users/get-user/`,
     method: "post",
   },
   signUp: {
-    url: `${backendDomain}users/register/`,
+    url: `${backendDomain}/users/register/`,
     method: "post",
   },
   signIn: {
-    url: `${backendDomain}users/token/`,
+    url: `${backendDomain}/users/token/`,
     method: "post",
   },
   current_user: {
-    url: `${backendDomain}users/user-details`,
+    url: `${backendDomain}/users/user-details`,
     method: "get",
   },
   logout_user: {
-    url: `${backendDomain}users/userLogout`,
+    url: `${backendDomain}/users/userLogout`,
     method: "get",
   },
   allUser: {
-    url: `${backendDomain}users/all-user`,
+    url: `${backendDomain}/users/all-user`,
     method: "get",
   },
   updateUser: {
-    url: `${backendDomain}users/update-user`,
+    url: `${backendDomain}/users/update-user`,
     method: "post",
   },
   uploadProduct: {
-    url: `${backendDomain}products/upload-product`,
+    url: `${backendDomain}/products/upload-product`,
     method: "post",
   },
   allProduct: {
-    url: `${backendDomain}products/`,
+    url: `${backendDomain}/products/`,
     method: "get",
   },
   updateProduct: {
-    url: `${backendDomain}products/update-product`,
+    url: `${backendDomain}/products/update-product`,
     method: "post",
   },
   categoryProduct: {
-    url: `${backendDomain}products/get-categoryProduct`,
+    url: `${backendDomain}/products/get-categoryProduct`,
     method: "get",
   },
   categoryWiseProduct: {
-    url: `${backendDomain}products/category-product`,
+    url: `${backendDomain}/products/category-product`,
     method: "post",
   },
   productDetail: {
-    url: `${backendDomain}products`,
+    url: `${backendDomain}/products`,
     method: "get",
   },
   fetchCart: {
-    url: `${backendDomain}cart/`,
+    url: `${backendDomain}/cart/`,
     method: "get",
   },
   addToCartProduct: {
-    url: `${backendDomain}cart/addtocart`,
+    url: `${backendDomain}/cart/addtocart`,
     method: "post",
   },
   addToCartProductCount: {
-    url: `${backendDomain}cart/countAddToCartProduct`,
+    url: `${backendDomain}/cart/countAddToCartProduct`,
     method: "get",
   },
   addToCartProductView: {
-    url: `${backendDomain}cart/view-card-product`,
+    url: `${backendDomain}/cart/view-card-product`,
     method: "get",
   },
   updateCartProduct: {
-    url: `${backendDomain}cart/update-cart-product`,
+    url: `${backendDomain}/cart/update-cart-product`,
     method: "post",
   },
   deleteCartProduct: {
-    url: `${backendDomain}cart/delete-cart-product`,
+    url: `${backendDomain}/cart/delete-cart-product`,
     method: "post",
   },
   searchProduct: {
-    url: `${backendDomain}products/search`,
+    url: `${backendDomain}//products/search`,
     method: "get",
   },
   filterProduct: {
-    url: `${backendDomain}products/filter-product`,
+    url: `${backendDomain}//products/filter-product`,
     method: "post",
   },
 };
