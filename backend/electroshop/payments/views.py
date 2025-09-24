@@ -26,9 +26,8 @@ class CreatePaymentView(APIView):
         if not all([amount, email,first_name]):
             print('not get email,amount,firstname')
             return Response({"error": "Amount, email, and first name are required."}, status=status.HTTP_400_BAD_REQUEST)
-      
+        frontend_url=settings.FRONTEND_URL
         payment_ref = f"multi-txn-{uuid.uuid4().hex[:8]}"
-        print('payment ref',payment_ref)
         payment_data = {
             "amount": amount,
             "currency": "ETB",
@@ -37,7 +36,7 @@ class CreatePaymentView(APIView):
             "last_name": last_name,
             "phone_number": phone_number,
             "tx_ref": payment_ref,  
-            "return_url": f"http://localhost:3000/payment/confirm?txt_ref={payment_ref}"
+            "return_url": f"{frontend_url}/payment/confirm?txt_ref={payment_ref}"
         }
 
         try:

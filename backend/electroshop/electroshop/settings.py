@@ -141,5 +141,5 @@ CORS_ALLOW_HEADERS = ["content-type", "authorization", "x-csrftoken"]
 
 # Chapa
 CHAPA_SECRET_KEY = config("CHAPA_SECRET_KEY", default="")
-print('chapa secret key',CHAPA_SECRET_KEY)
+FRONTEND_URL = config('FRONTEND_URL',default="")
 CHAPA_API_URL = config("CHAPA_API_URL", default="https://api.chapa.co/v1/transaction/initialize")
