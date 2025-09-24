@@ -10,7 +10,7 @@ class OrderItemSerializer(serializers.ModelSerializer):
         fields = ['id', 'product', 'quantity']
 
     def get_product(self, obj):
-        from products.serializers import ProductSerializer  # Lazy import
+        from products.serializers import ProductSerializer 
         return ProductSerializer(obj.product).data
     
 class OrderItemDetailSerializer(serializers.ModelSerializer):
@@ -21,7 +21,7 @@ class OrderItemDetailSerializer(serializers.ModelSerializer):
         fields = ['id', 'product', 'quantity']
 
     def get_product(self, obj):
-        from products.serializers import ProductSerializer  # Lazy import
+        from products.serializers import ProductSerializer 
         return ProductSerializer(obj.product).data
 
 class OrderSerializer(serializers.ModelSerializer):

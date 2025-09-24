@@ -9,7 +9,6 @@ from decouple import config, Csv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# SECURITY
 SECRET_KEY = config("SECRET_KEY")
 DEBUG = config("DEBUG", default=False, cast=bool)
 ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="127.0.0.1,localhost", cast=Csv())
@@ -63,6 +62,7 @@ SIMPLE_JWT = {
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
+    'whitenoise.middleware.WhiteNoiseMiddleware', 
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -116,6 +116,9 @@ TIME_ZONE = "UTC"
 USE_I18N = True
 USE_TZ = True
 
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+
 # Static and Media
 STATIC_URL = "/static/"
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
@@ -138,4 +141,5 @@ CORS_ALLOW_HEADERS = ["content-type", "authorization", "x-csrftoken"]
 
 # Chapa
 CHAPA_SECRET_KEY = config("CHAPA_SECRET_KEY", default="")
+print('chapa secret key',CHAPA_SECRET_KEY)
 CHAPA_API_URL = config("CHAPA_API_URL", default="https://api.chapa.co/v1/transaction/initialize")

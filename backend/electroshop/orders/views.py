@@ -201,7 +201,6 @@ class OrderDetailView(generics.RetrieveUpdateDestroyAPIView):
     def get_object(self):
         try:
             order_id = self.kwargs['order_id']
-            print('Order ID:', order_id)
             order = Order.objects.get(id=order_id)
             self.check_object_permissions(self.request, order)
             return order

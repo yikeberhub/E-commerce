@@ -27,10 +27,8 @@ class CreatePaymentView(APIView):
             print('not get email,amount,firstname')
             return Response({"error": "Amount, email, and first name are required."}, status=status.HTTP_400_BAD_REQUEST)
       
-        # Unique reference for the entire payment session
         payment_ref = f"multi-txn-{uuid.uuid4().hex[:8]}"
         print('payment ref',payment_ref)
-        # Prepare data for payment initialization
         payment_data = {
             "amount": amount,
             "currency": "ETB",
@@ -42,7 +40,6 @@ class CreatePaymentView(APIView):
             "return_url": f"http://localhost:3000/payment/confirm?txt_ref={payment_ref}"
         }
 
-        # Initialize payment
         try:
             print('try block')
             response = chapa.initialize(**payment_data)
@@ -60,13 +57,6 @@ class CreatePaymentView(APIView):
 @api_view(['GET'])
 def chapa_callback(request):
     pass
-    # payment_ref = request.GET.get('txt_ref')
-
-    # if payment_status == "success" and transaction_ids:
-    #     return Response({"message": "All payments recorded successfully"}, status=status.HTTP_200_OK)
-
-    # return Response({"message": "Payment failed or not processed"}, status=status.HTTP_400_BAD_REQUEST)
-
 
 
 @api_view(['GET'])
