@@ -49,7 +49,7 @@ export const AuthProvider = ({ children }) => {
     }
 
     try {
-      const response = await fetch(`${API_URL}users/`, {
+      const response = await fetch(`${API_URL}/users/`, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${authTokens.access}`,
