@@ -12,6 +12,7 @@ import FilterByVendor from "../components/filters/FilterByVendor";
 import FilterByCategory from "../components/filters/FilterByCategory";
 import FilterByTags from "../components/filters/FilterByTags";
 import FeaturedProducts from "../components/FeaturedProducts";
+import Spinner from "../common/Spinner";
 function Home() {
   const { products, loading, searchTerm, getProducts } =
     useContext(ProductContext);
@@ -21,14 +22,14 @@ function Home() {
     getProducts();
   }, []);
 
-  // useEffect(() => {
-  //   if (authTokens.access) {
-  //     fetchUserInfo();
-  //   }
-  // }, [authTokens]);
+  useEffect(() => {
+    if (authTokens.access) {
+      fetchUserInfo();
+    }
+  }, [authTokens]);
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <div><Spinner/></div>;
   }
 
   return (
