@@ -127,3 +127,5 @@ npm start
 This will start the React development server on http://localhost:3000/.
 Usage
 Open your browser and navigate to http://localhost:3000/ to view the React frontend.
+
+deployed url  https://e-commerce-frontend-25em.onrender.com/ visit to see the project
