@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useContext } from "react";
-import { FaSearch } from "react-icons/fa"; // Importing the search icon
+import React, { useContext, useEffect } from "react";
+import { FaSearch } from "react-icons/fa";
 import { ProductContext } from "../../contexts/ProductContext";
 import CategoriesSelect from "../select components/CategoriesSelect";
 
@@ -32,21 +32,25 @@ function Search() {
   };
 
   return (
-    <form className="flex items-center w-1/3 border border-gray rounded-md overflow-hidden shadow-md bg-white">
-      <CategoriesSelect />
-      <span className="text-gray-500">|</span>
+    <form
+      className="flex items-center w-full max-w-xl bg-white border border-slate-200 rounded-full shadow-sm focus-within:ring-2 focus-within:ring-primary-400 focus-within:border-primary-400 transition overflow-hidden"
+      onSubmit={(e) => e.preventDefault()}
+    >
+      <div className="hidden sm:block border-r border-slate-200">
+        <CategoriesSelect embedded />
+      </div>
       <input
         type="search"
         value={searchTerm}
         onChange={handleFilterChange}
         placeholder="Search for products..."
-        className="outline-none py-2 px-3 flex-grow bg-light text-gray-500 focus:outline-none placeholder-gray-300"
+        className="outline-none py-2.5 px-4 flex-grow bg-transparent text-sm text-slate-700 placeholder-slate-400"
       />
       <button
         type="submit"
-        className="flex items-center justify-center p-2 text-gray hover:text-blue transition duration-200"
+        className="flex items-center justify-center w-10 h-10 mr-1 rounded-full bg-primary-600 text-white hover:bg-primary-700 transition shrink-0"
       >
-        <FaSearch />
+        <FaSearch className="text-sm" />
       </button>
     </form>
   );

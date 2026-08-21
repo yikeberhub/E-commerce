@@ -11,18 +11,20 @@ const LogButton = () => {
     navigate("/login");
   };
 
-  return (
-    <>
-      {user ? (
-        <button onClick={handleLogout} className="text-gray_light">
-          Logout
-        </button>
-      ) : (
-        <Link to="/login">
-          <div className="text-gray_light">Login</div>
-        </Link>
-      )}
-    </>
+  return user ? (
+    <button
+      onClick={handleLogout}
+      className="hidden sm:inline text-sm font-medium text-slate-500 hover:text-red-500 transition"
+    >
+      Logout
+    </button>
+  ) : (
+    <Link
+      to="/login"
+      className="text-sm font-medium bg-primary-600 hover:bg-primary-700 text-white px-3.5 py-1.5 rounded-full transition"
+    >
+      Login
+    </Link>
   );
 };
 

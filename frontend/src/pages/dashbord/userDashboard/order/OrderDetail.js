@@ -1,6 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import OrderComponent from "./OrderComponent";
+import { RowSkeleton } from "../../../../common/Skeleton";
+import EmptyState from "../../../../common/EmptyState";
+
+const API_URL = process.env.REACT_APP_API_URL;
 
 const OrderDetail = () => {
   const { id } = useParams();
@@ -15,10 +19,9 @@ const OrderDetail = () => {
 
   const fetchOrderDetails = async () => {
     const token = localStorage.getItem("access");
-    console.log("token", token);
 
     try {
-      const response = await fetch(`https://extract-id-bot.onrender.com/orders/${id}/`, {
+      const response = await fetch(`${API_URL}/orders/${id}/`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -36,41 +39,47 @@ const OrderDetail = () => {
       setLoading(false);
     }
   };
+
   const handleNavigate = () => {
-    console.log("i am called");
+    if (!order.payment) return;
     const transactionId = order.payment.transaction_id;
-    console.log("trid", transactionId);
     localStorage.setItem("transaction_ids", transactionId);
-    navigate(`/checkout/summary/?order_id=${order.id}`);
+    navigate(`/checkout/summary?order_id=${order.id}`);
   };
 
   if (loading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="bg-white rounded-xl shadow-card p-4 sm:p-5">
+        <RowSkeleton count={3} />
+      </div>
+    );
   }
 
-  if (!order || !order.items) {
-    return <div>No order details available.</div>;
+  if (error || !order || !order.items) {
+    return (
+      <div className="bg-white rounded-xl shadow-card p-4 sm:p-5">
+        <EmptyState title="Order not found" description={error} />
+      </div>
+    );
   }
-
-  const calculateTotal = (price, quantity) => price * quantity;
 
   return (
-    <div>
-      <div className="flex flex-row justify-between mr-6 items-center">
-        <h2 className="text-2xl font-bold mb-4">
-          Order Details for Order ID: {order.id}{" "}
+    <div className="bg-white rounded-xl shadow-card p-4 sm:p-5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+        <h2 className="text-xl font-bold text-slate-900">
+          Order #{order.id}
         </h2>
-        {/* <Link to={`/checkout/summary/?order_id=${order.id}`}> */}
-        <button
-          className="bg-green-600 text-white hover:bg-purple-600 rounded-md py-2 px-2"
-          onClick={() => handleNavigate()}
-        >
-          Go to checkout
-        </button>
-        {/* </Link> */}
+        {order.payment && (
+          <button
+            className="bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-lg py-2 px-4 transition"
+            onClick={handleNavigate}
+          >
+            Go to checkout
+          </button>
+        )}
       </div>
 
-      <OrderComponent order={order} calculateTotal={calculateTotal} />
+      <OrderComponent order={order} />
     </div>
   );
 };

@@ -1,23 +1,24 @@
 import React, { useEffect, useState, useContext } from "react";
-import ListComp from "../../utilities/ListComp";
+import { FiHash } from "react-icons/fi";
 import Card from "../../utilities/CardComp";
-import { ProductContext } from "../../contexts/ProductContext"; // Assuming you have a context for products
+import { ProductContext } from "../../contexts/ProductContext";
+
+const API_URL = process.env.REACT_APP_API_URL;
 
 function FilterByTag() {
   const { products, onFilterProducts } = useContext(ProductContext);
-  const [tags, setTags] = useState([]); // State to hold tags
+  const [tags, setTags] = useState([]);
   const [selectedTags, setSelectedTags] = useState([]);
 
-  // Fetch tags from the backend
   useEffect(() => {
     const fetchTags = async () => {
       try {
-        const response = await fetch("https://extract-id-bot.onrender.com/products/tags/"); // Adjust the URL as needed
+        const response = await fetch(`${API_URL}/products/tags/`);
         if (!response.ok) {
           throw new Error("Network response was not ok");
         }
         const data = await response.json();
-        setTags(data); // Set tags from the response
+        setTags(data);
       } catch (error) {
         console.error("Error fetching tags:", error);
       }
@@ -29,10 +30,9 @@ function FilterByTag() {
   const handleTagClick = (tag) => {
     setSelectedTags((prev) => {
       const newSelectedTags = prev.includes(tag)
-        ? prev.filter((t) => t !== tag) // Remove tag if already selected
-        : [...prev, tag]; // Add tag if not selected
+        ? prev.filter((t) => t !== tag)
+        : [...prev, tag];
 
-      // Filter products based on selected tags
       const filteredProducts =
         newSelectedTags.length === 0
           ? products
@@ -48,27 +48,27 @@ function FilterByTag() {
   };
 
   return (
-    <div>
-      <Card title="Popular Tags">
-        <div className="grid grid-cols-2 gap-2">
-          {tags.map((tag) => (
-            <ListComp key={tag.id}>
-              <button
-                className={`flex w-fit items-center text-sm rounded-full px-2 text-white ${
-                  selectedTags.includes(tag.name)
-                    ? "bg-green-900"
-                    : "bg-green-500"
-                } border-gray-500 border-transparent hover:bg-green-700 transition-colors duration-200`}
-                onClick={() => handleTagClick(tag.name)}
-              >
-                <span className="text-2xl mr-2">&times;</span>
-                <span>{tag.name}</span>
-              </button>
-            </ListComp>
-          ))}
-        </div>
-      </Card>
-    </div>
+    <Card title="Popular Tags" icon={<FiHash />}>
+      <div className="flex flex-wrap gap-2">
+        {tags.map((tag) => {
+          const active = selectedTags.includes(tag.name);
+          return (
+            <button
+              key={tag.id}
+              type="button"
+              className={`text-xs font-medium rounded-full px-3 py-1.5 border transition-colors duration-200 ${
+                active
+                  ? "bg-primary-600 border-primary-600 text-white"
+                  : "bg-white border-slate-200 text-slate-600 hover:border-primary-300 hover:text-primary-600"
+              }`}
+              onClick={() => handleTagClick(tag.name)}
+            >
+              {tag.name}
+            </button>
+          );
+        })}
+      </div>
+    </Card>
   );
 }
 

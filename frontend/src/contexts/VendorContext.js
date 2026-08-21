@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 
+const API_URL = process.env.REACT_APP_API_URL;
+
 const VendorContext = createContext(null);
 
 export const VendorProvider = ({ children }) => {
@@ -13,12 +15,15 @@ export const VendorProvider = ({ children }) => {
     loadVendors();
   }, []);
   const token = localStorage.getItem("access");
+  const authHeaders = token
+    ? { Authorization: `Bearer ${token}`, "Content-Type": "application/json" }
+    : { "Content-Type": "application/json" };
 
   // Fetch vendors
   const loadVendors = async () => {
     setLoading(true);
     try {
-      const response = await fetch("https://extract-id-bot.onrender.com/vendors/");
+      const response = await fetch(`${API_URL}/vendors/`);
       if (!response.ok) {
         throw new Error("Network response was not ok");
       }
@@ -35,13 +40,10 @@ export const VendorProvider = ({ children }) => {
   const loadVendorOrders = async (vendorId) => {
     try {
       const response = await fetch(
-        `https://extract-id-bot.onrender.com/vendors/${vendorId}/orders/`,
+        `${API_URL}/vendors/${vendorId}/orders/`,
         {
           method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
+          headers: authHeaders,
         }
       );
       if (!response.ok) {
@@ -58,23 +60,18 @@ export const VendorProvider = ({ children }) => {
 
   // Fetch products for a specific vendor
   const loadVendorProducts = async (vendorId) => {
-    console.log("token is ", token);
     try {
       const response = await fetch(
-        `https://extract-id-bot.onrender.com/vendors/${vendorId}/products/`,
+        `${API_URL}/vendors/${vendorId}/products/`,
         {
           method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
+          headers: authHeaders,
         }
       );
       if (!response.ok) {
         throw new Error("Failed to fetch vendor products");
       }
       const data = await response.json();
-      console.log("vendor product", data.products);
       setProducts(data.products);
     } catch (error) {
       setError(error.message);
@@ -85,11 +82,11 @@ export const VendorProvider = ({ children }) => {
   const addVendor = async (vendorData) => {
     const token = localStorage.getItem("access");
     try {
-      const response = await fetch("https://extract-id-bot.onrender.com/vendors/", {
+      const response = await fetch(`${API_URL}/vendors/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer${token}`,
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(vendorData),
       });
@@ -107,7 +104,7 @@ export const VendorProvider = ({ children }) => {
   const updateVendor = async (vendorId, updatedData) => {
     try {
       const response = await fetch(
-        `https://extract-id-bot.onrender.com/vendors/${vendorId}/`,
+        `${API_URL}/vendors/${vendorId}/`,
         {
           method: "PUT",
           headers: {
@@ -132,7 +129,7 @@ export const VendorProvider = ({ children }) => {
   const deleteVendor = async (vendorId) => {
     try {
       const response = await fetch(
-        `https://extract-id-bot.onrender.com/vendors/${vendorId}/`,
+        `${API_URL}/vendors/${vendorId}/`,
         {
           method: "DELETE",
         }

@@ -1,73 +1,89 @@
-import React, { useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import React from "react";
+import { Link } from "react-router-dom";
 import WishlistItem from "../components/WishlistItem";
 import { useWishlist } from "../contexts/WishlistContext";
 import { useAuth } from "../contexts/AuthContext";
+import { RowSkeleton } from "../common/Skeleton";
+import EmptyState from "../common/EmptyState";
 
 function Wishlist() {
-  const { wishlist, loading, message, fetchWishlist, clearWishlist } =
-    useWishlist();
+  const { wishlist, loading, clearWishlist } = useWishlist();
   const { user } = useAuth();
 
-  if (loading) return <div>Loading...</div>;
+  if (!user) {
+    return (
+      <div className="max-w-3xl mx-auto px-4 py-16">
+        <EmptyState
+          title="Please log in to view your wishlist"
+          description="Sign in to see items you've saved for later."
+          action={
+            <Link
+              to="/login"
+              className="inline-block bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition"
+            >
+              Log in
+            </Link>
+          }
+        />
+      </div>
+    );
+  }
 
   return (
-    <div className="col-span-5 min-h-screen bg-bg_secondary text-gray_light grid grid-cols-6 border border-gray shadow-md ">
-      <div className="col-span-4 px-2 sm:mx-2 sm:my-2">
-        <h1 className="text-3xl mx-2 py-2 text-gray_lightest">
-          Your Wishlists
-        </h1>
-        <p className="text-gray_lightest  py-1">
-          You have{" "}
-          {wishlist.length
-            ? `${wishlist.items.length} Item in the wishlist`
-            : "no Item in the wishlist"}{" "}
-          .
-        </p>
-        <div className="bg-card rounded-md h-auto">
-          <table className="table-auto w-full  shadow-lg">
-            <thead>
-              <tr className=" border  border-spacing-x-32">
-                <th className="">product</th>
-                <th className="">Title</th>
-                <th className="">price</th>
-                <th className="">Stock status</th>
-                <th className="">Action</th>
-                <th className="">Remove</th>
-              </tr>
-            </thead>
-            <tbody>
-              {wishlist.length === 0 ? (
-                <div className="text-danger py-1 text-md text-center">
-                  your wishlist is empty
-                </div>
-              ) : (
-                wishlist.items.map((wishlistItem) => (
-                  <WishlistItem
-                    wishlistItem={wishlistItem}
-                    key={wishlistItem.product.id}
-                  />
-                ))
-              )}
-            </tbody>
-          </table>
-          <div className="flex flex-row items-center justify-between px-2 py-2 my-2 ">
-            <Link to={`/`}>
-              <button className="bg-green-500 mt-2 py-1 px-2 rounded text-white">
-                Continue shoping
-              </button>
-            </Link>
+    <div className="max-w-4xl mx-auto px-4 py-4">
+      <div className="bg-white rounded-xl shadow-card p-4 sm:p-5">
+        <div className="flex items-center justify-between mb-4">
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-900">
+            Your Wishlist
+          </h1>
+          <span className="text-sm text-slate-500">
+            {wishlist?.items?.length
+              ? `${wishlist.items.length} item${wishlist.items.length === 1 ? "" : "s"}`
+              : "Empty"}
+          </span>
+        </div>
 
-            {wishlist.items && (
+        {loading ? (
+          <RowSkeleton count={3} />
+        ) : !wishlist?.items?.length ? (
+          <EmptyState
+            title="Your wishlist is empty"
+            description="Save products you like so you can find them later."
+            action={
+              <Link
+                to="/products"
+                className="inline-block bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition"
+              >
+                Browse products
+              </Link>
+            }
+          />
+        ) : (
+          <>
+            <div className="flex flex-col gap-3">
+              {wishlist.items.map((wishlistItem) => (
+                <WishlistItem
+                  wishlistItem={wishlistItem}
+                  key={wishlistItem.product.id}
+                />
+              ))}
+            </div>
+            <div className="flex flex-wrap items-center justify-between gap-3 mt-5 pt-4 border-t border-slate-100">
+              <Link
+                to="/"
+                className="text-sm font-medium text-slate-600 hover:text-primary-600 transition"
+              >
+                ← Continue shopping
+              </Link>
               <button
-                className="bg-red-500 mt-1  py-2 px-2 rounded text-white"
+                className="text-sm font-medium text-red-500 hover:text-red-600 transition"
                 onClick={clearWishlist}
               >
-                clear wishlist
+                Clear wishlist
               </button>
-            )}
-          </div>
-        </div>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

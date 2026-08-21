@@ -12,6 +12,7 @@ import {
 import OrderList from "./AdminComponent/orderManagement/OrderList";
 import OrderFilter from "./AdminComponent/orderManagement/OrderFilter";
 import OrderDetailAdmin from "./AdminComponent/orderManagement/OrderDetailAdmin";
+import Spinner from "../../common/Spinner";
 
 const OrderManagement = () => {
   const [orders, setOrders] = useState([]);
@@ -108,7 +109,7 @@ const OrderManagement = () => {
   };
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <Spinner />;
   }
 
   return (

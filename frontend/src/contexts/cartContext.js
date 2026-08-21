@@ -2,6 +2,8 @@ import React, { createContext, useState, useContext, useEffect } from "react";
 import SummaryApi from "../common";
 import { useNavigate } from "react-router-dom";
 
+const API_URL = process.env.REACT_APP_API_URL;
+
 // Create CartContext
 const CartContext = createContext();
 
@@ -64,7 +66,7 @@ export const CartProvider = ({ children }) => {
 
   const addCartItem = async (itemId, quantity) => {
     try {
-      const response = await fetch("https://extract-id-bot.onrender.com/cart/add/", {
+      const response = await fetch(`${API_URL}/cart/add/`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -89,7 +91,7 @@ export const CartProvider = ({ children }) => {
   const updateCartItem = async (itemId, newQunatity) => {
     try {
       const response = await fetch(
-        `https://extract-id-bot.onrender.com/cart/update/${itemId}/`,
+        `${API_URL}/cart/update/${itemId}/`,
         {
           method: "PUT",
           headers: {
@@ -113,7 +115,7 @@ export const CartProvider = ({ children }) => {
   const removeCartItem = async (itemId) => {
     try {
       const response = await fetch(
-        `https://extract-id-bot.onrender.com/cart/remove/${itemId}/`,
+        `${API_URL}/cart/remove/${itemId}/`,
         {
           method: "DELETE",
           headers: {
@@ -134,7 +136,7 @@ export const CartProvider = ({ children }) => {
 
   const clearCart = async () => {
     try {
-      const response = await fetch("https://extract-id-bot.onrender.com/cart/clear/", {
+      const response = await fetch(`${API_URL}/cart/clear/`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,

@@ -2,12 +2,13 @@ import React, { useEffect } from "react";
 import AdminLogo from "../../../assets/icons/shopLogo/shop_logo.jpg";
 import { useAuth } from "../../../contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
+import Spinner from "../../../common/Spinner";
 
 const AdminNavbar = ({ type }) => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
-  if (!user) return <div>Loading....</div>;
+  if (!user) return <Spinner />;
   return (
     <div className="flex justify-start sm:justify-between w-full  lg:w-2/3 md:w-2/4 lg:flex-row lg:justify-between items-center bg-white p-4 text-black  gap-4 lg:gap-0">
       {/* Search Bar */}
@@ -46,13 +47,9 @@ const AdminNavbar = ({ type }) => {
           <span className="hidden sm:inline">{user.first_name}</span>
           <span className="ml-1 hidden sm:inline">▼</span> {/* Down arrow */}
           <p className="mx-2 py-1 ">
-            {user ? (
-              <span onClick={() => logout()}>Logout</span>
-            ) : (
-              <link to="/login">
-                <span>login</span>
-              </link>
-            )}
+            <span className="cursor-pointer hover:text-primary-600" onClick={() => logout()}>
+              Logout
+            </span>
           </p>
         </div>
       </div>

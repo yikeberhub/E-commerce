@@ -1,16 +1,18 @@
 import React, { useEffect, useState } from "react";
-import { FaStar, FaStore } from "react-icons/fa";
+import { FaStar, FaStore, FaMapMarkerAlt, FaSearch } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import Breadcrumb from "../components/BreadCrumb";
 import { useVendor } from "../contexts/VendorContext";
 import { useBreadcrumb } from "../contexts/BreadCrumbContext";
+import EmptyState from "../common/EmptyState";
+import { Skeleton } from "../common/Skeleton";
+import { selectClass, inputClass } from "../common/formStyles";
 
 const Vendors = () => {
   const { vendors = [], loading, error } = useVendor();
   const { addBreadcrumb, clearBreadcrumbs } = useBreadcrumb();
 
   const [searchTerm, setSearchTerm] = useState("");
-  const [filterCategory, setFilterCategory] = useState("");
   const [sortBy, setSortBy] = useState("name");
 
   useEffect(() => {
@@ -19,81 +21,52 @@ const Vendors = () => {
     addBreadcrumb({ label: "Vendors", path: "/vendors" });
   }, []);
 
-  // Filter and sort vendors
   const filteredVendors = vendors
     .filter((vendor) => {
+      const term = searchTerm.toLowerCase();
       return (
-        vendor.title &&
-        vendor.description &&
-        (vendor.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          vendor.description.toLowerCase().includes(searchTerm.toLowerCase()))
+        vendor.title?.toLowerCase().includes(term) ||
+        vendor.description?.toLowerCase().includes(term)
       );
     })
-    .filter((vendor) => {
-      return filterCategory ? vendor.category === filterCategory : true;
-    })
     .sort((a, b) => {
-      if (sortBy === "name") {
-        return a.title.localeCompare(b.title);
-      } else if (sortBy === "rating") {
+      if (sortBy === "name") return a.title.localeCompare(b.title);
+      if (sortBy === "rating")
         return b.authentic_rating - a.authentic_rating;
-      }
       return 0;
     });
 
-  if (loading)
-    return (
-      <div className="text-center text-lg font-semibold">
-        Loading vendors...
-      </div>
-    );
-  if (error) return <div className="text-red-500 text-center">{error}</div>;
-  if (filteredVendors.length === 0)
-    return (
-      <div className="text-center text-lg font-semibold">No vendors found</div>
-    );
+  if (error)
+    return <div className="text-red-500 text-center py-10">{error}</div>;
 
   return (
-    <div className="container mx-auto my-6 px-4">
-      <div className="w-full bg-white rounded-md py-4 shadow-lg mb-2 px-2">
+    <div className="max-w-7xl mx-auto px-4 py-4">
+      <div className="bg-white rounded-xl shadow-card px-4 py-3 mb-4">
         <Breadcrumb />
       </div>
-      <h1 className="text-4xl font-extrabold mb-3 text-blue-600 text-center">
-        Vendors
-      </h1>
 
-      <div className="flex flex-col items-center mb-4">
-        {/* Search Input */}
-        <input
-          type="text"
-          placeholder="Search vendors by thier name..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="border border-gray-300 p-3 w-full max-w-md rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200"
-        />
+      <div className="bg-white rounded-xl shadow-card p-5 mb-6">
+        <h1 className="text-2xl font-bold text-slate-900">Vendors</h1>
+        <p className="text-sm text-slate-500 mt-1">
+          {vendors.length} vendor{vendors.length === 1 ? "" : "s"} on the
+          marketplace
+        </p>
 
-        <div className="flex flex-row gap-3 mt-4 items-center justify-between">
-          {/* Filter Dropdown */}
-          <h3 className="text-md font-semibold text-gray-600">
-            We have {vendors.length} Vendors
-          </h3>
-
-          <select
-            value={filterCategory}
-            onChange={(e) => setFilterCategory(e.target.value)}
-            className="border border-gray-300 p-3 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200"
-          >
-            <option value="">All Categories</option>
-            <option value="electronics">Electronics</option>
-            <option value="clothing">Clothing</option>
-            <option value="home">Home & Garden</option>
-          </select>
-
-          {/* Sort Dropdown */}
+        <div className="flex flex-col sm:flex-row gap-3 mt-4">
+          <div className="relative flex-1">
+            <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm" />
+            <input
+              type="text"
+              placeholder="Search vendors by name..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className={`${inputClass} pl-9`}
+            />
+          </div>
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
-            className="border border-gray-300 p-3 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200"
+            className={selectClass}
           >
             <option value="name">Sort by Name</option>
             <option value="rating">Sort by Authentic Rating</option>
@@ -101,47 +74,76 @@ const Vendors = () => {
         </div>
       </div>
 
-      {/* Vendor Cards Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredVendors.map((vendor) => (
-          <div
-            key={vendor.id}
-            className="flex flex-col bg-white rounded-lg shadow-lg p-4 transition-transform transform hover:scale-105 border border-gray-200"
-          >
-            <div className="flex items-center mb-4">
-              <div>
+      {loading ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div
+              key={i}
+              className="bg-white rounded-xl border border-slate-100 shadow-card overflow-hidden"
+            >
+              <Skeleton className="h-20 w-full rounded-none" />
+              <div className="px-4 pb-4 -mt-8">
+                <Skeleton className="h-16 w-16 rounded-xl border-4 border-white" />
+                <Skeleton className="h-4 w-1/2 mt-3" />
+                <Skeleton className="h-3 w-1/3 mt-2" />
+                <Skeleton className="h-3 w-2/3 mt-2" />
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : filteredVendors.length === 0 ? (
+        <EmptyState
+          title="No vendors found"
+          description="Try a different search term."
+        />
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          {filteredVendors.map((vendor) => (
+            <Link
+              to={`/vendors/${vendor.id}`}
+              key={vendor.id}
+              className="group flex flex-col bg-white rounded-xl border border-slate-100 shadow-card hover:shadow-soft hover:-translate-y-0.5 transition-all duration-300 overflow-hidden"
+            >
+              <div className="h-20 bg-slate-100">
+                {vendor.banner_image && (
+                  <img
+                    src={vendor.banner_image}
+                    alt=""
+                    className="w-full h-full object-cover"
+                  />
+                )}
+              </div>
+              <div className="px-4 pb-4 -mt-8">
                 <img
                   src={vendor.logo}
                   alt={vendor.title}
-                  className="h-24 w-24 rounded-full border-2 border-blue-500"
+                  className="h-16 w-16 rounded-xl border-4 border-white shadow-sm object-cover bg-white"
                 />
-                <p className="text-sm text-gray-500">7 products</p>
-              </div>
-              <div className="ml-4">
-                <h2 className="text-2xl font-semibold text-gray-800 hover:text-blue-600 transition-colors duration-200">
+                <h2 className="text-lg font-semibold text-slate-800 group-hover:text-primary-600 transition-colors mt-2">
                   {vendor.title}
                 </h2>
-                <p className="text-gray-600 flex items-center">
-                  <FaStar className="text-yellow-500" />(
-                  {vendor.authentic_rating})
+                <p className="text-sm text-amber-500 flex items-center gap-1 mt-0.5">
+                  <FaStar /> {vendor.authentic_rating}/100
                 </p>
-                <h3 className="font-semibold text-md mt-4 text-gray-700">
-                  Info
-                </h3>
-                <p className="flex flex-col gap-1 text-md text-gray-600">
-                  <small>Address: {vendor.address}</small>
-                  <small>Contact seller: {vendor.phone_number}</small>
-                </p>
+                {vendor.address && (
+                  <p className="text-sm text-slate-500 flex items-center gap-1.5 mt-2">
+                    <FaMapMarkerAlt className="text-slate-400 shrink-0" />
+                    <span className="truncate">{vendor.address}</span>
+                  </p>
+                )}
+                {vendor.description && (
+                  <p className="text-sm text-slate-500 mt-2 line-clamp-2">
+                    {vendor.description}
+                  </p>
+                )}
+                <span className="inline-flex items-center gap-1.5 mt-3 text-sm font-medium text-primary-600">
+                  <FaStore /> Visit store
+                </span>
               </div>
-            </div>
-            <Link to={`/vendors/${vendor.id}`}>
-              <button className="bg-blue-600 w-fit hover:bg-blue-700 transition-colors duration-200 px-4 py-1 rounded-md text-white font-bold flex items-center">
-                <FaStore className="mr-2" /> View Store
-              </button>
             </Link>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };

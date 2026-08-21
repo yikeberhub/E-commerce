@@ -1,9 +1,9 @@
 import React from "react";
+import { Link } from "react-router-dom";
+import { FaTimes } from "react-icons/fa";
+import { FiShoppingBag, FiCheck } from "react-icons/fi";
 import { useWishlist } from "../contexts/WishlistContext";
 import { useCart } from "../contexts/cartContext";
-
-import RemoveItemIcon from "../assets/icons/images/cart_black_white.png";
-import AddItemtIcon from "../assets/icons/images/cart_blue.png";
 
 function WishlistItem({ wishlistItem }) {
   const { removeWishlistItem } = useWishlist();
@@ -22,44 +22,64 @@ function WishlistItem({ wishlistItem }) {
   };
 
   return (
-    <tr className="py-2  my-1 w-full text-center border border-gray_light">
-      <td className="pl-4">
+    <div className="flex flex-wrap sm:flex-nowrap items-center gap-3 sm:gap-4 bg-white rounded-xl border border-slate-100 shadow-card p-3">
+      <Link to={`/product/${wishlistItem.product.id}`} className="shrink-0">
         <img
           src={wishlistItem.product.image}
-          alt="prod-img"
-          className="w-12 h-12 rounded"
+          alt={wishlistItem.product.title}
+          className="w-16 h-16 rounded-lg object-cover"
         />
-      </td>
-      <td>{wishlistItem.product.title}</td>
-      <td>${wishlistItem.product.price}</td>
-      <td>{wishlistItem.product.status ? `in stuck` : "not available"} </td>
-      <td>
-        <p
-          className="border border-gray-200 shadow-sm rounded px-0.5  hover:cursor-pointer"
-          onClick={(e) => handleAddToCart()}
-        >
-          {!addedToCart ? (
-            <img
-              src={AddItemtIcon}
-              alt="add_to_cart_img"
-              className="rounded-full w-6 h-6"
-            />
-          ) : (
-            <img
-              src={RemoveItemIcon}
-              alt="cart_remove_img"
-              className="rounded-full w-8 h-8"
-            />
-          )}
+      </Link>
+
+      <div className="flex-1 min-w-[140px]">
+        <Link to={`/product/${wishlistItem.product.id}`}>
+          <p className="text-sm font-medium text-slate-800 line-clamp-2 hover:text-primary-600 transition">
+            {wishlistItem.product.title}
+          </p>
+        </Link>
+        <p className="text-xs text-slate-500 mt-0.5">
+          {wishlistItem.product.price} ETB
         </p>
-      </td>
-      <td
-        className="text-3xl hover:cursor-pointer"
-        onClick={(e) => removeWishlistItem(wishlistItem.id)}
+      </div>
+
+      <span
+        className={`text-xs font-medium px-2 py-1 rounded-full shrink-0 ${
+          wishlistItem.product.stock_quantity > 0
+            ? "bg-emerald-50 text-emerald-600"
+            : "bg-red-50 text-red-500"
+        }`}
       >
-        &times;
-      </td>
-    </tr>
+        {wishlistItem.product.stock_quantity > 0
+          ? "In stock"
+          : "Out of stock"}
+      </span>
+
+      <button
+        type="button"
+        onClick={handleAddToCart}
+        className={`flex items-center gap-1.5 text-xs font-medium border rounded-lg px-3 py-1.5 transition shrink-0 ${
+          addedToCart
+            ? "border-emerald-200 text-emerald-600 hover:border-emerald-300"
+            : "border-slate-200 hover:border-primary-300 hover:text-primary-600"
+        }`}
+      >
+        {addedToCart ? (
+          <FiCheck className="text-sm" />
+        ) : (
+          <FiShoppingBag className="text-sm" />
+        )}
+        {!addedToCart ? "Add to cart" : "In cart"}
+      </button>
+
+      <button
+        type="button"
+        onClick={() => removeWishlistItem(wishlistItem.id)}
+        title="Remove from wishlist"
+        className="text-slate-400 hover:text-red-500 transition shrink-0"
+      >
+        <FaTimes />
+      </button>
+    </div>
   );
 }
 

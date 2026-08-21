@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useState } from "react";
-import ListComp from "../../utilities/ListComp";
+import { FiTag } from "react-icons/fi";
 import Card from "../../utilities/CardComp";
+import Checkbox from "../../common/Checkbox";
 import { ProductContext } from "../../contexts/ProductContext";
 
 function FilterByVendor() {
@@ -10,8 +11,7 @@ function FilterByVendor() {
   useEffect(() => {
     const vendors = [
       ...new Set(products.map((product) => product?.vendor?.title)),
-    ];
-    console.log("checked vendors", checkedVendors);
+    ].filter(Boolean);
     const initialChecked = vendors.reduce((acc, vendor) => {
       acc[vendor] = false;
       return acc;
@@ -29,12 +29,9 @@ function FilterByVendor() {
   };
 
   const applyFilter = (checkedVendorsState) => {
-    // Get selected vendors
     const selectedVendors = Object.keys(checkedVendorsState).filter(
       (vendor) => checkedVendorsState[vendor]
     );
-
-    console.log("selected vebdors,", selectedVendors);
 
     const filteredProducts =
       selectedVendors.length === 0
@@ -43,33 +40,22 @@ function FilterByVendor() {
             selectedVendors.includes(product?.vendor?.title)
           );
 
-    handleFilter(filteredProducts);
-  };
-
-  const handleFilter = (filteredProducts) => {
     onFilterProducts(filteredProducts);
   };
 
   return (
-    <div>
-      <Card title="By Vendor">
+    <Card title="Vendor" icon={<FiTag />}>
+      <div className="flex flex-col gap-0.5 max-h-56 overflow-y-auto pr-1">
         {Object.keys(checkedVendors).map((vendor) => (
-          <ListComp
+          <Checkbox
             key={vendor}
-            style={`text-lg py-2 px-2 border rounded-md shadow-sm hover:shadow-lg transition-shadow duration-300`}
-          >
-            <input
-              type="checkbox"
-              name={vendor.title}
-              checked={checkedVendors[vendor]}
-              onChange={() => handleCheckboxChange(vendor)}
-              className="h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-            />
-            <label className="ml-2 text-gray-800 font-medium">{vendor}</label>
-          </ListComp>
+            checked={checkedVendors[vendor]}
+            onChange={() => handleCheckboxChange(vendor)}
+            label={vendor}
+          />
         ))}
-      </Card>
-    </div>
+      </div>
+    </Card>
   );
 }
 

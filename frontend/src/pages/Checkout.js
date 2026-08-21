@@ -1,432 +1,351 @@
 import React, { useEffect, useState } from "react";
-import { useParams, Link, useLocation } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
+import { FiTruck, FiCreditCard, FiCheckCircle } from "react-icons/fi";
 import OrderComponent from "./dashbord/userDashboard/order/OrderComponent";
-import PaypalImg from "../assets/icons/images/paypal_icon.png";
 import ChapaImg from "../assets/icons/images/chapa_logo.jpg";
 import EditAddress from "./dashbord/userDashboard/address/EditAddress";
 import { useAuth } from "../contexts/AuthContext";
-import Spinner from "../common/Spinner";
+import { RowSkeleton } from "../common/Skeleton";
+import EmptyState from "../common/EmptyState";
 
-const PreviewOrder = ({
-  updatedOrder,
-  paymentGateway,
-  paymentMethod,
-  handlePayment,
-  onClose,
-}) => {
-  const { user } = useAuth();
-  const [loading, setLoading] = useState(false);
+const API_URL = process.env.REACT_APP_API_URL;
 
-  console.log("order preview component:", updatedOrder);
-  const token = localStorage.getItem("access");
-
-  // if (loading) return <Spinner />;
-  if (!updatedOrder) return <div>loading</div>;
-  return (
-    <div className=" absolute w-full r-4 t-6 bg-white p-4 rounded-lg shadow-lg max-w-md mx-auto">
-      <h2 className="text-3xl font-bold text-gray-800 mb-4 text-center">
-        Order Preview{" "}
-        <sapn
-          className="hover:cursor-pointer hover:bg-white bg-gray-200 rounded-full"
-          onClick={() => onClose(false)}
-        >
-          ❌
-        </sapn>
-      </h2>
-
-      <div className="overflow-auto mb-4">
-        <table className="min-w-full bg-white border border-gray-200">
-          <thead>
-            <tr className="bg-gray-200 border-b">
-              <th className="text-left py-2 px-3 text-gray-700 font-semibold">
-                Field
-              </th>
-              <th className="text-left py-2 px-3 text-gray-700 font-semibold">
-                Details
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {[
-              { label: "Order ID", value: updatedOrder.id },
-              { label: "Status", value: updatedOrder.status },
-              {
-                label: "Total Price",
-                value: `$${updatedOrder.total_price}`,
-              },
-              {
-                label: "Created At",
-                value: new Date(updatedOrder.created_at).toLocaleDateString(),
-              },
-              {
-                label: "Last Updated",
-                value: new Date(updatedOrder.updated_at).toLocaleDateString(),
-              },
-            ].map((row, index) => (
-              <tr key={index} className="border-b hover:bg-gray-50">
-                <td className="py-2 px-3 font-semibold">{row.label}</td>
-                <td className="py-2 px-3">{row.value}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      <div className="mt-4">
-        <h3 className="text-2xl font-semibold text-gray-700 mb-2">
-          Customer Info
-        </h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-          {[
-            { label: "Full Name", value: updatedOrder.address.full_name },
-            { label: "Phone", value: updatedOrder.address.phone_number },
-            { label: "Email", value: updatedOrder.user.email },
-          ].map((info, index) => (
-            <div key={index} className="bg-gray-100 rounded-lg p-2">
-              <p className="font-semibold text-sm text-gray-600">
-                {info.label}:
-              </p>
-              <p className="text-sm">{info.value}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div className="mt-4">
-        <h3 className="text-2xl font-semibold text-gray-700 mb-2">
-          Shipping Address
-        </h3>
-        <div className="bg-gray-100 rounded-lg p-2">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-            {[
-              { label: "Kebele", value: updatedOrder.address.kebele },
-              { label: "City", value: updatedOrder.address.city },
-              { label: "Region", value: updatedOrder.address.region },
-              { label: "Kebele", value: updatedOrder.address.kebele },
-              updatedOrder.address.postal_code && {
-                label: "Postal Code",
-                value: updatedOrder.address.postal_code,
-              },
-              updatedOrder.address.delivery_instruction && {
-                label: "Delivery Instructions",
-                value: updatedOrder.address.delivery_instruction,
-              },
-            ]
-              .filter(Boolean)
-              .map((address, index) => (
-                <div
-                  key={index}
-                  className="bg-white rounded-lg p-2 grid grid-cols-3"
-                >
-                  <p className="font-semibold text-sm text-gray-600">
-                    {address.label}:
-                  </p>
-                  <p className="text-sm">{address.value}</p>
-                </div>
-              ))}
-          </div>
-        </div>
-      </div>
-
-      <div className="mt-4">
-        <h3 className="text-2xl font-semibold text-gray-700 mb-2">
-          Payment Info
-        </h3>
-        <div className="bg-gray-100 rounded-lg p-2 flex flex-col space-y-2">
-          <div className="flex justify-between">
-            <p className="font-semibold">Payment Method:</p>
-            <p>{paymentMethod}</p>
-          </div>
-          <div className="flex justify-between">
-            <p className="font-semibold">Payment Gateway:</p>
-            <p>{paymentGateway}</p>
-          </div>
-          {updatedOrder.payment && (
-            <div className="flex justify-between">
-              <p className="font-semibold">Payment ID:</p>
-              <p>{updatedOrder.payment.transaction_id}</p>
-            </div>
-          )}
-        </div>
-      </div>
-
-      <button
-        className="bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700 mt-4 w-full transition duration-300"
-        onClick={() => {
-          handlePayment();
-        }}
-      >
-        Confirm Payment
-      </button>
-    </div>
-  );
-};
+const PaymentOption = ({ active, onClick, icon, title, description }) => (
+  <button
+    type="button"
+    onClick={onClick}
+    className={`w-full flex items-start gap-3 text-left border rounded-xl p-3.5 transition ${
+      active
+        ? "border-primary-500 bg-primary-50/50 ring-1 ring-primary-500"
+        : "border-slate-200 hover:border-primary-200"
+    }`}
+  >
+    <span
+      className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 ${
+        active ? "bg-primary-600 text-white" : "bg-slate-100 text-slate-500"
+      }`}
+    >
+      {icon}
+    </span>
+    <span>
+      <span className="block text-sm font-medium text-slate-800">
+        {title}
+      </span>
+      <span className="block text-xs text-slate-500 mt-0.5">
+        {description}
+      </span>
+    </span>
+  </button>
+);
 
 const Checkout = () => {
-  const { user } = useAuth();
-  const location = useLocation();
-  const { orderIds } = location.state || {};
+  const { user, loading: authLoading } = useAuth();
+  const [searchParams] = useSearchParams();
+
+  const orderIdsParam = searchParams.get("order_ids");
+  const orderIdParam = searchParams.get("order_id");
+  const orderIds = orderIdsParam
+    ? orderIdsParam.split(",").filter(Boolean)
+    : orderIdParam
+    ? [orderIdParam]
+    : [];
+
   const [orderDetails, setOrderDetails] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [paymentMethod, setPaymentMethod] = useState("online");
-  const [paymentGateway, setPaymentGateway] = useState("chapa");
-  const [updatedOrders, setUpdatedOrders] = useState([]);
-  const [showPreview, setShowPreview] = useState(false);
-  const [selectedOrderId, setSelectedOrderId] = useState(null);
+  const [placing, setPlacing] = useState(false);
+  const [placeError, setPlaceError] = useState("");
+  const [orderConfirmed, setOrderConfirmed] = useState(false);
   const token = localStorage.getItem("access");
 
   useEffect(() => {
-    fetchOrderDetails();
-  }, [orderIds]);
-
-  const handlePayment = async () => {
-    if (orderDetails) {
-      initiatePayment();
-    }
-  };
-  const initiatePayment = async () => {
-    if (!orderDetails.length) {
-      console.error("No order details available for payment initiation.");
+    if (!user || !orderIds.length) {
+      setLoading(false);
       return;
     }
+    fetchOrderDetails();
+  }, [user]);
 
-    let totalAmount = 0;
-    const transactionIds = [];
-
-    orderDetails.forEach((order) => {
-      if (order && order.total_price) {
-        // Convert order.total_price to a number before adding it to totalAmount
-        const orderTotalPrice = parseFloat(order.total_price);
-
-        if (!isNaN(orderTotalPrice)) {
-          totalAmount += orderTotalPrice; // Add to totalAmount
-          transactionIds.push(order.payment.transaction_id); // Add transaction ID
-        } else {
-          console.error(
-            `Order ID ${order.id} has an invalid total_price: ${order.total_price}`
-          );
-        }
-      } else {
-        console.error(`Order ID ${order.id} is missing total_price`);
-      }
-    });
-
-    const paymentData = {
-      total_amount: totalAmount,
-      first_name: user.first_name,
-      last_name: user.last_name,
-      email: user.email,
-      phone_number: user.addresses[0]["phone_number"],
-    };
-    console.log("payment data", paymentData);
-
-    try {
-      const response = await fetch("https://extract-id-bot.onrender.com/payments/create/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(paymentData),
-      });
-
-      if (!response.ok) throw new Error("Failed to initiate payment.");
-
-      const paymentResponse = await response.json();
-      console.log("Payment initiated successfully:", paymentResponse);
-
-      // Make sure to check if the response contains the checkout_url
-      if (paymentResponse.data && paymentResponse.data.checkout_url) {
-        localStorage.setItem("transaction_ids", JSON.stringify(transactionIds));
-
-        window.location.href = paymentResponse.data.checkout_url;
-      } else {
-        console.error("Checkout URL not found in payment response.");
-      }
-    } catch (error) {
-      console.error("Error initiating payment:", error.message);
-    }
-  };
-
-  console.log("order ids are", orderIds);
   const fetchOrderDetails = async () => {
     try {
       const fetchedOrders = await Promise.all(
         orderIds.map(async (orderId) => {
-          const response = await fetch(
-            `https://extract-id-bot.onrender.com/orders/${orderId}`,
-            {
-              method: "GET",
-              headers: {
-                Authorization: `Bearer ${token}`,
-                "Content-Type": "application/json",
-              },
-            }
-          );
+          const response = await fetch(`${API_URL}/orders/${orderId}/`, {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          });
           if (!response.ok) throw new Error("Failed to fetch order details.");
           return await response.json();
         })
       );
       setOrderDetails(fetchedOrders);
     } catch (error) {
-      console.error("Error:", error.message);
+      setPlaceError(error.message);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const updateOrder = async (orderId) => {
-    const address = user.addresses.find((addr) => addr.is_default);
+  const applyAddressToOrder = async (orderId, addressId) => {
+    const response = await fetch(`${API_URL}/orders/${orderId}/update/`, {
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ address_id: addressId }),
+    });
+    if (!response.ok) throw new Error("Failed to set the shipping address.");
+    return response.json();
+  };
+
+  const initiatePayment = async () => {
+    let totalAmount = 0;
+    const transactionIds = [];
+
+    for (const order of orderDetails) {
+      const orderTotalPrice = parseFloat(order.total_price);
+      if (isNaN(orderTotalPrice) || !order.payment) continue;
+      totalAmount += orderTotalPrice;
+      transactionIds.push(order.payment.transaction_id);
+    }
+
+    if (!transactionIds.length) {
+      throw new Error("No payable orders found.");
+    }
+
+    const defaultAddress =
+      user.addresses?.find((addr) => addr.is_default) || user.addresses?.[0];
+
+    const paymentData = {
+      total_amount: totalAmount,
+      first_name: user.first_name,
+      last_name: user.last_name,
+      email: user.email,
+      phone_number: defaultAddress?.phone_number,
+    };
+
+    const response = await fetch(`${API_URL}/payments/create/`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(paymentData),
+    });
+
+    if (!response.ok) throw new Error("Failed to initiate payment.");
+    const paymentResponse = await response.json();
+
+    if (paymentResponse.data?.checkout_url) {
+      localStorage.setItem("transaction_ids", JSON.stringify(transactionIds));
+      window.location.href = paymentResponse.data.checkout_url;
+    } else {
+      throw new Error("Checkout URL not found in payment response.");
+    }
+  };
+
+  const handlePlaceOrder = async () => {
+    setPlaceError("");
+
+    if (!user.addresses?.length) {
+      setPlaceError("Please add a shipping address before placing your order.");
+      return;
+    }
+
+    const defaultAddress =
+      user.addresses.find((addr) => addr.is_default) || user.addresses[0];
+
+    setPlacing(true);
     try {
-      const response = await fetch(
-        `https://extract-id-bot.onrender.com/orders/${orderId}/update/`,
-        {
-          method: "PUT",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            address_id: address.id,
-            amount: orderDetails.find((order) => order.id === orderId)
-              .total_price,
-          }),
-        }
+      await Promise.all(
+        orderDetails.map((order) =>
+          applyAddressToOrder(order.id, defaultAddress.id)
+        )
       );
-      if (!response.ok) throw new Error("Failed to update order details.");
-      const data = await response.json();
-      setUpdatedOrders((prev) => [...prev, data]);
+
+      if (paymentMethod === "cash") {
+        setOrderConfirmed(true);
+      } else {
+        await initiatePayment();
+      }
     } catch (error) {
-      console.error("Error:", error.message);
+      setPlaceError(error.message);
+    } finally {
+      setPlacing(false);
     }
   };
 
-  const handlePreviewClick = async (orderId) => {
-    await updateOrder(orderId);
-    await setSelectedOrderId(orderId);
-    setShowPreview(true);
-  };
+  if (authLoading || loading) {
+    return (
+      <div className="max-w-5xl mx-auto px-4 py-4">
+        <RowSkeleton count={3} />
+      </div>
+    );
+  }
 
-  const handlePaymentMethodChange = (e) => setPaymentMethod(e.target.value);
-  const handlePaymentGatewayChange = (e) => setPaymentGateway(e.target.value);
+  if (!user) {
+    return (
+      <div className="max-w-3xl mx-auto px-4 py-16">
+        <EmptyState
+          title="Please log in to check out"
+          description="Sign in to view and complete your order."
+          action={
+            <Link
+              to="/login"
+              className="inline-block bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition"
+            >
+              Log in
+            </Link>
+          }
+        />
+      </div>
+    );
+  }
 
-  // if (!orderDetails.length) return <Spinner />;
+  if (!orderIds.length) {
+    return (
+      <div className="max-w-3xl mx-auto px-4 py-16">
+        <EmptyState
+          title="Nothing to check out"
+          description="Add items to your cart and proceed to checkout to see your order summary here."
+          action={
+            <Link
+              to="/products"
+              className="inline-block bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition"
+            >
+              Browse products
+            </Link>
+          }
+        />
+      </div>
+    );
+  }
+
+  if (orderConfirmed) {
+    return (
+      <div className="max-w-lg mx-auto px-4 py-16 text-center">
+        <FiCheckCircle className="text-emerald-500 text-5xl mx-auto mb-4" />
+        <h1 className="text-2xl font-bold text-slate-900">Order placed!</h1>
+        <p className="text-slate-500 mt-2">
+          Pay with cash when your order is delivered. You can track its
+          status from your account.
+        </p>
+        <Link
+          to="/user-dashboard/orders"
+          className="inline-block mt-6 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition"
+        >
+          View my orders
+        </Link>
+      </div>
+    );
+  }
 
   return (
-    <div className="flex flex-col lg:flex-row m-auto mb-28 space-y-4 lg:space-y-0 lg:space-x-8">
-      <div className="w-full lg:w-2/5 px-4 py-4">
-        <EditAddress
-          id={user.addresses.find((addr) => addr.is_default).id}
-          use={true}
-        />
+    <div className="max-w-6xl mx-auto px-4 py-4">
+      <h1 className="text-2xl font-bold text-slate-900 mb-4">Checkout</h1>
 
-        <div className="mt-10 shadow-md rounded-md text-gray-600 font-serif">
-          <h2 className="text-xl py-2 font-mono ml-4">Select Payment Method</h2>
-          <div className="flex flex-row space-x-4 bg-gray-50 px-4 py-4 rounded-md">
-            <form className="space-y-2">
-              <label className="flex items-center">
-                <input
-                  type="radio"
-                  onChange={handlePaymentMethodChange}
-                  value="cash"
-                  checked={paymentMethod === "cash"}
-                  name="payment_method"
-                  className="mr-2"
-                />
-                Cash on Delivery
-              </label>
-              <label className="flex items-center">
-                <input
-                  type="radio"
-                  onChange={handlePaymentMethodChange}
-                  value="online"
-                  checked={paymentMethod === "online"}
-                  name="payment_method"
-                  className="mr-2"
-                />
-                Online Gateway
-              </label>
-            </form>
+      <div className="flex flex-col lg:flex-row gap-6">
+        {/* Left column */}
+        <div className="w-full lg:w-2/5 flex flex-col gap-4">
+          {user.addresses?.length ? (
+            <EditAddress
+              id={(user.addresses.find((a) => a.is_default) || user.addresses[0]).id}
+              use
+            />
+          ) : (
+            <div className="bg-white rounded-xl border border-slate-100 p-4">
+              <p className="text-sm text-slate-600 mb-3">
+                You don't have a saved address yet. Add one to continue.
+              </p>
+              <EditAddress create setOpenedCreateAddress={() => {}} />
+            </div>
+          )}
 
-            {paymentMethod === "online" && (
-              <div className="mt-6">
-                <h3 className="text-lg font-semibold mb-2">
-                  Choose Payment Gateway
-                </h3>
-                <div className="space-y-4">
-                  <label className="flex items-center space-x-2">
-                    <input
-                      type="radio"
-                      id="chapa"
-                      checked={paymentGateway === "chapa"}
-                      onChange={handlePaymentGatewayChange}
-                      name="payment"
-                      value="chapa"
-                      className="form-radio text-blue-600 h-5 w-5"
-                    />
-                    <span>Chapa</span>
-                    <img
-                      src={ChapaImg}
-                      alt="Chapa Logo"
-                      className="h-8 rounded-sm"
-                    />
-                  </label>
-                  <label className="flex items-center space-x-2">
-                    <input
-                      type="radio"
-                      id="paypal"
-                      checked={paymentGateway === "paypal"}
-                      onChange={handlePaymentGatewayChange}
-                      name="payment"
-                      value="paypal"
-                      className="form-radio text-blue-600 h-5 w-5"
-                    />
-                    <span>PayPal</span>
-                    <img src={PaypalImg} alt="PayPal Logo" className="h-8" />
-                  </label>
-                </div>
-              </div>
-            )}
+          <div className="bg-white rounded-xl shadow-card p-4">
+            <h2 className="text-sm font-semibold text-slate-800 mb-3">
+              Payment Method
+            </h2>
+            <div className="flex flex-col gap-2">
+              <PaymentOption
+                active={paymentMethod === "online"}
+                onClick={() => setPaymentMethod("online")}
+                icon={<img src={ChapaImg} alt="" className="w-5 h-5 rounded-sm object-cover" />}
+                title="Pay Online (Chapa)"
+                description="Telebirr, CBE and other Chapa-supported methods."
+              />
+              <PaymentOption
+                active={paymentMethod === "cash"}
+                onClick={() => setPaymentMethod("cash")}
+                icon={<FiTruck />}
+                title="Cash on Delivery"
+                description="Pay in cash when your order arrives."
+              />
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Right Column */}
-      <div className="flex flex-col w-full lg:w-3/5 px-4 border border-gray-200 rounded-md shadow-md">
-        <h1 className="font-mono text-xl text-gray-700 mb-4">
-          Your Orders from
-        </h1>
-        {orderDetails.map((order) => (
-          <div key={order.id} className="mb-4">
-            <h2 className="text-gray-700 text-lg">
-              <span>Order ID: {order.id} from </span>
-              <span className="text-blue-500">{order?.vendor?.title}</span>
+        {/* Right column */}
+        <div className="w-full lg:w-3/5 flex flex-col gap-4">
+          <div className="bg-white rounded-xl shadow-card p-4 sm:p-5">
+            <h2 className="text-sm font-semibold text-slate-800 mb-3">
+              Your Order
             </h2>
-            <p className="text-gray-600">Total price: {order.total_price}</p>
-            <OrderComponent order={order} />
-            <button
-              className="text-blue-500 underline"
-              onClick={() => {
-                handlePreviewClick(order.id);
-              }}
-            >
-              {showPreview && selectedOrderId === order.id
-                ? "Hide Order"
-                : "Preview Order"}
-            </button>
-          </div>
-        ))}
+            <div className="flex flex-col gap-5">
+              {orderDetails.map((order) => (
+                <div key={order.id}>
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-sm text-slate-600">
+                      From{" "}
+                      <span className="text-primary-600 font-medium">
+                        {order?.vendor?.title}
+                      </span>
+                    </p>
+                    <p className="text-sm font-semibold text-slate-800">
+                      {order.total_price} ETB
+                    </p>
+                  </div>
+                  <OrderComponent order={order} />
+                </div>
+              ))}
+            </div>
 
-        {showPreview && selectedOrderId && (
-          <PreviewOrder
-            updatedOrder={
-              updatedOrders.find(
-                (updOrder) => updOrder.id === selectedOrderId
-              ) || orderDetails.find((order) => order.id === selectedOrderId)
-            }
-            onClose={setShowPreview}
-            handlePayment={handlePayment}
-            paymentGateway={paymentGateway}
-            paymentMethod={paymentMethod}
-          />
-        )}
+            <div className="flex justify-between items-center pt-4 mt-4 border-t border-slate-100">
+              <span className="text-sm font-semibold text-slate-800">
+                Total
+              </span>
+              <span className="text-lg font-bold text-primary-600">
+                {orderDetails
+                  .reduce((sum, o) => sum + parseFloat(o.total_price || 0), 0)
+                  .toLocaleString()}{" "}
+                ETB
+              </span>
+            </div>
+          </div>
+
+          {placeError && (
+            <p className="text-sm text-red-500 bg-red-50 rounded-lg px-3 py-2">
+              {placeError}
+            </p>
+          )}
+
+          <button
+            type="button"
+            onClick={handlePlaceOrder}
+            disabled={placing}
+            className="flex items-center justify-center gap-2 w-full bg-primary-600 hover:bg-primary-700 text-white font-medium py-3 rounded-lg transition disabled:opacity-60"
+          >
+            <FiCreditCard />
+            {placing
+              ? "Placing order..."
+              : paymentMethod === "cash"
+              ? "Place Order"
+              : "Place Order & Pay"}
+          </button>
+        </div>
       </div>
     </div>
   );

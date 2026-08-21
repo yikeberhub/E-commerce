@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Bar } from "react-chartjs-2";
 import { useAuth } from "../../../../contexts/AuthContext";
+import Spinner from "../../../../common/Spinner";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -20,6 +21,8 @@ ChartJS.register(
   Legend
 );
 
+const API_URL = process.env.REACT_APP_API_URL;
+
 const OrderChart = () => {
   const { user } = useAuth();
   const [orders, setOrders] = useState([]);
@@ -33,7 +36,7 @@ const OrderChart = () => {
     const fetchOrders = async () => {
       try {
         const response = await fetch(
-          `https://extract-id-bot.onrender.com/orders/status-chart/?user_id=${user.id}`,
+          `${API_URL}/orders/status-chart/?user_id=${user.id}`,
           {
             method: "GET",
             headers: {
@@ -59,7 +62,7 @@ const OrderChart = () => {
     const fetchSales = async () => {
       try {
         const response = await fetch(
-          `https://extract-id-bot.onrender.com/orders/sales-chart/?user_id=${user.id}`,
+          `${API_URL}/orders/sales-chart/?user_id=${user.id}`,
           {
             method: "GET",
             headers: {
@@ -164,7 +167,7 @@ const OrderChart = () => {
     },
   };
 
-  if (loading) return <div className="text-center">Loading...</div>;
+  if (loading) return <Spinner />;
   if (error)
     return (
       <div className="text-center text-red-500">Error: {error.message}</div>

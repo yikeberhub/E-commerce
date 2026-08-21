@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 
+const API_URL = process.env.REACT_APP_API_URL;
+
 const EditUser = () => {
   const { id } = useParams();
   const [user, setUser] = useState({
@@ -15,8 +17,10 @@ const EditUser = () => {
 
   useEffect(() => {
     const fetchUser = async () => {
+      const token = localStorage.getItem("access");
       const response = await fetch(
-        `https://extract-id-bot.onrender.com/admin_api/super-admin-dashboard/users/${id}/`
+        `${API_URL}/admin_api/super-admin-dashboard/users/${id}/`,
+        { headers: { Authorization: `Bearer ${token}` } }
       );
       const data = await response.json();
       setUser(data);
@@ -37,7 +41,7 @@ const EditUser = () => {
     console.log("Sending data:", userData);
 
     const response = await fetch(
-      `https://extract-id-bot.onrender.com/admin_api/super-admin-dashboard/users/${id}/`,
+      `${API_URL}/admin_api/super-admin-dashboard/users/${id}/`,
       {
         method: "PUT",
         headers: {

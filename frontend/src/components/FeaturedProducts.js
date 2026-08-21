@@ -1,12 +1,13 @@
 // FeaturedProducts.js
 import React, { useEffect, useState } from "react";
-import { FaShoppingCart, FaHeart } from "react-icons/fa";
-import { Link } from "react-router-dom";
 import Slider from "react-slick";
-import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
+import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import Product from "./Product";
+import { ProductGridSkeleton } from "../common/Skeleton";
+
+const API_URL = process.env.REACT_APP_API_URL;
 
 const FeaturedProducts = () => {
   const [featuredProducts, setFeaturedProducts] = useState([]);
@@ -16,9 +17,7 @@ const FeaturedProducts = () => {
   useEffect(() => {
     const fetchFeaturedProducts = async () => {
       try {
-        const response = await fetch(
-          "https://extract-id-bot.onrender.com/products/featured/"
-        );
+        const response = await fetch(`${API_URL}/products/featured/`);
         if (!response.ok) {
           throw new Error("Failed to fetch featured products");
         }
@@ -34,45 +33,27 @@ const FeaturedProducts = () => {
     fetchFeaturedProducts();
   }, []);
 
-  const SampleNextArrow = (props) => {
-    const { className, style, onClick } = props;
-    return (
-      <div
-        className={`${className} right-0 top-1/2 transform -translate-y-1/2 z-10`}
-        style={{
-          ...style,
-          display: "block",
-          background: "transparent",
-          border: "none",
-        }}
-        onClick={onClick}
-        role="button"
-        aria-label="Next"
-      >
-        <FaChevronRight className="text-gray-800 text-2xl" />
-      </div>
-    );
-  };
+  const SampleNextArrow = ({ onClick }) => (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label="Next"
+      className="absolute -right-3 top-1/2 -translate-y-1/2 z-10 w-9 h-9 rounded-full bg-white shadow-md border border-slate-100 flex items-center justify-center text-slate-600 hover:text-primary-600 hover:border-primary-200 transition"
+    >
+      <FiChevronRight />
+    </button>
+  );
 
-  const SamplePrevArrow = (props) => {
-    const { className, style, onClick } = props;
-    return (
-      <div
-        className={`${className} left-0 top-1/2 transform -translate-y-1/2 z-10`}
-        style={{
-          ...style,
-          display: "block",
-          background: "transparent",
-          border: "none",
-        }}
-        onClick={onClick}
-        role="button"
-        aria-label="Previous"
-      >
-        <FaChevronLeft className="text-gray-800 text-2xl" />
-      </div>
-    );
-  };
+  const SamplePrevArrow = ({ onClick }) => (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label="Previous"
+      className="absolute -left-3 top-1/2 -translate-y-1/2 z-10 w-9 h-9 rounded-full bg-white shadow-md border border-slate-100 flex items-center justify-center text-slate-600 hover:text-primary-600 hover:border-primary-200 transition"
+    >
+      <FiChevronLeft />
+    </button>
+  );
 
   const settings = {
     dots: true,
@@ -102,24 +83,31 @@ const FeaturedProducts = () => {
     ],
   };
 
-  if (loading) return <div className="text-center">Loading...</div>;
-  if (error) return <div className="text-red-500 text-center">{error}</div>;
-
-  return (
-    featuredProducts && (
-      <div className="container mx-auto my-2 bg-gray-100 ">
-        <h2 className="text-2xl font-bold mb-4 text-black">
+  if (loading)
+    return (
+      <div className="bg-white rounded-xl shadow-card p-4 sm:p-5 my-4">
+        <h2 className="text-xl font-bold text-slate-900 mb-4">
           Featured Products
         </h2>
-        <Slider {...settings}>
-          {featuredProducts.map((product) => (
-            <div key={product.id} className="p-4">
-              <Product product={product} />
-            </div>
-          ))}
-        </Slider>
+        <ProductGridSkeleton count={5} columns="grid-cols-2 sm:grid-cols-3 lg:grid-cols-5" />
       </div>
-    )
+    );
+  if (error) return <div className="text-red-500 text-center">{error}</div>;
+  if (!featuredProducts.length) return null;
+
+  return (
+    <div className="bg-white rounded-xl shadow-card p-4 sm:p-5 my-4">
+      <h2 className="text-xl font-bold text-slate-900 mb-2">
+        Featured Products
+      </h2>
+      <Slider {...settings}>
+        {featuredProducts.map((product) => (
+          <div key={product.id} className="p-2">
+            <Product product={product} />
+          </div>
+        ))}
+      </Slider>
+    </div>
   );
 };
 

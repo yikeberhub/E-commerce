@@ -1,118 +1,171 @@
 import { useContext, useEffect, useState } from "react";
-import Header from "./header component/Header";
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
+import { FaBars, FaPhoneAlt } from "react-icons/fa";
+import Logo from "./header component/Logo";
+import logo from "../assets/icons/logo.svg";
+import Search from "./header component/Search";
+import RightContent from "./header component/RightContent";
+import Drawer from "../common/Drawer";
 import { ProductContext } from "../contexts/ProductContext";
+import { useAuth } from "../contexts/AuthContext";
 import VendorSelect from "./select components/VendorSelect";
 import PagesSelect from "./select components/PagesSelect";
 import CategoriesSelect from "./select components/CategoriesSelect";
 
-const customStyle = "border border-gray-200 py-1 rounded-md  ";
+const NAV_LINKS = [
+  { label: "Home", to: "/" },
+  { label: "Shop", to: "/products" },
+  { label: "Categories", to: "/categories" },
+  { label: "Vendors", to: "/vendors" },
+  { label: "Wishlist", to: "/wishlist" },
+  { label: "Contact", to: "/contact" },
+  { label: "About Us", to: "/about" },
+];
 
 const Navigation = () => {
-  const { products, categories, fetchCategories, onFilterProducts } =
-    useContext(ProductContext);
-  const [selectedCategory, setSelectedCategory] = useState("All");
+  const { fetchCategories } = useContext(ProductContext);
+  const { user, logout } = useAuth();
+  const [menuOpen, setMenuOpen] = useState(false);
 
-  const location = useLocation();
-  const search = location.pathname.includes("products");
-  const home = location.pathname === "/";
-
-  // Fetch categories only when the component mounts
   useEffect(() => {
     fetchCategories();
-  }, []); // Empty dependency array means this effect runs once on mount
-
-  const handleCategoryChange = (category) => {
-    setSelectedCategory(category);
-
-    if (category === "All") {
-      onFilterProducts(products);
-    } else {
-      const filteredProducts = products.filter(
-        (product) => product?.category?.title === category
-      );
-      onFilterProducts(filteredProducts);
-    }
-  };
+  }, []);
 
   return (
-    <div className="p-0 bg-gray-50 shadow-md ">
-      <div className="text-gray_lightest">
-        <div className="flex flex-col md:flex-row justify-between mx-4 container-md text-gray-600 ">
-          <ul className="flex flex-row justify-between items-center pt-2 pb-1 gap-4">
-            <li className="text-sm hover:text-md hover:cursor-pointer hover:border-b hover:border-b-yellow-400 font-semibold text-gray_lighter transition duration-300 hover:text-green-400">
-              About us |
-            </li>
-            <li className="text-sm hover:text-md hover:cursor-pointer hover:border-b hover:border-b-yellow-400 font-semibold text-gray_lighter transition duration-300 hover:text-green">
-              My Account |
-            </li>
-            <li className="text-sm hover:text-md hover:cursor-pointer hover:border-b hover:border-b-yellow-400 font-semibold text-gray_lighter transition duration-300 hover:text-green-400">
-              Wishlist |
-            </li>
-          </ul>
-
-          <p className="font-semibold text-sm pt-2 pb-1 text-center md:text-left">
+    <div className="bg-white shadow-sm sticky top-0 z-30">
+      {/* Desktop-only utility bar */}
+      <div className="hidden lg:block border-b border-slate-100">
+        <div className="max-w-7xl mx-auto px-4 flex justify-between items-center text-xs text-slate-500 py-1.5">
+          <div className="flex gap-4">
+            <Link to="/about" className="hover:text-primary-600 transition">
+              About Us
+            </Link>
+            <Link
+              to="/user-dashboard"
+              className="hover:text-primary-600 transition"
+            >
+              My Account
+            </Link>
+            <Link
+              to="/wishlist"
+              className="hover:text-primary-600 transition"
+            >
+              Wishlist
+            </Link>
+          </div>
+          <p className="font-medium text-primary-600">
             Today is 25% off on all products!
           </p>
-
-          <ul className="flex flex-row justify-between items-center pt-2 pb-1 gap-4">
-            <li className="text-sm hover:text-md hover:cursor-pointer hover:border-b hover:border-b-yellow-400 font-semibold text-gray_lighter transition duration-300 hover:text-green-400">
-              Need help? Call us
-            </li>
-            <li className="text-sm font-semibold text-gray_lighter">
-              +2511946472687
-            </li>
-            <li className="text-sm">
-              <Link to="/about">
-                <p className="bg-card border bg-blue-600 text-white font-bold border-yellow-600 hover:border-gray-500 hover:cursor-pointer rounded px-2 py-1 focus:outline-none ">
-                  About us
-                </p>
-              </Link>
-            </li>
-          </ul>
+          <a
+            href="tel:+251946472687"
+            className="flex items-center gap-1.5 hover:text-primary-600 transition"
+          >
+            <FaPhoneAlt className="text-[10px]" /> +251 94 647 2687
+          </a>
         </div>
-        <hr className="border-gray" />
-        <Header />
       </div>
 
-      <nav className="max-w-screen-lg px-4 py-2 mb-2">
-        <div className="flex items-center">
-          <CategoriesSelect style={customStyle} />
-          <ul className="flex sm:ml-4 sm:space-x-4 justify-between items-centers text-gray_light">
-            <li>
-              <Link
-                to="/"
-                className="text-black hover:border-blue-500 hover:border-b hover:rounded-b px-3 py-2"
-              >
-                Home
-              </Link>
-            </li>
-            <li>
-              <Link
-                to="/products"
-                className="text-black hover:border-blue-500 hover:border-b hover:rounded-b sm:px-3 py-2"
-              >
-                Shop
-              </Link>
-            </li>
-            <li>
-              <VendorSelect />
-            </li>
-            <li>
-              <PagesSelect />
-            </li>
-            <li>
-              <Link
-                to="/contact"
-                className="text-black hover:border-blue-500 hover:border-b hover:rounded-b px-3 py-2"
-              >
-                Contact
-              </Link>
-            </li>
-          </ul>
+      {/* Main row */}
+      <div className="max-w-7xl mx-auto px-4 py-3 flex items-center gap-3">
+        <button
+          type="button"
+          onClick={() => setMenuOpen(true)}
+          className="lg:hidden text-slate-600 text-xl p-1 shrink-0"
+          aria-label="Open menu"
+        >
+          <FaBars />
+        </button>
+
+        <Link to="/" className="shrink-0">
+          <Logo logo={logo} />
+        </Link>
+
+        <div className="hidden sm:block flex-1">
+          <Search />
         </div>
-      </nav>
-      <hr className="border-sm border-gray" />
+
+        <div className="ml-auto shrink-0">
+          <RightContent />
+        </div>
+      </div>
+
+      {/* Mobile search row */}
+      <div className="sm:hidden px-4 pb-3">
+        <Search />
+      </div>
+
+      {/* Desktop secondary nav */}
+      <div className="hidden lg:block border-t border-slate-100">
+        <div className="max-w-7xl mx-auto px-4 py-2 flex items-center gap-6">
+          <CategoriesSelect />
+          {NAV_LINKS.filter((l) => l.label !== "Wishlist" && l.label !== "About Us").map(
+            (link) => (
+              <Link
+                key={link.to}
+                to={link.to}
+                className="text-sm font-medium text-slate-600 hover:text-primary-600 transition"
+              >
+                {link.label}
+              </Link>
+            )
+          )}
+          <VendorSelect />
+          <PagesSelect />
+        </div>
+      </div>
+
+      {/* Mobile drawer */}
+      <Drawer
+        open={menuOpen}
+        onClose={() => setMenuOpen(false)}
+        title="Menu"
+        position="left"
+      >
+        <nav className="flex flex-col gap-1">
+          {NAV_LINKS.map((link) => (
+            <Link
+              key={link.to}
+              to={link.to}
+              onClick={() => setMenuOpen(false)}
+              className="text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-primary-600 rounded-lg px-3 py-2.5 transition"
+            >
+              {link.label}
+            </Link>
+          ))}
+        </nav>
+
+        <hr className="my-4 border-slate-100" />
+
+        {user ? (
+          <div className="flex flex-col gap-1">
+            <Link
+              to="/user-dashboard"
+              onClick={() => setMenuOpen(false)}
+              className="text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-primary-600 rounded-lg px-3 py-2.5 transition"
+            >
+              My Account
+            </Link>
+            <button
+              type="button"
+              onClick={() => {
+                logout();
+                setMenuOpen(false);
+              }}
+              className="text-left text-sm font-medium text-red-500 hover:bg-red-50 rounded-lg px-3 py-2.5 transition"
+            >
+              Logout
+            </button>
+          </div>
+        ) : (
+          <Link
+            to="/login"
+            onClick={() => setMenuOpen(false)}
+            className="block text-center text-sm font-medium bg-primary-600 hover:bg-primary-700 text-white rounded-lg px-3 py-2.5 transition"
+          >
+            Login
+          </Link>
+        )}
+      </Drawer>
     </div>
   );
 };

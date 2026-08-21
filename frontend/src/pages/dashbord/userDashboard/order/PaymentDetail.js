@@ -1,80 +1,70 @@
 import { React, useState, useEffect, useRef } from "react";
 import { useLocation, Link } from "react-router-dom";
-import { FaHome } from "react-icons/fa"; // Import the home icon
+import { FiHome, FiPrinter, FiCheckCircle, FiXCircle } from "react-icons/fi";
 
 import ShopLogoImg from "../../../../assets/icons/shopLogo/shop_logo.jpg";
-const PrintableReceipt = ({ paymentDetail }) => {
-  console.log("payment detail in printable component", paymentDetail);
-  if (!paymentDetail || paymentDetail.length === 0) {
-    return <p>No payment details available.</p>;
+import { RowSkeleton } from "../../../../common/Skeleton";
+
+const API_URL = process.env.REACT_APP_API_URL;
+
+const PrintableReceipt = ({ payments }) => {
+  if (!payments || payments.length === 0) {
+    return <p className="text-slate-500">No payment details available.</p>;
   }
 
-  console.log("map started");
-  paymentDetail?.map((paymentResponse, index) => {
-    const paymentDetail = paymentResponse.payment;
-    console.log("payment mapped is  is", index, paymentDetail.order);
-  });
-  console.log("map finished");
-
   return (
-    <div className="max-w-lg mx-auto p-6 bg-white shadow-lg rounded-lg">
+    <div className="max-w-lg mx-auto">
       <img
         src={ShopLogoImg}
         alt="Logo"
-        className="w-32 mx-auto mb-4 rounded-full"
+        className="w-16 h-16 mx-auto mb-3 rounded-full object-cover"
       />
-      <h1 className="text-3xl font-bold text-center text-blue-600 mb-6">
-        Payment Receipts{" "}
-        <span>TransactionId {paymentDetail.transaction_id}</span>
+      <h1 className="text-xl font-bold text-center text-slate-900 mb-6">
+        Payment Receipt
       </h1>
-      {paymentDetail?.map((paymentResponse, index) => {
-        const paymentDetail = paymentResponse.payment;
 
+      {payments.map((entry) => {
+        const payment = entry.payment;
         return (
           <div
-            key={paymentResponse.payment.transaction_id}
-            className="relative overflow-hidden mb-8 p-4 bg-gray-50 rounded-lg shadow-md"
+            key={entry.transaction_id}
+            className="mb-4 p-4 bg-slate-50 rounded-lg border border-slate-100"
           >
-            <div className="absolute inset-0 opacity-30 flex items-center justify-center">
-              <span className="text-2xl text-green-300 font-bold">
-                Paid with {paymentDetail.payment?.payment_gateway || "N/A"}
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs font-mono text-slate-400">
+                #{entry.transaction_id}
+              </span>
+              <span className="text-xs font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
+                {payment.payment_status}
               </span>
             </div>
-
-            <h2 className="text-xl font-semibold mt-4 text-gray-800">
-              PaymentId ID: {paymentResponse.transaction_id}
-            </h2>
-            <p className="mt-2 text-gray-700">
-              <strong>User:</strong> {paymentDetail.order?.user?.email || "N/A"}
-            </p>
-            <p className="mt-2 text-gray-700">
-              <strong>Amount:</strong> ${paymentDetail?.amount || "0.00"}
-            </p>
-            <p className="mt-2 text-gray-700">
-              <strong>Payment Method:</strong>{" "}
-              {paymentDetail.payment_method || "N/A"}
-            </p>
-            <p className="mt-2 text-gray-700">
-              <strong>Payment Gateway:</strong>{" "}
-              {paymentDetail.payment_gateway || "N/A"}
-            </p>
-            <p className="mt-2 text-gray-700">
-              <strong>Status:</strong>{" "}
-              {paymentDetail.payment_status || paymentResponse.status}
-            </p>
-            <p className="mt-2 text-gray-700">
-              <strong>Date:</strong>{" "}
-              {new Date(paymentDetail.created_at).toLocaleString() || "N/A"}
-            </p>
-
-            <div className="mt-4 text-center">
-              <p className="font-medium text-lg text-blue-600">
-                Thank you for your payment!
-              </p>
-            </div>
+            <dl className="grid grid-cols-2 gap-y-1.5 text-sm">
+              <dt className="text-slate-500">Amount</dt>
+              <dd className="text-right font-semibold text-slate-800">
+                {payment.amount} {payment.currency?.toUpperCase() || "ETB"}
+              </dd>
+              <dt className="text-slate-500">Payment Method</dt>
+              <dd className="text-right text-slate-700">
+                {payment.payment_method || "N/A"}
+              </dd>
+              <dt className="text-slate-500">Gateway</dt>
+              <dd className="text-right text-slate-700">
+                {payment.payment_gateway || "N/A"}
+              </dd>
+              <dt className="text-slate-500">Date</dt>
+              <dd className="text-right text-slate-700">
+                {payment.created_at
+                  ? new Date(payment.created_at).toLocaleString()
+                  : "N/A"}
+              </dd>
+            </dl>
           </div>
         );
       })}
+
+      <p className="text-center text-sm text-primary-600 font-medium mt-2">
+        Thank you for your purchase!
+      </p>
     </div>
   );
 };
@@ -83,59 +73,52 @@ const PaymentDetail = () => {
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
   const transactionId = queryParams.get("txt_ref");
-  console.log("transaction id is:", transactionId);
 
-  const [paymentDetail, setPaymentDetail] = useState(null);
+  const [payments, setPayments] = useState([]);
+  const [status, setStatus] = useState("loading"); // loading | success | failed | error
   const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const receiptRef = useRef(null); // Reference for the receipt component
-  const storedTransactionIds = localStorage.getItem("transaction_ids");
-  console.log(
-    "stored transaction_ids are  in payment detai is ",
-    storedTransactionIds
-  );
+  const receiptRef = useRef(null);
+
   useEffect(() => {
     const fetchPaymentDetail = async () => {
       const storedTransactionIds = localStorage.getItem("transaction_ids");
-      console.log("transaction_ids are ", storedTransactionIds);
       const transactionIds = storedTransactionIds
         ? JSON.parse(storedTransactionIds)
         : [];
 
-      if (!transactionIds.length) {
-        setError("No transaction IDs found.");
-        setLoading(false);
+      if (!transactionId || !transactionIds.length) {
+        setError("No transaction reference found.");
+        setStatus("error");
         return;
       }
 
       try {
         const transactionIdsString = transactionIds.join(",");
+        const token = localStorage.getItem("access");
         const response = await fetch(
-          `https://extract-id-bot.onrender.com/payments/check_payment_status/${transactionId}/?transaction_ids=${transactionIdsString}`
+          `${API_URL}/payments/check_payment_status/${transactionId}/?transaction_ids=${transactionIdsString}`,
+          { headers: { Authorization: `Bearer ${token}` } }
         );
 
         if (!response.ok) {
           throw new Error("Failed to fetch payment details.");
         }
 
-        const paymentResponses = await response.json();
-        console.log("payment responses length", paymentResponses.length);
-        if (paymentResponses.payments && paymentResponses.payments.length) {
-          const successfulPayments = paymentResponses.payments.filter(
-            (payment) => payment.status === "completed"
-          );
-          if (successfulPayments.length > 0) {
-            setPaymentDetail(successfulPayments.map((payment) => payment));
-          } else {
-            setError("No successful payment details found.");
-          }
+        const data = await response.json();
+        const successfulPayments = (data.payments || []).filter(
+          (payment) => payment.status === "completed"
+        );
+
+        if (successfulPayments.length > 0) {
+          setPayments(successfulPayments);
+          setStatus("success");
         } else {
-          setError("No payment details found in the response.");
+          setStatus("failed");
         }
       } catch (err) {
         setError(err.message);
+        setStatus("error");
       } finally {
-        setLoading(false);
         localStorage.removeItem("transaction_ids");
       }
     };
@@ -169,45 +152,70 @@ const PaymentDetail = () => {
     };
   };
 
-  if (loading) {
-    return <div className="text-center py-10 text-gray-600">Loading...</div>;
+  if (status === "loading") {
+    return (
+      <div className="max-w-lg mx-auto px-4 py-8">
+        <RowSkeleton count={2} />
+      </div>
+    );
   }
 
-  if (!paymentDetail) {
+  if (status === "failed" || status === "error") {
     return (
-      <div className="text-red-600 text-center py-10">
-        No payment details found.
+      <div className="max-w-lg mx-auto px-4 py-16">
+        <div className="bg-white rounded-xl shadow-card p-8 text-center">
+          <FiXCircle className="text-red-500 text-5xl mx-auto mb-4" />
+          <h1 className="text-xl font-bold text-slate-900">
+            {status === "failed" ? "Payment not confirmed" : "Something went wrong"}
+          </h1>
+          <p className="text-slate-500 mt-2 text-sm">
+            {status === "failed"
+              ? "We couldn't confirm this payment. If you were charged, it should reflect shortly — otherwise please try again."
+              : error}
+          </p>
+          <Link
+            to="/"
+            className="inline-block mt-6 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition"
+          >
+            Back to Home
+          </Link>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-lg mx-auto p-8 bg-white shadow-lg rounded-xl relative border border-gray-200">
-      <div className="text-center mb-6">
-        <div className="flex flex-row gap-x-4 items-center mb-4">
-          <Link
-            to="/"
-            className="flex items-center text-blue-600 hover:underline"
-          >
-            <FaHome className="mr-1" /> {/* Home Icon */}
-            Back to Home
-          </Link>
-          <h1 className="text-3xl font-bold text-gray-800">Payment Receipt</h1>
+    <div className="max-w-lg mx-auto px-4 py-8">
+      <div className="bg-white rounded-xl shadow-card p-6 sm:p-8">
+        <div className="text-center mb-6">
+          <FiCheckCircle className="text-emerald-500 text-5xl mx-auto mb-3" />
+          <h1 className="text-xl font-bold text-slate-900">
+            Payment Successful
+          </h1>
+          <p className="text-slate-500 text-sm mt-1">
+            Thank you — your order has been confirmed.
+          </p>
         </div>
-        <p className="text-gray-600 mt-2">Thank you for your payment!</p>
+
+        <div ref={receiptRef} className="bg-slate-50 p-4 sm:p-6 rounded-lg">
+          <PrintableReceipt payments={payments} />
+        </div>
+
+        <div className="flex flex-col sm:flex-row gap-3 mt-6">
+          <Link
+            to="/user-dashboard/orders"
+            className="flex-1 flex items-center justify-center gap-2 border border-slate-200 hover:border-primary-300 hover:text-primary-600 text-slate-700 text-sm font-medium py-2.5 rounded-lg transition"
+          >
+            <FiHome /> View My Orders
+          </Link>
+          <button
+            onClick={handlePrint}
+            className="flex-1 flex items-center justify-center gap-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium py-2.5 rounded-lg transition"
+          >
+            <FiPrinter /> Print Receipt
+          </button>
+        </div>
       </div>
-      <div
-        ref={receiptRef}
-        className="bg-gray-50 p-6 rounded-lg shadow-lg mt-4"
-      >
-        <PrintableReceipt paymentDetail={paymentDetail} />
-      </div>
-      <button
-        onClick={handlePrint}
-        className="mt-6 w-full px-4 py-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 transition duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-300"
-      >
-        Print Receipt
-      </button>
     </div>
   );
 };

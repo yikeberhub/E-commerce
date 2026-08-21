@@ -4,7 +4,7 @@ module.exports = function(app) {
   app.use(
     '/api',  
     createProxyMiddleware({
-      target: 'https://extract-id-bot.onrender.com',
+      target: process.env.REACT_APP_API_URL,
       changeOrigin: true,
     })
   );

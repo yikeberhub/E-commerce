@@ -1,9 +1,11 @@
 import { React, useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import CartItem from "../components/CartItem";
 import ProceedCheckout from "../components/ProceedCheckout";
 import { useCart } from "../contexts/cartContext";
 import { useAuth } from "../contexts/AuthContext";
+import { RowSkeleton } from "../common/Skeleton";
+import EmptyState from "../common/EmptyState";
 
 const CartLists = () => {
   const { cart, loading, message, fetchCart, clearCart } = useCart();
@@ -12,9 +14,8 @@ const CartLists = () => {
   const { user } = useAuth();
 
   useEffect(() => {
-    console.log('cart items are cart',cart);
     calculateItemPrice();
-  }, [fetchCart]);
+  }, [cart]);
 
   const calculateItemPrice = () => {
     if (cart?.items?.length) {
@@ -28,76 +29,93 @@ const CartLists = () => {
     }
   };
 
-  if (loading) return <div>Loading...</div>;
-  if (!user) return alert(message);
+  if (!user) {
+    return (
+      <div className="max-w-3xl mx-auto px-4 py-16">
+        <EmptyState
+          title="Please log in to view your cart"
+          description="Sign in to see items you've added to your cart."
+          action={
+            <Link
+              to="/login"
+              className="inline-block bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition"
+            >
+              Log in
+            </Link>
+          }
+        />
+      </div>
+    );
+  }
 
   return (
-    <div className="col-span-5  grid grid-cols-6 border  border-gray-50 shadow-sm  pb-10 min-h-screen">
-      <div className="col-span-4 px-2">
-        <h1 className="text-3xl mx-2 py-2 text-black font-mono font-semibold">
-          Your Cart
-        </h1>
-        <p className="text-center text-gray-700">
-          You have{" "}
-          {cart?.items?.length
-            ? `${cart.items.length} Item in the cart`
-            : "no Item in the cart"}{" "}
-          .
-        </p>
-        <div className="bg-gray-100 h-auto rounded-lg shadow-md">
-          <table className="border border-separate border-spacing-2   border-card w-full  table-auto md:table-fixed">
-            <thead>
-              <tr className=" w-full">
-                <th>product</th>
-                <th>Title</th>
-                <th>Unit price</th>
-                <th>Quantity</th>
-                <th>Subtotal</th>
-                <th>Refresh</th>
-                <th>Remove</th>
-              </tr>
-            </thead>
-            <tbody>
-              {cart.length === 0 ? (
-                <tr>
-                  <td>Empty cart</td>
-                </tr>
-              ) : (
-                cart.items.map((cartItem) => (
-                  <CartItem
-                    cartItem={cartItem}
-                    calculateItemPrice={calculateItemPrice}
-                    key={cartItem.product.id}
-                  />
-                ))
-              )}
-            </tbody>
-          </table>
-          <div className="flex flex-row items-center justify-between px-2 py-2">
-            <Link to={`/`}>
-              <button className="bg-blue-500 mt-2 py-1 px-2 rounded text-white">
-                Continue shoping
-              </button>
-            </Link>
-            {cart?.items?.length ? (
-              <button
-                className="bg-red-500 mt-1  py-1 px-2 rounded text-white"
-                onClick={(e) => clearCart()}
-              >
-                clear cart
-              </button>
+    <div className="max-w-7xl mx-auto px-4 py-4">
+      <div className="flex flex-col lg:flex-row gap-6">
+        <div className="flex-1 min-w-0">
+          <div className="bg-white rounded-xl shadow-card p-4 sm:p-5">
+            <div className="flex items-center justify-between mb-4">
+              <h1 className="text-xl sm:text-2xl font-bold text-slate-900">
+                Your Cart
+              </h1>
+              <span className="text-sm text-slate-500">
+                {cart?.items?.length
+                  ? `${cart.items.length} item${cart.items.length === 1 ? "" : "s"}`
+                  : "Empty"}
+              </span>
+            </div>
+
+            {loading ? (
+              <RowSkeleton count={3} />
+            ) : !cart?.items?.length ? (
+              <EmptyState
+                title="Your cart is empty"
+                description="Browse products and add something you like."
+                action={
+                  <Link
+                    to="/products"
+                    className="inline-block bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition"
+                  >
+                    Browse products
+                  </Link>
+                }
+              />
             ) : (
-              ""
+              <>
+                <div className="flex flex-col gap-3">
+                  {cart.items.map((cartItem) => (
+                    <CartItem
+                      cartItem={cartItem}
+                      calculateItemPrice={calculateItemPrice}
+                      key={cartItem.product.id}
+                    />
+                  ))}
+                </div>
+                <div className="flex flex-wrap items-center justify-between gap-3 mt-5 pt-4 border-t border-slate-100">
+                  <Link
+                    to="/"
+                    className="text-sm font-medium text-slate-600 hover:text-primary-600 transition"
+                  >
+                    ← Continue shopping
+                  </Link>
+                  <button
+                    className="text-sm font-medium text-red-500 hover:text-red-600 transition"
+                    onClick={() => clearCart()}
+                  >
+                    Clear cart
+                  </button>
+                </div>
+              </>
             )}
           </div>
         </div>
-      </div>
-      <div className="col-span-2  mb-2 shadow-md ">
-        <ProceedCheckout
-          cart={cart}
-          itemsTotalPrice={itemsTotalPrice}
-          shipingPrice={shipingPrice}
-        />
+
+        <div className="w-full lg:w-80 shrink-0">
+          <ProceedCheckout
+            cart={cart}
+            itemsTotalPrice={itemsTotalPrice}
+            shipingPrice={shipingPrice}
+          />
+        </div>
       </div>
     </div>
   );

@@ -115,32 +115,33 @@ class AddressDeleteView(generics.DestroyAPIView):
 
 class UserUpdateView(generics.UpdateAPIView):
     queryset = CustomUser.objects.all()
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
     serializer_class = UserSerializer
-    
+
     def get_object(self):
-        print('get object is called')
         try:
-            user =CustomUser.objects.get(id = self.kwargs['pk'])
-            print('object user is',user)
-            return user
+            user = CustomUser.objects.get(id=self.kwargs['pk'])
         except CustomUser.DoesNotExist:
             raise exceptions.NotFound('User not Found')
-        
+        if user != self.request.user and self.request.user.role != 'admin':
+            raise exceptions.PermissionDenied("You can't edit another user's account.")
+        return user
 
     def put(self, request, *args, **kwargs):
         try:
             user = self.get_object()
             serializer = self.get_serializer(user,data=request.data,partial = True)
-            serializer.is_valid(raise_exception=True) 
+            serializer.is_valid(raise_exception=True)
             if serializer.is_valid():
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             return Response(serializer.errors,status=400)
+        except exceptions.APIException:
+            raise
         except Exception as e:
             print('Error encountered',str(e))
             return Response({'error':str(e)},status=500)
-    
+
 class LoginView(TokenObtainPairView):
     serializer_class = LoginSerializer
     

@@ -1,5 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { selectClass } from "../../common/formStyles";
+import Spinner from "../../common/Spinner";
+
+const API_URL = process.env.REACT_APP_API_URL;
 
 const VendorSelect = () => {
   const [vendors, setVendors] = useState([]);
@@ -10,7 +14,7 @@ const VendorSelect = () => {
   useEffect(() => {
     const fetchVendors = async () => {
       try {
-        const response = await fetch("https://extract-id-bot.onrender.com/vendors/");
+        const response = await fetch(`${API_URL}/vendors/`);
         if (!response.ok) {
           throw new Error("Failed to fetch vendors");
         }
@@ -35,18 +39,15 @@ const VendorSelect = () => {
   };
 
   if (loading) {
-    return <div>Loading vendors...</div>;
+    return <Spinner size="sm" />;
   }
 
   if (error) {
-    return <div>Error: {error}</div>;
+    return <div className="text-xs text-red-500">Error: {error}</div>;
   }
 
   return (
-    <select
-      className="rounded border px-2 py-1 text-black hover:bg-gray-100"
-      onChange={(e) => handleVendorSelect(e.target.value)}
-    >
+    <select className={selectClass} onChange={(e) => handleVendorSelect(e.target.value)}>
       <option value="">Select a vendor</option>
       {vendors.map((vendor) => (
         <option key={vendor.id} value={vendor.id}>

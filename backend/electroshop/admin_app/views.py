@@ -3,25 +3,27 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import viewsets,generics,serializers
-from rest_framework import status  
+from rest_framework import status
 
 from rest_framework.permissions import IsAuthenticated
 from django.db.models import Sum,Count
 from orders.models import Order
 from products.models import Product
 from vendors.models import Vendor
-from users.models import CustomUser 
-
-from users.serializers import UserSerializer
 from users.models import CustomUser
+
+from users.serializers import AdminUserSerializer
+from users.models import CustomUser
+from electroshop.permissions import IsAdmin, IsVendor
 
 
 
 
 class UserDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = CustomUser.objects.all()
-    serializer_class = UserSerializer
-    
+    serializer_class = AdminUserSerializer
+    permission_classes = [IsAuthenticated, IsAdmin]
+
     def update(self, request, *args, **kwargs):
         try:
             print('data:', request.data)
@@ -37,13 +39,9 @@ class UserDetailView(generics.RetrieveUpdateDestroyAPIView):
         
         
 class SuperAdminDashboardView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsAdmin]
 
     def get(self, request):
-        if request.user.role != 'admin':
-            print('user is not admin')
-            return Response({'error': 'Unauthorized'}, status=403)
-
         # Fetch total metrics
         total_vendors = Vendor.objects.count()
         total_users = CustomUser.objects.count()
@@ -81,18 +79,20 @@ class SuperAdminDashboardView(APIView):
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = CustomUser.objects.all()
-    serializer_class = UserSerializer
-    
+    serializer_class = AdminUserSerializer
+    permission_classes = [IsAuthenticated, IsAdmin]
+
 class VendorAdminDashboardView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsVendor]
 
     def get(self, request):
-        if not request.user.is_vendor:  # Check if the user is a vendor admin
-            return Response({'error': 'Unauthorized'}, status=403)
+        vendor = Vendor.objects.filter(user=request.user).first()
+        if vendor is None:
+            return Response({'error': 'No vendor profile found for this user.'}, status=404)
 
-        total_products = Product.objects.filter(vendor=request.user.vendor).count()
-        total_orders = Order.objects.filter(product__vendor=request.user.vendor).count()
-        total_sales = Order.objects.filter(product__vendor=request.user.vendor).aggregate(total=Sum('amount'))['total'] or 0
+        total_products = Product.objects.filter(vendor=vendor).count()
+        total_orders = Order.objects.filter(vendor=vendor).count()
+        total_sales = Order.objects.filter(vendor=vendor).aggregate(total=Sum('total_price'))['total'] or 0
 
         data = {
             'totalProducts': total_products,

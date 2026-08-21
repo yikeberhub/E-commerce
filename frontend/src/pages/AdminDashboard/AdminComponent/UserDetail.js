@@ -9,6 +9,8 @@ import {
   FaHistory,
 } from "react-icons/fa"; // Importing icons
 
+const API_URL = process.env.REACT_APP_API_URL;
+
 const UserDetail = () => {
   const { id } = useParams();
   const [user, setUser] = useState(null);
@@ -19,8 +21,10 @@ const UserDetail = () => {
   useEffect(() => {
     const fetchUserDetails = async () => {
       try {
+        const token = localStorage.getItem("access");
         const response = await fetch(
-          `https://extract-id-bot.onrender.com/admin_api/super-admin-dashboard/users/${id}/`
+          `${API_URL}/admin_api/super-admin-dashboard/users/${id}/`,
+          { headers: { Authorization: `Bearer ${token}` } }
         );
         if (!response.ok) {
           throw new Error("Failed to fetch user details");

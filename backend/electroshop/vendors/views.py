@@ -13,18 +13,26 @@ from orders.models import Order,OrderItem
 from orders.serializers import OrderSerializer
 from products.serializers import ProductSerializer
 from products.models import Product
+from electroshop.permissions import IsAdmin, IsOwnerOrAdminOrReadOnly
 
 
 # List and Create Vendors
 class VendorListView(generics.ListCreateAPIView):
     queryset = Vendor.objects.all()
-    permission_classes = [AllowAny]
     serializer_class = VendorSerializer
+
+    def get_permissions(self):
+        # Anyone can browse the vendor list; only an admin can create a
+        # vendor directly here (normal onboarding goes through
+        # VendorRegistrationView, which ties the vendor to its own user).
+        if self.request.method == 'POST':
+            return [IsAuthenticated(), IsAdmin()]
+        return [AllowAny()]
 
 # Retrieve, Update, and Delete Vendor
 class VendorDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Vendor.objects.all()
-    permission_classes = [AllowAny]  
+    permission_classes = [IsOwnerOrAdminOrReadOnly]
     serializer_class = VendorSerializer
  
  
@@ -54,11 +62,12 @@ class VendorOrdersView(generics.ListAPIView):
 
     def get_queryset(self):
         vendor_id = self.kwargs['vendor_id']
-        print('vendor id is',vendor_id)
-        return Order.objects.filter(id=vendor_id)
+        return Order.objects.filter(vendor_id=vendor_id)
 
     def list(self, request, *args, **kwargs):
         vendor = generics.get_object_or_404(Vendor, id=self.kwargs['vendor_id'])
+        if vendor.user_id != request.user.id and request.user.role != 'admin':
+            return Response({'error': 'Not authorized to view this vendor\'s orders.'}, status=status.HTTP_403_FORBIDDEN)
         queryset = self.get_queryset()
         serializer = self.get_serializer(queryset, many=True)
         return Response({
@@ -70,7 +79,7 @@ class VendorOrdersView(generics.ListAPIView):
 
 class VendorProductsView(generics.ListAPIView):
     serializer_class = ProductSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
 
     def get_queryset(self):
         vendor_id = self.kwargs['vendor_id']

@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { FaUser, FaUsers, FaUserPlus } from "react-icons/fa"; // Import icons from React Icons
 
+const API_URL = process.env.REACT_APP_API_URL;
+
 const UserList = () => {
   const [users, setUsers] = useState([]);
   const [filteredUsers, setFilteredUsers] = useState([]);
@@ -10,8 +12,10 @@ const UserList = () => {
 
   useEffect(() => {
     const fetchUsers = async () => {
+      const token = localStorage.getItem("access");
       const response = await fetch(
-        "https://extract-id-bot.onrender.com/admin_api/super-admin-dashboard/users/"
+        `${API_URL}/admin_api/super-admin-dashboard/users/`,
+        { headers: { Authorization: `Bearer ${token}` } }
       );
       const data = await response.json();
       setUsers(data);
@@ -29,10 +33,12 @@ const UserList = () => {
   };
 
   const handleDelete = async (id) => {
+    const token = localStorage.getItem("access");
     await fetch(
-      `https://extract-id-bot.onrender.com/admin_api/super-admin-dashboard/users/${id}/`,
+      `${API_URL}/admin_api/super-admin-dashboard/users/${id}/`,
       {
         method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
       }
     );
     setFilteredUsers(filteredUsers.filter((user) => user.id !== id));
@@ -42,7 +48,7 @@ const UserList = () => {
   const handleRoleChange = async (id, newRole) => {
     const token = localStorage.getItem("access");
     const response = await fetch(
-      `https://extract-id-bot.onrender.com/admin_api/super-admin-dashboard/users/${id}/`,
+      `${API_URL}/admin_api/super-admin-dashboard/users/${id}/`,
       {
         method: "PUT",
         headers: {

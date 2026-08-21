@@ -1,5 +1,8 @@
 import { createContext, useEffect, useState } from "react";
 import SummaryApi from "../common";
+
+const API_URL = process.env.REACT_APP_API_URL;
+
 const ProductContext = createContext(null);
 
 function ProductProvider({ children }) {
@@ -27,9 +30,7 @@ function ProductProvider({ children }) {
 
   const fetchCategories = async () => {
     try {
-      const response = await fetch(
-        "https://extract-id-bot.onrender.com/products/categories/"
-      );
+      const response = await fetch(`${API_URL}/products/categories/`);
       if (!response.ok) {
         throw new Error("Network response was not ok");
       }

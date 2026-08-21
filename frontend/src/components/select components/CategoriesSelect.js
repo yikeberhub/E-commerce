@@ -1,7 +1,11 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect } from "react";
 import { ProductContext } from "../../contexts/ProductContext";
+import { selectClass } from "../../common/formStyles";
 
-function CategoriesSelect({ style }) {
+const embeddedClass =
+  "appearance-none cursor-pointer bg-transparent border-0 shadow-none pl-4 pr-8 py-2.5 text-sm text-slate-600 focus:outline-none focus:ring-0 bg-no-repeat bg-[right_0.6rem_center] bg-[length:12px] bg-[url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%2394a3b8%22 stroke-width=%222.5%22><polyline points=%226 9 12 15 18 9%22/></svg>')]";
+
+function CategoriesSelect({ embedded = false }) {
   const {
     products,
     categories,
@@ -30,15 +34,13 @@ function CategoriesSelect({ style }) {
 
   return (
     <select
-      className={`sm:px-3 text-black focus:outline-none  ${style && style}`}
+      className={embedded ? embeddedClass : selectClass}
       onChange={(e) => handleCategoryChange(e.target.value)}
       value={selectedCategory}
     >
-      <option value="All" className="text-black ">
-        All Categories
-      </option>
+      <option value="All">All Categories</option>
       {categories?.map((cat) => (
-        <option key={cat.title} value={cat.title} className="text-black">
+        <option key={cat.title} value={cat.title}>
           {cat.title}
         </option>
       ))}

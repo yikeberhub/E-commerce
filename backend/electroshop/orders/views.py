@@ -1,6 +1,8 @@
 from django.shortcuts import render,redirect
 from rest_framework import generics,status
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.exceptions import NotFound, APIException
+from django.http import Http404
 from rest_framework.response import Response
 from django.db.models.functions import TruncMonth
 from django.shortcuts import get_object_or_404
@@ -12,10 +14,12 @@ import uuid
 from .models import Order,OrderItem
 from cart.models import Cart
 from users.models import CustomUser,Address
+from vendors.models import Vendor
 
 from .serializers import OrderSerializer,OrderDetailSerializer
 from payments.serializers import PaymentSerializer
 from payments.models import Payment
+from electroshop.permissions import IsOwnerOrAdmin
 logger = logging.getLogger(__name__)
 
 
@@ -80,6 +84,9 @@ class CheckoutView(generics.CreateAPIView):
 
             print('Orders before serialization:', orders)
 
+            # The cart's contents are now committed to orders — clear it.
+            cart.items.all().delete()
+
             # Serialize orders
             serialized_orders = [OrderSerializer(order).data for order in orders]
             return Response({
@@ -105,7 +112,8 @@ class OrderListView(generics.ListAPIView):
         if user.role == 'admin':
             return Order.objects.all()
         elif user.role == 'vendor':
-            return Order.objects.filter(vendor=user.vendor)
+            vendor = Vendor.objects.filter(user=user).first()
+            return Order.objects.filter(vendor=vendor) if vendor else Order.objects.none()
         elif user.role == 'customer':
             print('it is user')
             return Order.objects.filter(user=user)
@@ -124,10 +132,15 @@ class OrderListView(generics.ListAPIView):
 
 
 class UserOrderStatusListView(generics.ListAPIView):
+    permission_classes = [IsAuthenticated]
+
     def get_queryset(self):
         user_id = self.request.query_params.get('user_id')
-        user = get_object_or_404(CustomUser, id=user_id)
-        
+        if user_id and self.request.user.role == 'admin':
+            user = get_object_or_404(CustomUser, id=user_id)
+        else:
+            user = self.request.user
+
         print('user id',user.id)
         order =  Order.objects .filter(user=user).annotate(month=TruncMonth('created_at')).values('month', 'status') .annotate(count=Count('id')).order_by('month', 'status')
         print('order found is',order)
@@ -168,14 +181,15 @@ class UserSalesChartView(APIView):
 
     def get(self, request):
         user_id = request.query_params.get('user_id')
-        
-        if not user_id:
-            return Response({"error": "User ID is required."}, status=400)
+        if user_id and request.user.role == 'admin':
+            target_user_id = user_id
+        else:
+            target_user_id = request.user.id
 
         # Filter orders for the specific user and aggregate total sales by month
         sales_data = (
             Order.objects
-            .filter(user_id=user_id)
+            .filter(user_id=target_user_id)
             .annotate(month=TruncMonth('created_at'))  # Group by month
             .values('month')
             .annotate(total_sales=Sum('total_price'))  # Sum total price
@@ -195,7 +209,7 @@ class UserSalesChartView(APIView):
 
 class OrderDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = OrderDetailSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsOwnerOrAdmin]
     queryset = Order.objects.all()
 
     def get_object(self):
@@ -205,22 +219,22 @@ class OrderDetailView(generics.RetrieveUpdateDestroyAPIView):
             self.check_object_permissions(self.request, order)
             return order
         except Order.DoesNotExist:
-            raise Response({'error': 'Order not found'}, status=status.HTTP_404_NOT_FOUND)
+            raise NotFound('Order not found')
 
     def get(self, request, *args, **kwargs):
         order = self.get_object()
         serializer = self.get_serializer(order)
-        return Response(serializer.data)    
+        return Response(serializer.data)
 
 class OrderUpdateView(generics.UpdateAPIView):
     queryset = Order.objects.all()
-    serializer_class = OrderSerializer
-    
+    serializer_class = OrderDetailSerializer
+    permission_classes = [IsAuthenticated, IsOwnerOrAdmin]
+    lookup_url_kwarg = 'order_id'
 
     def put(self, request, *args, **kwargs):
         try:
-            order_id = self.kwargs['order_id']
-            order = Order.objects.get(id=order_id)
+            order = self.get_object()
             address_id = request.data.get('address_id')
             if address_id:
                 try:
@@ -238,39 +252,8 @@ class OrderUpdateView(generics.UpdateAPIView):
 
         except Order.DoesNotExist:
             return Response({'error': 'Order not found.'}, status=status.HTTP_404_NOT_FOUND)
-        except Exception as e:
-            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        
-        
-class ProcessPaymentView(generics.GenericAPIView):
-    queryset = Order.objects.all()
-
-    def post(self, request, *args, **kwargs):
-        try:
-            order = self.get_object()
-            # Check if payment info is set
-            if not order.payment_method or not order.payment_gateway:
-                return Response({'error': 'Payment information is missing.'}, status=status.HTTP_400_BAD_REQUEST)
-
-            # Process payment using stored payment method and gateway
-            payment_data = process_payment(order, order.payment_method, order.payment_gateway)
-            if payment_data is None:
-                return Response({'error': 'Payment processing failed.'}, status=status.HTTP_400_BAD_REQUEST)
-
-            # If payment is successful, save the transaction ID
-            if not order.payment:
-                # Create and associate a new payment record if needed
-                payment = Payment(...,order=order, transaction_id=payment_data['transaction_id'])
-                payment.save()
-                order.payment = payment
-            
-            order.payment.transaction_id = payment_data['transaction_id']
-            order.payment.save()
-
-            return Response({'message': 'Payment processed successfully.', 'transaction_id': payment_data['transaction_id']}, status=status.HTTP_200_OK)
-
-        except Order.DoesNotExist:
-            return Response({'error': 'Order not found.'}, status=status.HTTP_404_NOT_FOUND)
+        except (APIException, Http404):
+            raise
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -278,3 +261,5 @@ class ProcessPaymentView(generics.GenericAPIView):
 class OrderCancelView(generics.DestroyAPIView):
     serializer_class = OrderSerializer
     queryset = Order.objects.all()
+    permission_classes = [IsAuthenticated, IsOwnerOrAdmin]
+    lookup_url_kwarg = 'order_id'

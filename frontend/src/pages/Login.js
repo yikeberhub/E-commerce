@@ -5,6 +5,8 @@ import { useAuth } from "../contexts/AuthContext";
 import Spinner from "../common/Spinner";
 import AlertModal from "../common/AlertModal"; // adjust the import path if needed
 
+const API_URL = process.env.REACT_APP_API_URL;
+
 const Login = () => {
   const { setTokens, user } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
@@ -35,7 +37,7 @@ const Login = () => {
     try {
       setLoading(true);
       setMessages({});
-      const response = await fetch("https://extract-id-bot.onrender.com/users/login/", {
+      const response = await fetch(`${API_URL}/users/login/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),

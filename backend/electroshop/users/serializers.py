@@ -32,19 +32,42 @@ def set_default_address(id,user):
        
 
 
-class UserSerializer(serializers.ModelSerializer):
-    addresses = AddressSerializer(many=True,read_only=True)
+class PublicUserSerializer(serializers.ModelSerializer):
+    """Safe-to-expose subset of a user, for nesting in other users' views
+    (e.g. a review's author, a vendor's owner) so PII/credentials never leak."""
+
     class Meta:
         model = CustomUser
-        fields = '__all__'
-        
-        def update(self, instance, validated_data):
-            # Update the user fields first
-            instance.username = validated_data.get('username', instance.username)
-            instance.email = validated_data.get('email', instance.email)
-            instance.phone_number = validated_data.get('phone_number', instance.phone_number)
-            instance.save()
-            return instance
+        fields = ['id', 'username', 'first_name', 'last_name', 'profile_image']
+
+
+class OrderContactSerializer(serializers.ModelSerializer):
+    """Safe subset of a user for order participants (vendor/admin viewing a
+    customer's order) — enough to fulfil the order, nothing financial/private."""
+
+    class Meta:
+        model = CustomUser
+        fields = ['id', 'username', 'first_name', 'last_name', 'email', 'phone_number', 'profile_image']
+
+
+class UserSerializer(serializers.ModelSerializer):
+    addresses = AddressSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = CustomUser
+        exclude = ['password']
+        read_only_fields = [
+            'role', 'account_status', 'balance',
+            'is_staff', 'is_superuser', 'is_active',
+            'date_joined', 'last_login',
+        ]
+
+
+class AdminUserSerializer(UserSerializer):
+    """Used only behind admin-only views: lets an admin change role/status/balance."""
+
+    class Meta(UserSerializer.Meta):
+        read_only_fields = ['is_staff', 'is_superuser', 'date_joined', 'last_login']
 
 class RegisterSerializer(serializers.ModelSerializer):
     class Meta:

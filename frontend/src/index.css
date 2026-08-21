@@ -1,9 +1,57 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-/* 
-@layer components {
-  .btn-primary {
-    @apply py-2 px-4 bg-blue-500 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75;
+
+@layer base {
+  body {
+    @apply font-sans text-slate-800 bg-slate-50;
   }
-} */
+}
+
+/* react-slick's default theme draws its own arrow glyph via ::before on
+   .slick-prev/.slick-next regardless of a custom arrow render prop, which
+   doubles up with any icon rendered inside — kill the built-in glyph so
+   only the custom icon shows. */
+.slick-prev:before,
+.slick-next:before {
+  content: none !important;
+}
+
+/* Custom-styled <input type="range"> thumb for a premium look — Tailwind
+   has no utility for range thumbs, so this is plain CSS. */
+.premium-range {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  border-radius: 9999px;
+  background: #e2e8f0;
+  cursor: pointer;
+}
+
+.premium-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 9999px;
+  background: #35a4cc;
+  border: 2px solid #ffffff;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.3);
+  cursor: pointer;
+}
+
+.premium-range::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 9999px;
+  background: #35a4cc;
+  border: 2px solid #ffffff;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.3);
+  cursor: pointer;
+}
+
+.premium-range::-moz-range-track {
+  height: 6px;
+  border-radius: 9999px;
+  background: #e2e8f0;
+}

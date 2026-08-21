@@ -1,5 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { selectClass } from "../../common/formStyles";
 
 const PagesSelect = () => {
   const navigate = useNavigate();
@@ -8,8 +9,8 @@ const PagesSelect = () => {
     { id: "", title: "Home" },
     { id: "vendors", title: "Vendors" },
     { id: "products", title: "Products" },
-    { id: "contact-us", title: "Contact Us" },
-    { id: "categories", title: "categories" },
+    { id: "contact", title: "Contact Us" },
+    { id: "categories", title: "Categories" },
   ];
 
   const handlePageSelect = (pageId) => {
@@ -17,10 +18,7 @@ const PagesSelect = () => {
   };
 
   return (
-    <select
-      className="rounded border px-2 py-1"
-      onChange={(e) => handlePageSelect(e.target.value)}
-    >
+    <select className={selectClass} onChange={(e) => handlePageSelect(e.target.value)}>
       <option value="">Select a page</option>
       {pages.map((page) => (
         <option key={page.id} value={page.id}>

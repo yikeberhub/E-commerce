@@ -1,4 +1,7 @@
 import React, { useState } from "react";
+
+const API_URL = process.env.REACT_APP_API_URL;
+
 const VendorRegistrationModal = ({ isOpen, onClose }) => {
   const [formData, setFormData] = useState({
     title: "",
@@ -29,7 +32,7 @@ const VendorRegistrationModal = ({ isOpen, onClose }) => {
       data.append(key, formData[key]);
     });
     try {
-      const response = await fetch("https://extract-id-bot.onrender.com/vendors/register/", {
+      const response = await fetch(`${API_URL}/vendors/register/`, {
         method: "POST",
         body: data,
         headers: {

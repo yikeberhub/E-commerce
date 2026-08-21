@@ -3,6 +3,8 @@ import { useParams } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import SummaryApi from "../common";
 
+const API_URL = process.env.REACT_APP_API_URL;
+
 const ReviewSection = () => {
   const { id } = useParams();
   const { user } = useAuth();
@@ -20,9 +22,7 @@ const ReviewSection = () => {
 
   const fetchReviews = async () => {
     try {
-      const response = await fetch(
-        `https://extract-id-bot.onrender.com/products/${id}/reviews/`
-      );
+      const response = await fetch(`${API_URL}/products/${id}/reviews/`);
       if (!response.ok) throw new Error("Failed to fetch reviews");
       const data = await response.json();
       setReviews(data);
@@ -50,7 +50,7 @@ const ReviewSection = () => {
       const token = localStorage.getItem("access");
       setLoading(true);
       const response = await fetch(
-        `https://extract-id-bot.onrender.com/products/${id}/reviews/add/`,
+        `${API_URL}/products/${id}/reviews/add/`,
         {
           method: "POST",
           headers: {

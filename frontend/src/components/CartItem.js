@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { FaMinus, FaPlus, FaTimes } from "react-icons/fa";
 import { useCart } from "../contexts/cartContext";
 
 const CartItem = ({ cartItem, calculateItemPrice }) => {
@@ -22,51 +23,68 @@ const CartItem = ({ cartItem, calculateItemPrice }) => {
   };
 
   return (
-    <tr className="py-2  my-1 w-full text-center border border-gray">
-      <td className="pl-4">
-        <img
-          src={cartItem?.product?.image}
-          alt="prod-img"
-          className="w-12 h-12 rounded"
-        />
-      </td>
-      <td>{cartItem.product.title}</td>
-      <td>${cartItem.product.price}</td>
-      <td>
-        <span
-          className="bg-red-500 text-white px-1 py-0 my-1 mx-1 rounded-full shadow-sm hover:bg-green-500 hover:shadow-inner hover:cursor-pointer"
+    <div className="flex flex-wrap sm:flex-nowrap items-center gap-3 sm:gap-4 bg-white rounded-xl border border-slate-100 shadow-card p-3">
+      <img
+        src={cartItem?.product?.image}
+        alt={cartItem.product.title}
+        className="w-16 h-16 rounded-lg object-cover shrink-0"
+      />
+
+      <div className="flex-1 min-w-[140px]">
+        <p className="text-sm font-medium text-slate-800 line-clamp-2">
+          {cartItem.product.title}
+        </p>
+        <p className="text-xs text-slate-500 mt-0.5">
+          {cartItem.product.price} ETB
+        </p>
+      </div>
+
+      <div className="flex items-center gap-2">
+        <button
+          type="button"
           onClick={decreaseQuantity}
+          className="w-7 h-7 rounded-full border border-slate-200 text-slate-500 hover:border-primary-300 hover:text-primary-600 flex items-center justify-center transition"
         >
-          -
+          <FaMinus className="text-[10px]" />
+        </button>
+        <span className="w-6 text-center text-sm font-medium text-slate-700">
+          {quantity}
         </span>
-        {quantity}
-        <span
-          className="bg-green-500 text-white px-1 py-0 my-1 mx-1 rounded-full shadow-sm hover:bg-blue-500 hover:shadow-inner hover:cursor-pointer"
+        <button
+          type="button"
           onClick={increaseQuantity}
+          className="w-7 h-7 rounded-full border border-slate-200 text-slate-500 hover:border-primary-300 hover:text-primary-600 flex items-center justify-center transition"
         >
-          +
-        </span>
-      </td>
-      <td>{subTotal} Birr </td>
-      <td
-        className={
-          "hover:cursor-pointer text-md " +
-          (isUpdated ? "text-red-500" : "text-green-500")
-        }
-        onClick={(e) => {
-          isUpdated && updateCartItem(cartItem.id, quantity);
-          isUpdated && setIsUpdated(false);
-        }}
+          <FaPlus className="text-[10px]" />
+        </button>
+      </div>
+
+      <div className="text-sm font-semibold text-slate-900 w-20 text-right shrink-0">
+        {subTotal} ETB
+      </div>
+
+      {isUpdated && (
+        <button
+          type="button"
+          onClick={() => {
+            updateCartItem(cartItem.id, quantity);
+            setIsUpdated(false);
+          }}
+          className="text-xs font-medium text-primary-600 hover:text-primary-700 shrink-0"
+        >
+          Update
+        </button>
+      )}
+
+      <button
+        type="button"
+        onClick={() => removeCartItem(cartItem.id)}
+        title="Remove"
+        className="text-slate-400 hover:text-red-500 transition shrink-0"
       >
-        {isUpdated ? "update" : "updated"}
-      </td>
-      <td
-        className="text-3xl hover:cursor-pointer"
-        onClick={(e) => removeCartItem(cartItem.id)}
-      >
-        &times;
-      </td>
-    </tr>
+        <FaTimes />
+      </button>
+    </div>
   );
 };
 

@@ -1,11 +1,22 @@
 import React, { useState } from "react";
 import { useAuth } from "../../../contexts/AuthContext";
+import { TextBlockSkeleton, Skeleton } from "../../../common/Skeleton";
 
 const AccountDetail = () => {
   const { user } = useAuth();
   const [error, setError] = useState(null);
 
-  if (!user) return <p className="text-center text-gray-600">Loading...</p>;
+  if (!user)
+    return (
+      <div className="max-w-5xl mx-auto p-8 bg-white rounded-lg shadow-xl mt-8">
+        <div className="flex flex-col md:flex-row items-center gap-6 mb-10">
+          <Skeleton className="w-36 h-36 rounded-full shrink-0" />
+          <div className="w-full">
+            <TextBlockSkeleton lines={4} />
+          </div>
+        </div>
+      </div>
+    );
   if (error) return <p className="text-center text-red-500">{error}</p>;
 
   return (
@@ -20,7 +31,7 @@ const AccountDetail = () => {
             <img
               src={user.profile_image}
               alt="Profile"
-              className="w-36 h-36 rounded-full border-4 border-indigo-300 mb-4 md:mb-0 md:mr-8 shadow-md"
+              className="w-36 h-36 rounded-full border-4 border-primary-200 mb-4 md:mb-0 md:mr-8 shadow-md object-cover"
             />
             <div className="text-center md:text-left">
               <h3 className="text-2xl font-semibold text-gray-900">
@@ -67,7 +78,7 @@ const AccountDetail = () => {
                   className="bg-gray-50 p-5 rounded-lg border border-gray-200 shadow-md hover:shadow-lg transform transition duration-200 hover:scale-105"
                 >
                   <div className="flex items-center justify-between mb-2">
-                    <p className="font-semibold text-lg text-indigo-700">
+                    <p className="font-semibold text-lg text-primary-700">
                       {address.full_name}
                     </p>
                     {address.is_default && (

@@ -1,115 +1,93 @@
 import React from "react";
-import { FaFacebook, FaTwitter, FaInstagram, FaLinkedin } from "react-icons/fa";
+import { Link } from "react-router-dom";
+import { FaEnvelope, FaPhoneAlt, FaMapMarkerAlt } from "react-icons/fa";
+import logo from "../assets/icons/logo.svg";
+
+const SHOP_LINKS = [
+  { label: "Home", to: "/" },
+  { label: "All Products", to: "/products" },
+  { label: "Categories", to: "/categories" },
+  { label: "Vendors", to: "/vendors" },
+];
+
+const COMPANY_LINKS = [
+  { label: "About Us", to: "/about" },
+  { label: "Contact Us", to: "/contact" },
+];
+
+const FooterColumn = ({ title, children }) => (
+  <div>
+    <h3 className="font-semibold text-sm uppercase tracking-wide text-slate-400 mb-4">
+      {title}
+    </h3>
+    {children}
+  </div>
+);
 
 const Footer = () => {
   return (
-    <footer className="bg-gray-200 text-gray-800 py-6 mt-10 w-full">
-      <div className="container mx-auto px-4">
-        <div className="grid  grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-          {/* Company Info */}
-          <div>
-            <h3 className="font-bold text-lg mb-4">Company</h3>
-            <p className="mb-2">
-              <a href="#" className="hover:text-blue-600">
-                About Us
-              </a>
-            </p>
-            <p className="mb-2">
-              <a href="#" className="hover:text-blue-600">
-                Careers
-              </a>
-            </p>
-            <p className="mb-2">
-              <a href="#" className="hover:text-blue-600">
-                Privacy Policy
-              </a>
-            </p>
-            <p className="mb-2">
-              <a href="#" className="hover:text-blue-600">
-                Terms of Service
-              </a>
-            </p>
-          </div>
-
-          {/* Quick Links */}
-          <div>
-            <h3 className="font-bold text-lg mb-4">Quick Links</h3>
-            <p className="mb-2">
-              <a href="#" className="hover:text-blue-600">
-                Shop
-              </a>
-            </p>
-            <p className="mb-2">
-              <a href="#" className="hover:text-blue-600">
-                Contact Us
-              </a>
-            </p>
-            <p className="mb-2">
-              <a href="#" className="hover:text-blue-600">
-                FAQ
-              </a>
-            </p>
-            <p className="mb-2">
-              <a href="#" className="hover:text-blue-600">
-                Returns
-              </a>
-            </p>
-          </div>
-
-          {/* Contact Info */}
-          <div>
-            <h3 className="font-bold text-lg mb-4">Contact Us</h3>
-            <p className="mb-2">
-              Email:{" "}
-              <a
-                href="mailto:yikeber50@gmail.com"
-                className="hover:text-blue-600"
-              >
-                support@example.com
-              </a>
-            </p>
-            <p className="mb-2">Phone: +251946472687</p>
-            <p className="mb-2">
-              Address: Bahir Dar,Ethiopia
-            </p>
-          </div>
-
-          {/* Newsletter Signup */}
-          <div>
-            <h3 className="font-bold text-lg mb-4">Newsletter</h3>
-            <p className="mb-2">
-              Sign up for our newsletter to receive updates and offers.
-            </p>
-            <input
-              type="email"
-              placeholder="Email"
-              className="p-2 rounded bg-white border border-gray-300 w-full mb-2"
-            />
-            <button className="bg-blue-500 text-white p-2 rounded hover:bg-blue-600 transition duration-200 w-full">
-              Subscribe
-            </button>
-          </div>
+    <footer className="w-full bg-slate-900 text-slate-300 mt-16">
+      <div className="max-w-7xl mx-auto px-6 py-12 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-10">
+        <div>
+          <Link to="/" className="flex items-center gap-2 mb-3">
+            <img src={logo} alt="logo" className="w-8 h-8" />
+            <span className="text-xl font-semibold text-white">ጣና ገበያ</span>
+          </Link>
+          <p className="text-sm text-slate-400 leading-relaxed">
+            A multi-vendor marketplace connecting local shops with shoppers
+            across Ethiopia.
+          </p>
         </div>
 
-        <div className="mt-6 border-t border-gray-400 pt-4 text-center">
-          <div className="flex justify-center space-x-4 mb-2">
-            <a href="#" className="text-gray-600 hover:text-blue-600">
-              <FaFacebook />
-            </a>
-            <a href="#" className="text-gray-600 hover:text-blue-600">
-              <FaTwitter />
-            </a>
-            <a href="#" className="text-gray-600 hover:text-blue-600">
-              <FaInstagram />
-            </a>
-            <a href="#" className="text-gray-600 hover:text-blue-600">
-              <FaLinkedin />
-            </a>
-          </div>
-          <p className="text-gray-600 text-sm">
-            &copy; {new Date().getFullYear()} Your Company Name. All Rights
-            Reserved.
-          </p>
+        <FooterColumn title="Shop">
+          <ul className="space-y-2 text-sm">
+            {SHOP_LINKS.map((link) => (
+              <li key={link.to}>
+                <Link to={link.to} className="hover:text-primary-400 transition-colors">
+                  {link.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </FooterColumn>
+
+        <FooterColumn title="Company">
+          <ul className="space-y-2 text-sm">
+            {COMPANY_LINKS.map((link) => (
+              <li key={link.to}>
+                <Link to={link.to} className="hover:text-primary-400 transition-colors">
+                  {link.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </FooterColumn>
+
+        <FooterColumn title="Contact">
+          <ul className="space-y-3 text-sm">
+            <li className="flex items-center gap-2">
+              <FaEnvelope className="text-primary-400 shrink-0" />
+              <a href="mailto:yikeber50@gmail.com" className="hover:text-primary-400 transition-colors">
+                yikeber50@gmail.com
+              </a>
+            </li>
+            <li className="flex items-center gap-2">
+              <FaPhoneAlt className="text-primary-400 shrink-0" />
+              <a href="tel:+251946472687" className="hover:text-primary-400 transition-colors">
+                +251 94 647 2687
+              </a>
+            </li>
+            <li className="flex items-center gap-2">
+              <FaMapMarkerAlt className="text-primary-400 shrink-0" />
+              <span>Bahir Dar, Ethiopia</span>
+            </li>
+          </ul>
+        </FooterColumn>
+      </div>
+
+      <div className="border-t border-slate-800">
+        <div className="max-w-7xl mx-auto px-6 py-5 text-center text-sm text-slate-500">
+          &copy; {new Date().getFullYear()} ጣና ገበያ. All rights reserved.
         </div>
       </div>
     </footer>

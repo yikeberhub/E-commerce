@@ -1,10 +1,14 @@
 import React, { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import Slider from "react-slick";
+import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import { useWishlist } from "../contexts/WishlistContext";
 import { useCart } from "../contexts/cartContext";
+import { Skeleton } from "../common/Skeleton";
+
+const API_URL = process.env.REACT_APP_API_URL;
 
 const PromotedProduct = ({ promotion }) => {
   const { newItem, checkItemInCart, addCartItem, removeCartItem } = useCart();
@@ -42,48 +46,45 @@ const PromotedProduct = ({ promotion }) => {
 
   return (
     <div
-      className="relative mb-4 flex items-center bg-gray-50"
+      className="relative mb-1 rounded-xl overflow-hidden cursor-pointer"
       onClick={() => handleNavigate(promotion.product.id)}
     >
       <img
         src={promotion.product.image}
         alt={promotion.product.title}
-        className="w-auto h-72 object-cover rounded-lg shadow-lg"
+        className="w-full h-56 sm:h-72 object-cover"
       />
 
-      <div className="absolute inset-0 flex flex-col justify-center items-center text-white bg-opacity-50 rounded-lg p-4">
-        <h2 className="text-xl font-bold mb-2 text-blue-500">
+      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent flex flex-col justify-end items-start text-white p-4 sm:p-6">
+        <span className="bg-red-500 text-white text-xs font-bold px-2.5 py-1 rounded-full mb-2">
+          {promotion.discount_percentage}% OFF
+        </span>
+        <h2 className="text-lg sm:text-2xl font-bold mb-1">
           {promotion.product.title}
         </h2>
-        <p className="text-md mb-2 text-center text-blue-400">
+        <p className="text-sm text-white/80 mb-3 max-w-md line-clamp-2">
           {promotion.description}
         </p>
-        <span className="bg-red-600 text-white font-bold px-4 py-2 rounded-full mb-2">
-          {promotion.discount_percentage}%
-        </span>
-        <div className="flex space-x-2 mt-2">
+        <div className="flex flex-wrap gap-2">
           <button
-            className="bg-blue-500 text-white px-4 py-2 rounded-lg"
-            onClick={handleAddToCart}
+            className="bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleAddToCart();
+            }}
           >
-            {!addedToCart ? (
-              <span>Add to Cart</span>
-            ) : (
-              <span>Remove from Cart</span>
-            )}
+            {!addedToCart ? "Add to Cart" : "Remove from Cart"}
           </button>
           <button
-            className="bg-gray-400 text-white px-4 py-2 rounded-lg"
-            onClick={handleAddToWishlist}
+            className="bg-white/90 hover:bg-white text-slate-800 text-sm font-medium px-4 py-2 rounded-lg transition"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleAddToWishlist();
+            }}
           >
-            {!addedToWishlist ? (
-              <span>Add to Wishlist</span>
-            ) : (
-              <span>Remove from Wishlist</span>
-            )}
+            {!addedToWishlist ? "Add to Wishlist" : "Remove from Wishlist"}
           </button>
         </div>
-        <p className="text-md mt-2">{promotion.product.title}</p>
       </div>
     </div>
   );
@@ -97,7 +98,7 @@ const Promotions = () => {
   useEffect(() => {
     const fetchPromotions = async () => {
       try {
-        const response = await fetch("https://extract-id-bot.onrender.com/promotions/");
+        const response = await fetch(`${API_URL}/promotions/`);
         if (!response.ok) {
           throw new Error("Network response was not ok");
         }
@@ -115,60 +116,39 @@ const Promotions = () => {
   }, []);
 
   if (loading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="bg-white rounded-xl shadow-card p-4 sm:p-5 my-4">
+        <Skeleton className="h-4 w-32 mb-4" />
+        <Skeleton className="w-full h-56 sm:h-72 rounded-xl" />
+      </div>
+    );
   }
 
   if (error) {
-    return <div>Error: {error}</div>;
+    return <div className="text-red-500 text-center">{error}</div>;
   }
 
-  const SampleNextArrow = (props) => {
-    const { className, style, onClick } = props;
-    return (
-      <div
-        className={`${className} right-0 top-1/2 transform -translate-y-1/2 z-10`}
-        style={{
-          ...style,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          background: "#007BFF",
-          borderRadius: "50%",
-          width: "40px",
-          height: "40px",
-          color: "#000000",
-          cursor: "pointer",
-          boxShadow: "0 2px 5px rgba(0,0,0,0.3)",
-        }}
-        onClick={onClick}
-        aria-label="Next"
-      ></div>
-    );
-  };
+  const SampleNextArrow = ({ onClick }) => (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label="Next"
+      className="absolute right-3 top-1/2 -translate-y-1/2 z-10 w-9 h-9 rounded-full bg-white/90 backdrop-blur shadow-md flex items-center justify-center text-slate-700 hover:bg-white transition"
+    >
+      <FiChevronRight />
+    </button>
+  );
 
-  const SamplePrevArrow = (props) => {
-    const { className, style, onClick } = props;
-    return (
-      <div
-        className={`${className} left-0 top-1/2 transform -translate-y-1/2 z-10`}
-        style={{
-          ...style,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          background: "#007BFF",
-          borderRadius: "50%",
-          width: "40px",
-          height: "40px",
-          color: "#000000",
-          cursor: "pointer",
-          boxShadow: "0 2px 5px rgba(0,0,0,0.3)",
-        }}
-        onClick={onClick}
-        aria-label="Previous"
-      ></div>
-    );
-  };
+  const SamplePrevArrow = ({ onClick }) => (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label="Previous"
+      className="absolute left-3 top-1/2 -translate-y-1/2 z-10 w-9 h-9 rounded-full bg-white/90 backdrop-blur shadow-md flex items-center justify-center text-slate-700 hover:bg-white transition"
+    >
+      <FiChevronLeft />
+    </button>
+  );
 
   const settings = {
     dots: true,
@@ -200,10 +180,8 @@ const Promotions = () => {
 
   return (
     promotions.length !== 0 && (
-      <div className="w-full">
-        <h2 className="text-2xl font-bold mb-4 text-black text-left mt-2 bg-gray-100">
-          Promotion
-        </h2>
+      <div className="bg-white rounded-xl shadow-card p-4 sm:p-5 my-4">
+        <h2 className="text-xl font-bold text-slate-900 mb-2">Promotions</h2>
         <Slider {...settings}>
           {promotions.map((promotion) => (
             <PromotedProduct key={promotion.id} promotion={promotion} />

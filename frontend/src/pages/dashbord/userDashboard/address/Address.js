@@ -2,6 +2,8 @@ import { React, useEffect, useState } from "react";
 import { useAuth } from "../../../../contexts/AuthContext";
 import EditAddress from "./EditAddress";
 
+const API_URL = process.env.REACT_APP_API_URL;
+
 function Address() {
   const { user, fetchUserInfo } = useAuth();
   const [defaultAddress, setDefaultAddress] = useState(1);
@@ -14,7 +16,7 @@ function Address() {
     const token = localStorage.getItem("access");
     try {
       const response = await fetch(
-        `https://extract-id-bot.onrender.com/users/address/${id}/set-default/`,
+        `${API_URL}/users/address/${id}/set-default/`,
         {
           method: "PUT",
           headers: {
@@ -40,7 +42,7 @@ function Address() {
     console.log("address id", addressId);
     try {
       const response = await fetch(
-        `https://extract-id-bot.onrender.com/users/address/${addressId}/delete/`,
+        `${API_URL}/users/address/${addressId}/delete/`,
         {
           method: "DELETE",
           headers: {

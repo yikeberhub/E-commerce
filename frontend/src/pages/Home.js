@@ -1,6 +1,5 @@
-import { React, useContext, useEffect } from "react";
-import { Link } from "react-router-dom";
-import { FaMobileAlt } from "react-icons/fa"; // Importing an icon
+import { React, useContext, useEffect, useState } from "react";
+import { FaFilter } from "react-icons/fa";
 import ProductLists from "../components/ProductList";
 import CategoryLists from "../components/CategoryLists";
 import Promotions from "../components/Promotions";
@@ -12,11 +11,14 @@ import FilterByVendor from "../components/filters/FilterByVendor";
 import FilterByCategory from "../components/filters/FilterByCategory";
 import FilterByTags from "../components/filters/FilterByTags";
 import FeaturedProducts from "../components/FeaturedProducts";
-import Spinner from "../common/Spinner";
+import { ProductGridSkeleton } from "../common/Skeleton";
+import Drawer from "../common/Drawer";
+
 function Home() {
   const { products, loading, searchTerm, getProducts } =
     useContext(ProductContext);
   const { authTokens, fetchUserInfo } = useAuth();
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
   useEffect(() => {
     getProducts();
@@ -28,25 +30,49 @@ function Home() {
     }
   }, [authTokens]);
 
-  if (loading) {
-    return <div><Spinner/></div>;
-  }
+  const filterPanels = (
+    <>
+      <CategoryLists />
+      <FilterByPrice />
+      <FilterByVendor />
+      <FilterByCategory />
+      <FilterByTags />
+    </>
+  );
 
   return (
-    <div className="grid sm:grid-cols-5 md:grid-cols-7 lg:grid-cols-9 gap-2">
-      <div className="lg:col-span-2  w-full lg:px-2 md:top-0 sm:col-span-1 md:col-span-1">
-        <CategoryLists />
-        <FilterByPrice />
-        <FilterByVendor />
-        <FilterByCategory />
-        <FilterByTags />
-      </div>
-      <div className="sm:col-span-4 md:col-span-4 lg:col-span-7 items-center justify-center   shadow-md">
+    <div className="max-w-7xl mx-auto px-4 py-4 grid grid-cols-1 lg:grid-cols-4 gap-6">
+      <aside className="hidden lg:flex lg:col-span-1 flex-col gap-4">
+        {filterPanels}
+      </aside>
+
+      <div className="lg:col-span-3 flex flex-col gap-4">
+        <button
+          type="button"
+          onClick={() => setFiltersOpen(true)}
+          className="lg:hidden self-start flex items-center gap-1.5 text-sm font-medium bg-white shadow-card border border-slate-100 rounded-lg px-3 py-2 hover:border-primary-300 hover:text-primary-600 transition"
+        >
+          <FaFilter className="text-xs" /> Filters &amp; Categories
+        </button>
+
         {!searchTerm && <Promotions />}
         {!searchTerm && <FeaturedProducts />}
         <HomeNavLink />
-        <ProductLists products={products} />
+        {loading ? (
+          <ProductGridSkeleton count={10} />
+        ) : (
+          <ProductLists products={products} />
+        )}
       </div>
+
+      <Drawer
+        open={filtersOpen}
+        onClose={() => setFiltersOpen(false)}
+        title="Filters & Categories"
+        position="bottom"
+      >
+        <div className="flex flex-col gap-4">{filterPanels}</div>
+      </Drawer>
     </div>
   );
 }

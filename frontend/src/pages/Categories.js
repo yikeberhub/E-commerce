@@ -4,12 +4,13 @@ import { ProductContext } from "../contexts/ProductContext.js";
 import CategoryLists from "../components/CategoryLists.js";
 import Breadcrumb from "../components/BreadCrumb.js";
 import { useBreadcrumb } from "../contexts/BreadCrumbContext.js";
+import { ProductGridSkeleton } from "../common/Skeleton";
+import EmptyState from "../common/EmptyState";
+import { selectClass, inputClass } from "../common/formStyles";
 
 const Categories = () => {
   const { categories } = useContext(ProductContext);
   const { addBreadcrumb, clearBreadcrumbs } = useBreadcrumb();
-
-  console.log("cat....", categories);
 
   const [searchTerm, setSearchTerm] = useState("");
   const [itemsToShow, setItemsToShow] = useState(50);
@@ -21,46 +22,47 @@ const Categories = () => {
     addBreadcrumb({ label: "Categories", path: "/categories" });
   }, []);
 
-  if (!categories) return <div>Loading...</div>;
+  if (!categories) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 py-4">
+        <ProductGridSkeleton count={8} columns="grid-cols-2 sm:grid-cols-3 lg:grid-cols-4" />
+      </div>
+    );
+  }
 
   const filteredCategories = categories.filter((category) =>
     category.title.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const sortedCategories = filteredCategories.sort((a, b) => {
-    if (sortOrder === "featured") {
-      return a.id - b.id;
-    } else if (sortOrder === "alphabetical") {
-      return a.title.localeCompare(b.title);
-    }
-
+  const sortedCategories = [...filteredCategories].sort((a, b) => {
+    if (sortOrder === "featured") return a.id - b.id;
+    if (sortOrder === "alphabetical") return a.title.localeCompare(b.title);
     return 0;
   });
 
   return (
-    <div className="bg-gray-100 min-h-screen mx-auto text-black container my-1">
-      <div className="w-full mb-4 bg-gray-200 rounded-md py-6 mx-auto shadow-lg px-2 lg:px-10">
-        <h2 className="text-3xl font-mono font-semibold mb-2">Categories</h2>
-        <Breadcrumb />
-      </div>
+    <div className="max-w-7xl mx-auto px-4 py-4">
+      <div className="bg-white rounded-xl shadow-card p-5 mb-6">
+        <h1 className="text-2xl font-bold text-slate-900">Categories</h1>
+        <div className="mb-2">
+          <Breadcrumb />
+        </div>
 
-      <div>
-        {/* Controls for filtering and sorting */}
-        <div className="flex flex-row items-center justify-between mt-4 space-x-2">
-          <h1 className="py-1 mx-2 text-3xl font-semibold font-mono shadow-sm">
-            {categories?.length} Categories
-          </h1>
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 mt-4">
+          <h2 className="text-sm text-slate-500 shrink-0">
+            {categories?.length} categories
+          </h2>
           <input
             type="text"
-            placeholder="Search Categories"
+            placeholder="Search categories"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="border border-gray-300 rounded-md p-2 mb-2 md:mb-0 md:mr-2 w-1/3 focus:outline-blue-500"
+            className={`${inputClass} sm:max-w-xs sm:ml-auto`}
           />
           <select
             value={itemsToShow}
             onChange={(e) => setItemsToShow(Number(e.target.value))}
-            className="border border-gray-300 rounded-md p-2 mb-2 md:mb-0 md:mr-2"
+            className={selectClass}
           >
             <option value={50}>Show 50</option>
             <option value={100}>Show 100</option>
@@ -68,39 +70,53 @@ const Categories = () => {
           <select
             value={sortOrder}
             onChange={(e) => setSortOrder(e.target.value)}
-            className="border border-gray-300 rounded-md p-2"
+            className={selectClass}
           >
             <option value="featured">Sort by Featured</option>
             <option value="alphabetical">Sort Alphabetically</option>
           </select>
         </div>
-        <div className="flex flex-row gap-2 w-full">
-          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-4 gap-6 p-6 w-4/5">
-            {sortedCategories.slice(0, itemsToShow).map((category) => (
-              <div
-                key={category.id}
-                className="bg-white rounded-lg shadow-md overflow-hidden transition-transform transform hover:scale-105"
-              >
-                <img
-                  src={category.image}
-                  alt={category.title}
-                  className="w-full h-4/5  object-cover"
-                />
-                <Link to={`/categories/${category.id}`}>
-                  <div className="px-3">
-                    <h2 className="text-lg font-semibold">{category.title}</h2>
-                    <p className="text-gray-600 font-mono text-sm">
+      </div>
+
+      <div className="flex flex-col lg:flex-row gap-6">
+        <div className="flex-1 min-w-0">
+          {sortedCategories.length === 0 ? (
+            <EmptyState
+              title="No categories found"
+              description="Try a different search term."
+            />
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+              {sortedCategories.slice(0, itemsToShow).map((category) => (
+                <Link
+                  to={`/categories/${category.id}`}
+                  key={category.id}
+                  className="group bg-white rounded-xl border border-slate-100 shadow-card hover:shadow-soft hover:-translate-y-0.5 transition-all duration-300 overflow-hidden"
+                >
+                  <div className="aspect-square bg-slate-50 overflow-hidden">
+                    <img
+                      src={category.image}
+                      alt={category.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                  </div>
+                  <div className="p-3">
+                    <h3 className="text-sm font-semibold text-slate-800 group-hover:text-primary-600 transition-colors">
+                      {category.title}
+                    </h3>
+                    <p className="text-xs text-slate-500 mt-0.5">
                       {category.num_of_products} products
                     </p>
                   </div>
                 </Link>
-              </div>
-            ))}
-          </div>
-          <div className="w-1/5 ">
-            <CategoryLists />
-          </div>
+              ))}
+            </div>
+          )}
         </div>
+
+        <aside className="w-full lg:w-64 shrink-0">
+          <CategoryLists />
+        </aside>
       </div>
     </div>
   );

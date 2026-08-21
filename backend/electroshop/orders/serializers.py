@@ -54,5 +54,5 @@ class OrderDetailSerializer(serializers.ModelSerializer):
         return AddressSerializer(obj.address).data
 
     def get_user(self, obj):
-        from users.serializers import UserSerializer 
-        return UserSerializer(obj.user).data
+        from users.serializers import OrderContactSerializer
+        return OrderContactSerializer(obj.user).data
