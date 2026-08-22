@@ -7,6 +7,7 @@ import {
   FiX,
   FiPackage,
   FiStar,
+  FiImage,
 } from "react-icons/fi";
 import { useAuth } from "../../../contexts/AuthContext";
 import { inputClass, selectClass } from "../../../common/formStyles";
@@ -42,6 +43,102 @@ const emptyForm = {
   featured: false,
   image: null,
 };
+
+function ProductGallery({ productId }) {
+  const { authTokens } = useAuth();
+  const [images, setImages] = useState([]);
+  const [uploading, setUploading] = useState(false);
+  const [deletingId, setDeletingId] = useState(null);
+
+  useEffect(() => {
+    fetch(`${API_URL}/products/${productId}/`)
+      .then((r) => r.json())
+      .then((data) => setImages(data.images || []))
+      .catch(() => {});
+  }, [productId]);
+
+  const handleUpload = async (e) => {
+    const files = Array.from(e.target.files);
+    if (!files.length) return;
+    const formData = new FormData();
+    files.forEach((f) => formData.append("image", f));
+
+    try {
+      setUploading(true);
+      const response = await fetch(`${API_URL}/products/${productId}/images/`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${authTokens.access}` },
+        body: formData,
+      });
+      if (response.ok) {
+        const newImages = await response.json();
+        setImages((prev) => [...prev, ...newImages]);
+      }
+    } finally {
+      setUploading(false);
+      e.target.value = "";
+    }
+  };
+
+  const handleDelete = async (imageId) => {
+    setDeletingId(imageId);
+    try {
+      const response = await fetch(`${API_URL}/products/images/${imageId}/`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${authTokens.access}` },
+      });
+      if (response.ok) {
+        setImages((prev) => prev.filter((img) => img.id !== imageId));
+      }
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
+  return (
+    <div>
+      <label className="flex items-center gap-1.5 text-sm font-medium text-slate-700 mb-1.5">
+        <FiImage className="text-slate-400" /> Additional Photos
+      </label>
+      {images.length > 0 && (
+        <div className="flex flex-wrap gap-2 mb-2">
+          {images.map((img) => (
+            <div key={img.id} className="relative w-16 h-16 group">
+              <img
+                src={img.image}
+                alt=""
+                className="w-16 h-16 rounded-lg object-cover border border-slate-200"
+              />
+              <button
+                type="button"
+                onClick={() => handleDelete(img.id)}
+                disabled={deletingId === img.id}
+                className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-red-500 text-white flex items-center justify-center text-[10px] opacity-0 group-hover:opacity-100 transition disabled:opacity-60"
+                aria-label="Remove photo"
+              >
+                <FiX />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+      <label
+        className={`inline-block text-xs font-medium text-primary-600 hover:text-primary-700 cursor-pointer ${
+          uploading ? "opacity-60 pointer-events-none" : ""
+        }`}
+      >
+        {uploading ? "Uploading..." : "+ Add photos"}
+        <input
+          type="file"
+          accept="image/*"
+          multiple
+          onChange={handleUpload}
+          className="hidden"
+        />
+      </label>
+    </div>
+  );
+}
 
 function ProductForm({ initial, categories, tags, onCancel, onSaved }) {
   const { authTokens } = useAuth();
@@ -298,6 +395,8 @@ function ProductForm({ initial, categories, tags, onCancel, onSaved }) {
               </div>
             </div>
           )}
+
+          {isEdit && <ProductGallery productId={initial.id} />}
 
           <label className="flex items-center gap-2 text-sm text-slate-600">
             <input

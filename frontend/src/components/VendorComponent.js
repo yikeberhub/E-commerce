@@ -1,10 +1,133 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { FiStar, FiMapPin, FiPhone, FiX } from "react-icons/fi";
+import { FiStar, FiMapPin, FiPhone, FiX, FiMessageCircle, FiSend } from "react-icons/fi";
 import Card from "../utilities/CardComp";
 import { inputClass } from "../common/formStyles";
+import { useAuth } from "../contexts/AuthContext";
 
 const API_URL = process.env.REACT_APP_API_URL;
+
+const MessageVendorModal = ({ vendorUserId, vendorTitle, onClose }) => {
+  const { authTokens } = useAuth();
+  const [messages, setMessages] = useState([]);
+  const [body, setBody] = useState("");
+  const [sending, setSending] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const messagesEndRef = useRef(null);
+
+  const fetchThread = async () => {
+    try {
+      const response = await fetch(`${API_URL}/chats/${vendorUserId}/`, {
+        headers: { Authorization: `Bearer ${authTokens.access}` },
+      });
+      if (response.ok) setMessages(await response.json());
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchThread();
+    const interval = setInterval(fetchThread, 5000);
+    return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  const handleSend = async (e) => {
+    e.preventDefault();
+    if (!body.trim()) return;
+    setSending(true);
+    try {
+      const response = await fetch(`${API_URL}/chats/${vendorUserId}/`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${authTokens.access}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ body }),
+      });
+      if (response.ok) {
+        const newMessage = await response.json();
+        setMessages((prev) => [...prev, newMessage]);
+        setBody("");
+      }
+    } finally {
+      setSending(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 px-4">
+      <div className="w-full max-w-md bg-white rounded-2xl shadow-soft flex flex-col h-[70vh] max-h-[560px]">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
+          <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+            <FiMessageCircle className="text-primary-500" /> Message {vendorTitle}
+          </h2>
+          <button
+            type="button"
+            onClick={onClose}
+            className="text-slate-400 hover:text-slate-600 transition"
+            aria-label="Close"
+          >
+            <FiX className="text-xl" />
+          </button>
+        </div>
+
+        <div className="flex-1 overflow-y-auto px-4 py-3 flex flex-col gap-2 bg-slate-50/40">
+          {loading ? (
+            <p className="text-xs text-slate-400 text-center py-6">Loading...</p>
+          ) : messages.length === 0 ? (
+            <p className="text-xs text-slate-400 text-center py-6">
+              Say hello — ask about stock, shipping, or anything else.
+            </p>
+          ) : (
+            messages.map((msg) => {
+              const isMine = msg.sender.id !== vendorUserId;
+              return (
+                <div
+                  key={msg.id}
+                  className={`max-w-[80%] rounded-xl px-3 py-2 text-sm ${
+                    isMine
+                      ? "self-end bg-primary-600 text-white rounded-br-sm"
+                      : "self-start bg-white border border-slate-100 text-slate-700 rounded-bl-sm"
+                  }`}
+                >
+                  {msg.body}
+                </div>
+              );
+            })
+          )}
+          <div ref={messagesEndRef} />
+        </div>
+
+        <form
+          onSubmit={handleSend}
+          className="flex items-center gap-2 px-4 py-3 border-t border-slate-100"
+        >
+          <input
+            type="text"
+            value={body}
+            onChange={(e) => setBody(e.target.value)}
+            placeholder="Type a message..."
+            className="flex-1 rounded-full border border-slate-200 px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-400"
+          />
+          <button
+            type="submit"
+            disabled={sending || !body.trim()}
+            className="flex items-center justify-center w-9 h-9 rounded-full bg-primary-600 hover:bg-primary-700 disabled:opacity-60 text-white transition shrink-0"
+            aria-label="Send"
+          >
+            <FiSend className="text-sm" />
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+};
 
 const VendorRegistrationModal = ({ isOpen, onClose }) => {
   const [formData, setFormData] = useState({
@@ -249,7 +372,9 @@ const StatBlock = ({ label, value }) => (
 );
 
 const VendorComponent = ({ vendor }) => {
+  const { user } = useAuth();
   const [isModalOpen, setModalOpen] = useState(false);
+  const [messageModalOpen, setMessageModalOpen] = useState(false);
 
   return (
     <Card title="Vendor">
@@ -298,6 +423,25 @@ const VendorComponent = ({ vendor }) => {
               value={vendor.chat_response_time}
             />
           </div>
+
+          {vendor.user && (user?.id !== vendor.user.id) && (
+            user ? (
+              <button
+                type="button"
+                onClick={() => setMessageModalOpen(true)}
+                className="w-full flex items-center justify-center gap-2 mt-4 bg-primary-50 hover:bg-primary-100 text-primary-600 text-sm font-medium py-2 rounded-lg transition"
+              >
+                <FiMessageCircle className="text-sm" /> Message Vendor
+              </button>
+            ) : (
+              <Link
+                to="/login"
+                className="w-full flex items-center justify-center gap-2 mt-4 bg-primary-50 hover:bg-primary-100 text-primary-600 text-sm font-medium py-2 rounded-lg transition"
+              >
+                <FiMessageCircle className="text-sm" /> Log in to Message Vendor
+              </Link>
+            )
+          )}
         </>
       ) : (
         <p className="text-sm text-slate-400">Vendor information unavailable.</p>
@@ -318,6 +462,14 @@ const VendorComponent = ({ vendor }) => {
         isOpen={isModalOpen}
         onClose={() => setModalOpen(false)}
       />
+
+      {messageModalOpen && vendor?.user && (
+        <MessageVendorModal
+          vendorUserId={vendor.user.id}
+          vendorTitle={vendor.title}
+          onClose={() => setMessageModalOpen(false)}
+        />
+      )}
     </Card>
   );
 };

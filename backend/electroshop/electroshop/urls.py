@@ -17,6 +17,8 @@ urlpatterns = [
     path('promotions/', include('promotions.urls')),
     path('cart/', include('cart.urls')),
     path('wishlist/', include('wishlists.urls')),
+    path('notifications/', include('notifications.urls')),
+    path('chats/', include('chats.urls')),
 
 ]
 if settings.DEBUG:  

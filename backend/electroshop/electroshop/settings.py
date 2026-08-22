@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     "notifications",
     "cart",
     "wishlists",
+    "chats",
 ]
 
 REST_FRAMEWORK = {

@@ -2,6 +2,7 @@ import uuid
 from django.shortcuts import get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
+from rest_framework import generics
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -9,8 +10,9 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 
 from orders.models import Order
+from vendors.models import Vendor
 from .models import Payment
-from .serializers import PaymentSerializer
+from .serializers import PaymentSerializer, VendorPaymentSerializer
 from chapa import Chapa
 from .check_payment import verify_payment
 
@@ -129,3 +131,18 @@ def check_payment_status(request, payment_reference):
         user.save()
 
     return Response({"payments": payment_responses}, status=status.HTTP_200_OK)
+
+
+class VendorPaymentsView(generics.ListAPIView):
+    """Payment history for the authenticated vendor's own orders."""
+    serializer_class = VendorPaymentSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.role == 'admin':
+            return Payment.objects.select_related('order', 'order__user').all()
+        vendor = Vendor.objects.filter(user=user).first()
+        if not vendor:
+            return Payment.objects.none()
+        return Payment.objects.select_related('order', 'order__user').filter(order__vendor=vendor)

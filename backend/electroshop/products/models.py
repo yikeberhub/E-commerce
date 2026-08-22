@@ -116,8 +116,10 @@ class ProductImages(models.Model):
 class ProductReview(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='reviews')
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
-    rating = models.PositiveIntegerField()  
+    rating = models.PositiveIntegerField()
     comment = models.TextField(blank=True, null=True)
+    vendor_reply = models.TextField(blank=True, null=True)
+    vendor_reply_at = models.DateTimeField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

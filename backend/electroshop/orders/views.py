@@ -20,6 +20,7 @@ from .serializers import OrderSerializer,OrderDetailSerializer
 from payments.serializers import PaymentSerializer
 from payments.models import Payment
 from electroshop.permissions import IsOwnerOrAdmin
+from notifications.utils import notify
 logger = logging.getLogger(__name__)
 
 
@@ -79,8 +80,18 @@ class CheckoutView(generics.CreateAPIView):
 
                 orders.append(order)
                 order_ids.append(order.id)
-                print('Vendor total:', vendor_total)
-                print('success')
+
+                if vendor and vendor.user:
+                    try:
+                        notify(
+                            recipient=vendor.user,
+                            notification_type='order',
+                            title=f'New order #{order.id}',
+                            message=f'{request.user.username} placed an order worth {vendor_total} ETB.',
+                            link=f'/vendor-dashboard/orders',
+                        )
+                    except Exception:
+                        pass
 
             print('Orders before serialization:', orders)
 
@@ -274,6 +285,18 @@ class OrderStatusUpdateView(generics.UpdateAPIView):
 
         order.status = new_status
         order.save(update_fields=['status', 'updated_at'])
+
+        try:
+            notify(
+                recipient=order.user,
+                notification_type='order',
+                title=f'Order #{order.id} is now {VALID_STATUSES[new_status].lower()}',
+                message=f'Your order from {order.vendor.title if order.vendor else "the vendor"} was updated.',
+                link=f'/user-dashboard/orders/{order.id}',
+            )
+        except Exception:
+            pass
+
         serializer = self.get_serializer(order)
         return Response(serializer.data)
 
@@ -323,5 +346,21 @@ class OrderCancelView(generics.DestroyAPIView):
             )
         order.status = 'canceled'
         order.save(update_fields=['status', 'updated_at'])
+
+        other_party = (
+            (order.vendor.user if order.vendor else None)
+            if request.user == order.user
+            else order.user
+        )
+        try:
+            notify(
+                recipient=other_party,
+                notification_type='order',
+                title=f'Order #{order.id} was canceled',
+                message=f'{request.user.username} canceled order #{order.id}.',
+            )
+        except Exception:
+            pass
+
         serializer = self.get_serializer(order)
         return Response(serializer.data, status=status.HTTP_200_OK)

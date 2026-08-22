@@ -29,8 +29,21 @@ class TransactionSerializer(serializers.ModelSerializer):
 class PaymentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Payment
-        fields = ['order', 'payment_status', 'transaction_id', 'amount', 'currency', 'payment_method', 
+        fields = ['order', 'payment_status', 'transaction_id', 'amount', 'currency', 'payment_method',
                   'chapa_sub_method', 'charge', 'payment_gateway', 'created_at', 'updated_at']
+
+
+class VendorPaymentSerializer(serializers.ModelSerializer):
+    order_id = serializers.IntegerField(source='order.id', read_only=True)
+    customer = serializers.CharField(source='order.user.username', read_only=True)
+
+    class Meta:
+        model = Payment
+        fields = [
+            'id', 'order_id', 'customer', 'payment_status', 'transaction_id',
+            'amount', 'currency', 'payment_method', 'chapa_sub_method',
+            'payment_gateway', 'created_at',
+        ]
         
    
     def create(self, validated_data):

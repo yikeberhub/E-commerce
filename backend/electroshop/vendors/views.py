@@ -8,18 +8,20 @@ from rest_framework.exceptions import NotFound
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework import status
+from django.db.models import Sum, Count, Avg
+from django.db.models.functions import TruncMonth
 from .models import Vendor
-from .serializer import VendorSerializer
+from .serializer import VendorSerializer, MyVendorSerializer
 from orders.models import Order,OrderItem
 from orders.serializers import OrderSerializer
 from products.serializers import ProductSerializer
-from products.models import Product
+from products.models import Product, ProductReview
 from electroshop.permissions import IsAdmin, IsOwnerOrAdminOrReadOnly
 
 
 class MyVendorView(generics.RetrieveAPIView):
     """Returns the authenticated user's own vendor profile."""
-    serializer_class = VendorSerializer
+    serializer_class = MyVendorSerializer
     permission_classes = [IsAuthenticated]
 
     def get_object(self):
@@ -110,4 +112,58 @@ class VendorProductsView(generics.ListAPIView):
         return Response({
             "vendor": vendor.title,
             "products": serializer.data
+        })
+
+
+class VendorAnalyticsView(APIView):
+    """Revenue trend, order-status breakdown, and top products for the
+    authenticated vendor's own store."""
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        vendor = Vendor.objects.filter(user=request.user).first()
+        if not vendor and request.user.role != 'admin':
+            return Response({'error': 'You do not have a vendor profile.'}, status=status.HTTP_403_FORBIDDEN)
+
+        orders = Order.objects.filter(vendor=vendor) if vendor else Order.objects.all()
+
+        revenue_by_month = (
+            orders.annotate(month=TruncMonth('created_at'))
+            .values('month')
+            .annotate(total=Sum('total_price'))
+            .order_by('month')
+        )
+        revenue_trend = [
+            {'month': row['month'].strftime('%b %Y'), 'total': float(row['total'] or 0)}
+            for row in revenue_by_month
+        ]
+
+        status_breakdown = list(
+            orders.values('status').annotate(count=Count('id')).order_by('-count')
+        )
+
+        products_qs = Product.objects.filter(vendor=vendor) if vendor else Product.objects.all()
+        top_products = (
+            OrderItem.objects.filter(order__in=orders, product__in=products_qs)
+            .values('product__id', 'product__title')
+            .annotate(units_sold=Sum('quantity'))
+            .order_by('-units_sold')[:5]
+        )
+
+        rating_avg = ProductReview.objects.filter(product__in=products_qs).aggregate(avg=Avg('rating'))['avg']
+
+        return Response({
+            'summary': {
+                'total_revenue': float(orders.exclude(status__in=['pending', 'payment_processing', 'payment_failed', 'canceled']).aggregate(t=Sum('total_price'))['t'] or 0),
+                'total_orders': orders.count(),
+                'total_products': products_qs.count(),
+                'average_rating': round(rating_avg, 2) if rating_avg else None,
+                'balance': float(vendor.balance) if vendor else None,
+            },
+            'revenue_trend': revenue_trend,
+            'status_breakdown': status_breakdown,
+            'top_products': [
+                {'id': row['product__id'], 'title': row['product__title'], 'units_sold': row['units_sold']}
+                for row in top_products
+            ],
         })

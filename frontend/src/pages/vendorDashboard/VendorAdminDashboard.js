@@ -1,14 +1,27 @@
 import React, { useEffect, useState } from "react";
 import { NavLink, Outlet } from "react-router-dom";
-import { FiBox, FiShoppingBag, FiUsers } from "react-icons/fi";
+import {
+  FiBarChart2,
+  FiBox,
+  FiShoppingBag,
+  FiUsers,
+  FiMessageSquare,
+  FiMessageCircle,
+  FiCreditCard,
+} from "react-icons/fi";
 import { useAuth } from "../../contexts/AuthContext";
+import NotificationBell from "../../common/NotificationBell";
 
 const API_URL = process.env.REACT_APP_API_URL;
 
 const navItems = [
+  { to: "statistics", label: "Statistics", icon: FiBarChart2 },
   { to: "products", label: "Products", icon: FiBox },
   { to: "orders", label: "Orders", icon: FiShoppingBag },
   { to: "customers", label: "Customers", icon: FiUsers },
+  { to: "feedback", label: "Feedback", icon: FiMessageSquare },
+  { to: "chats", label: "Chats", icon: FiMessageCircle },
+  { to: "payments", label: "Payments", icon: FiCreditCard },
 ];
 
 const VendorAdminDashboard = () => {
@@ -33,6 +46,11 @@ const VendorAdminDashboard = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-4">
+      <div className="flex items-center justify-between mb-4">
+        <h1 className="text-lg font-bold text-slate-900">Vendor Dashboard</h1>
+        <NotificationBell />
+      </div>
+
       <div className="flex flex-col lg:flex-row gap-6">
         <aside className="w-full lg:w-64 shrink-0">
           <div className="bg-white rounded-xl border border-slate-100 shadow-card p-4 flex flex-col items-center text-center mb-4">

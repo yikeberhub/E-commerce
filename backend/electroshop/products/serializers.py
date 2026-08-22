@@ -22,10 +22,18 @@ class TagSerializer(serializers.ModelSerializer):
 
 class ProductReviewSerializer(serializers.ModelSerializer):
     user = PublicUserSerializer(read_only=True)
+    product_title = serializers.CharField(source='product.title', read_only=True)
+
     class Meta:
         model = ProductReview
-        fields = ['id', 'user', 'rating', 'comment', 'created_at', 'updated_at']
-        read_only_fields = ['id', 'user', 'created_at', 'updated_at']
+        fields = [
+            'id', 'user', 'product', 'product_title', 'rating', 'comment',
+            'vendor_reply', 'vendor_reply_at', 'created_at', 'updated_at',
+        ]
+        read_only_fields = [
+            'id', 'user', 'product', 'product_title',
+            'vendor_reply', 'vendor_reply_at', 'created_at', 'updated_at',
+        ]
 
     def create(self, validated_data):
         request = self.context.get('request')

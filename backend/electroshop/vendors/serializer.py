@@ -16,6 +16,13 @@ class VendorSerializer(serializers.ModelSerializer):
         exclude = ['balance']
 
     def create(self, validated_data):
-        vendor = Vendor(**validated_data)  
+        vendor = Vendor(**validated_data)
         vendor.save()
         return vendor
+
+
+class MyVendorSerializer(VendorSerializer):
+    """Same as VendorSerializer but includes balance — safe here since
+    this is only ever used to show a vendor their own profile."""
+    class Meta(VendorSerializer.Meta):
+        exclude = []
