@@ -5,17 +5,11 @@ import { ProductContext } from "../../contexts/ProductContext";
 import { inputClass } from "../../common/formStyles";
 
 function FilterByPrice() {
-  const { products, onFilterProducts } = useContext(ProductContext);
+  const { setFilter } = useContext(ProductContext);
   const [price, setPrice] = useState(0);
 
   const handleSearch = () => {
-    if (price > 0) {
-      const filteredProducts = products.filter(
-        (product) => product.price <= Number(price)
-      );
-
-      onFilterProducts(filteredProducts);
-    }
+    setFilter("maxPrice", Number(price) > 0 ? Number(price) : null);
   };
 
   return (

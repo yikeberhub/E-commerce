@@ -1,17 +1,18 @@
-import { React, useEffect, useState } from "react";
+import React, { useState } from "react";
+import { FiPlus, FiTrash2, FiEdit2, FiCheckCircle, FiMapPin } from "react-icons/fi";
 import { useAuth } from "../../../../contexts/AuthContext";
+import EmptyState from "../../../../common/EmptyState";
 import EditAddress from "./EditAddress";
 
 const API_URL = process.env.REACT_APP_API_URL;
 
 function Address() {
   const { user, fetchUserInfo } = useAuth();
-  const [defaultAddress, setDefaultAddress] = useState(1);
   const [openedEditAddress, setOpenedEditAddress] = useState(false);
   const [openedCreateAddress, setOpenedCreateAddress] = useState(false);
   const [numSelected, setNumSelected] = useState(false);
   const addresses = user.addresses;
-  
+
   const handleSetDefault = async (id) => {
     const token = localStorage.getItem("access");
     try {
@@ -26,20 +27,16 @@ function Address() {
         }
       );
       if (!response.ok) {
-        throw new Error("Couldn't delete Address");
+        throw new Error("Couldn't set default address");
       }
-      const responseData = await response.json();
-      console.log("you added default address!", responseData.address.id);
       fetchUserInfo();
-      setDefaultAddress(responseData.address.id);
     } catch (error) {
-      console.log("Error", error.message);
+      console.error("Error", error.message);
     }
   };
 
   const handleDeleteAddress = async (addressId) => {
     const token = localStorage.getItem("access");
-    console.log("address id", addressId);
     try {
       const response = await fetch(
         `${API_URL}/users/address/${addressId}/delete/`,
@@ -54,138 +51,142 @@ function Address() {
       if (!response.ok) {
         throw new Error("Couldn't delete Address");
       }
-      const data = await response.json();
-      console.log("address deleted successfully!", data);
       fetchUserInfo();
     } catch (error) {
-      console.log("Error", error.message);
+      console.error("Error", error.message);
     }
   };
 
-  if (!user.addresses) return <div>No address Found...</div>;
+  if (!addresses) return null;
 
   return (
-    <div className=" w-full items-center shadow-md rounded-sms px-2 py-2 mx-0">
-      <div className="w-full bg-white">
-        <div className="flex flex-row items-center justify-start gap-x-4">
-          <h1 className="text-2xl py-2 px-2  font-mono  ">My Address</h1>
-          {!openedCreateAddress && (
-            <button
-              className="bg-green-500 py-1 rounded-md px-2"
-              onClick={() => setOpenedCreateAddress(true)}
-            >
-              Create Address
-            </button>
-          )}
-        </div>
-        <div className="flex flex-row gap-2 w-full">
-          <div
-            className={`${
-              !openedCreateAddress &&
-              !openedEditAddress &&
-              "grid grid-cols-2 gap-x-4"
-            } py-2 px-2 bg-white w-2/3`}
+    <div className="bg-white rounded-xl border border-slate-100 shadow-card p-5">
+      <div className="flex items-center justify-between mb-4">
+        <h1 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+          <FiMapPin className="text-primary-500" /> My Addresses
+        </h1>
+        {!openedCreateAddress && (
+          <button
+            className="flex items-center gap-1.5 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium px-3.5 py-2 rounded-lg transition"
+            onClick={() => setOpenedCreateAddress(true)}
           >
-            {addresses.map((address, key) => (
-              <div
-                className="flex flex-row gap-2 py-1 w-fit mb-2 text-gray-700 bg-gray-50  shadow-md "
-                key={address.id}
-              >
-                <div className="px-2 py-2 ">
-                  <div className="flex flex-row gap-4 items-center">
-                    <h2 className="bg-gray-200 px-2 py-1 rounded-sm w-fit">
+            <FiPlus className="text-xs" /> Add Address
+          </button>
+        )}
+      </div>
+
+      <div className="flex flex-col lg:flex-row gap-4">
+        <div className="flex-1 min-w-0">
+          {addresses.length === 0 ? (
+            <EmptyState
+              title="No addresses yet"
+              description="Add an address to speed up checkout."
+            />
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {addresses.map((address, key) => (
+                <div
+                  key={address.id}
+                  className="bg-slate-50 rounded-xl border border-slate-100 p-4"
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-semibold text-slate-500 bg-slate-100 px-2 py-1 rounded-md">
                       Address {key + 1}
-                    </h2>
-                    <span
-                      className="text-xs hover:cursor-pointer hover:text-sm"
-                      onClick={() => handleDeleteAddress(address.id)}
-                    >
-                      ❌
                     </span>
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteAddress(address.id)}
+                      className="text-slate-400 hover:text-red-500 transition"
+                      aria-label="Delete address"
+                    >
+                      <FiTrash2 className="text-sm" />
+                    </button>
                   </div>
 
-                  <div className="grid grid-cols-2 py-2  items-center gap-x-1 text-sm text-gray-700 ">
-                    <div className="flex flex-row gap-1 my-1 text-center">
-                      <p>Full Name:</p>
-                      <p className="text-xs">{address.full_name}</p>
-                    </div>
-                    <div className="flex flex-row gap-1 my-1">
-                      <p>Phone Number:</p>
-                      <p className="text-xs">{address.phone_number}</p>
-                    </div>
-                    <div className="flex flex-row gap-1 my-1">
-                      <p>Kebele:</p>
-                      <p className="text-xs">{address.kebele}</p>
-                    </div>
-                    <div className="flex flex-row gap-1 py-1">
-                      <p>City:</p>
-                      <p className="text-xs">{address.city}</p>
-                    </div>
-                    <div className="flex flex-row gap-1 py-1">
-                      <p> Woreda:</p>
-                      <p className="text-xs">{address.woreda}</p>
-                    </div>
-                    <div className="flex flex-row gap-1 py-1">
-                      <p>Region:</p>
-                      <p className="text-xs">{address.region}</p>
-                    </div>
-                    <div className="flex flex-row gap-1 py-1">
-                      <p>Postal Code:</p>
-                      <p className="text-xs">{address.postal_code}</p>
-                    </div>
+                  <div className="grid grid-cols-2 gap-x-2 gap-y-1 text-xs text-slate-600">
+                    <p>
+                      <span className="text-slate-400">Name:</span>{" "}
+                      {address.full_name}
+                    </p>
+                    <p>
+                      <span className="text-slate-400">Phone:</span>{" "}
+                      {address.phone_number}
+                    </p>
+                    <p>
+                      <span className="text-slate-400">Kebele:</span>{" "}
+                      {address.kebele}
+                    </p>
+                    <p>
+                      <span className="text-slate-400">City:</span>{" "}
+                      {address.city}
+                    </p>
+                    <p>
+                      <span className="text-slate-400">Woreda:</span>{" "}
+                      {address.woreda}
+                    </p>
+                    <p>
+                      <span className="text-slate-400">Region:</span>{" "}
+                      {address.region}
+                    </p>
+                    <p className="col-span-2">
+                      <span className="text-slate-400">Postal Code:</span>{" "}
+                      {address.postal_code || "N/A"}
+                    </p>
                   </div>
-                  <div className="flex flex-row justify-between">
-                    {defaultAddress !== address.id ? (
+
+                  <div className="flex items-center justify-between mt-3 pt-3 border-t border-slate-200/70">
+                    {!address.is_default ? (
                       <button
-                        className="mx-2 py-2 shadow-md rounded-sm w-fit px-2 flex flex-row gap-2 items-center"
-                        onClick={() => {
-                          handleSetDefault(address.id);
-                          console.log("here is addres id:", address.id);
-                        }}
+                        className="text-xs font-medium text-slate-500 hover:text-primary-600 transition"
+                        onClick={() => handleSetDefault(address.id)}
                       >
-                        make Default
+                        Make Default
                       </button>
                     ) : (
-                      <span>✅</span>
+                      <span className="flex items-center gap-1 text-xs font-medium text-emerald-600">
+                        <FiCheckCircle /> Default
+                      </span>
                     )}
                     {!openedEditAddress && (
                       <button
-                        className="bg-green-500 py-1 rounded-md px-2"
+                        className="flex items-center gap-1 text-xs font-medium text-primary-600 hover:text-primary-700 transition"
                         onClick={() => {
                           setOpenedEditAddress(address.id);
                           setNumSelected(key + 1);
                         }}
                       >
-                        Edit Address
+                        <FiEdit2 className="text-xs" /> Edit
                       </button>
                     )}
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
+        </div>
 
-          {openedCreateAddress && (
+        {openedCreateAddress && (
+          <div className="w-full lg:w-96 shrink-0">
             <EditAddress
               create={true}
               edit={false}
               use={false}
               setOpenedCreateAddress={setOpenedCreateAddress}
               showCloseBtn={true}
-              shadow="shadow-2xl shadow-gray-700"
             />
-          )}
-          {openedEditAddress && (
+          </div>
+        )}
+        {openedEditAddress && (
+          <div className="w-full lg:w-96 shrink-0">
             <EditAddress
               id={openedEditAddress}
               numSelected={numSelected}
               setOpenedEditAddress={setOpenedEditAddress}
               showCloseBtn={true}
               edit={true}
-              shadow="shadow-2xl shadow-gray-700"
             />
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );

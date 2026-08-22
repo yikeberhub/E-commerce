@@ -143,3 +143,14 @@ CORS_ALLOW_HEADERS = ["content-type", "authorization", "x-csrftoken"]
 CHAPA_SECRET_KEY = config("CHAPA_SECRET_KEY", default="")
 FRONTEND_URL = config('FRONTEND_URL',default="")
 CHAPA_API_URL = config("CHAPA_API_URL", default="https://api.chapa.co/v1/transaction/initialize")
+
+# Email — defaults to printing to the console in DEBUG since no SMTP server is configured.
+EMAIL_BACKEND = config(
+    "EMAIL_BACKEND",
+    default=(
+        "django.core.mail.backends.console.EmailBackend"
+        if DEBUG
+        else "django.core.mail.backends.smtp.EmailBackend"
+    ),
+)
+DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL", default="no-reply@electroshop.local")

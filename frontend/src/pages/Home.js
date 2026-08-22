@@ -15,13 +15,14 @@ import { ProductGridSkeleton } from "../common/Skeleton";
 import Drawer from "../common/Drawer";
 
 function Home() {
-  const { products, loading, searchTerm, getProducts } =
+  const { loading, searchTerm, getProducts, resetFilters } =
     useContext(ProductContext);
   const { authTokens, fetchUserInfo } = useAuth();
   const [filtersOpen, setFiltersOpen] = useState(false);
 
   useEffect(() => {
     getProducts();
+    return () => resetFilters();
   }, []);
 
   useEffect(() => {
@@ -61,7 +62,7 @@ function Home() {
         {loading ? (
           <ProductGridSkeleton count={10} />
         ) : (
-          <ProductLists products={products} />
+          <ProductLists />
         )}
       </div>
 

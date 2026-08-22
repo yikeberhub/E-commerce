@@ -258,8 +258,25 @@ class OrderUpdateView(generics.UpdateAPIView):
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
+CANCELABLE_STATUSES = {'pending', 'payment_processing', 'processing'}
+
+
 class OrderCancelView(generics.DestroyAPIView):
+    """Cancels an order by setting its status to 'canceled' rather than
+    deleting it, so order history is preserved for the customer/vendor/admin."""
     serializer_class = OrderSerializer
     queryset = Order.objects.all()
     permission_classes = [IsAuthenticated, IsOwnerOrAdmin]
     lookup_url_kwarg = 'order_id'
+
+    def destroy(self, request, *args, **kwargs):
+        order = self.get_object()
+        if order.status not in CANCELABLE_STATUSES:
+            return Response(
+                {'detail': f"An order that is already '{order.get_status_display()}' can't be canceled."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        order.status = 'canceled'
+        order.save(update_fields=['status', 'updated_at'])
+        serializer = self.get_serializer(order)
+        return Response(serializer.data, status=status.HTTP_200_OK)

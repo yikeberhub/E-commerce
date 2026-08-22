@@ -1,6 +1,6 @@
 import React, { createContext, useState, useContext, useEffect } from "react";
 import SummaryApi from "../common";
-import { useNavigate } from "react-router-dom";
+import { useAuth } from "./AuthContext";
 
 const API_URL = process.env.REACT_APP_API_URL;
 
@@ -14,13 +14,18 @@ export const CartProvider = ({ children }) => {
   const [error, setError] = useState(null);
   const [message, setMessage] = useState(null);
   const [newItem, setNewItem] = useState({ product_id: "", quantity: 1 });
-  const navigate = useNavigate();
+  const { authTokens } = useAuth();
 
-  const token = localStorage.getItem("access");
+  const token = authTokens?.access;
 
   useEffect(() => {
+    if (!token) {
+      setCart([]);
+      setLoading(false);
+      return;
+    }
     fetchCart();
-  }, []);
+  }, [token]);
 
   const checkItemInCart = (product_id) => {
     let result = { isAdded: false, item: null };
@@ -50,8 +55,6 @@ export const CartProvider = ({ children }) => {
         },
       });
       if (!response.ok) {
-        setMessage("Please login first");
-        navigate("/");
         throw new Error("failed to fetch cart");
       }
       const data = await response.json();

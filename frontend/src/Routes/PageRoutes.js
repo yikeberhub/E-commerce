@@ -4,6 +4,7 @@ import Home from "../pages/Home";
 import Login from "../pages/Login";
 import SignUp from "../pages/SignUp";
 import ForgotPassword from "../pages/ForgotPassword";
+import ResetPassword from "../pages/ResetPassword";
 import Categories from "../pages/Categories";
 import Cart from "../pages/Cart";
 import Vendors from "../pages/Vendors";
@@ -26,6 +27,7 @@ const PageRoutes = () => {
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<SignUp />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/categories" element={<Categories />} />
       <Route path="/categories/:id" element={<ProductCategory />} />
       <Route path="/cart" element={<Cart />} />

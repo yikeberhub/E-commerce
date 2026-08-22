@@ -1,19 +1,29 @@
-import { createContext, useEffect, useState } from "react";
+import { createContext, useEffect, useMemo, useState } from "react";
 import SummaryApi from "../common";
 
 const API_URL = process.env.REACT_APP_API_URL;
 
 const ProductContext = createContext(null);
 
+const initialFilters = {
+  maxPrice: null,
+  categoryTitles: [],
+  categoryId: null,
+  vendorTitles: [],
+  tags: [],
+  rating: "All",
+  discount: "",
+  sortOrder: "default",
+};
+
 function ProductProvider({ children }) {
   const [products, setProduct] = useState([]);
   const [categories, setCategories] = useState([]);
 
   const [selectedProduct, setSelectedProduct] = useState(null);
-  const [filteredProducts, setFilteredProducts] = useState(products);
-  const [showSearchedProducts, setShowSearchedProducts] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
+  const [filters, setFilters] = useState(initialFilters);
 
   const [loading, setLoading] = useState(true);
 
@@ -21,10 +31,11 @@ function ProductProvider({ children }) {
     getProducts();
   }, []);
 
-  const handleFilterProduct = (products) => {
-    setFilteredProducts(products);
-    setShowSearchedProducts((state) => !state);
+  const setFilter = (key, value) => {
+    setFilters((prev) => ({ ...prev, [key]: value }));
   };
+
+  const resetFilters = () => setFilters(initialFilters);
 
   const handleSetProduct = (products) => setProduct(products);
 
@@ -36,7 +47,6 @@ function ProductProvider({ children }) {
       }
       const categoryData = await response.json();
       setCategories(categoryData);
-      console.log("Fetched categories:", categoryData);
     } catch (error) {
       console.error("Error fetching categories:", error);
     }
@@ -65,6 +75,76 @@ function ProductProvider({ children }) {
     }
   };
 
+  const filteredProducts = useMemo(() => {
+    let result = products;
+
+    if (searchTerm) {
+      const term = searchTerm.toLowerCase();
+      result = result.filter((product) =>
+        product.title?.toLowerCase().includes(term)
+      );
+    }
+
+    if (selectedCategory !== "All") {
+      result = result.filter(
+        (product) => product.category?.title === selectedCategory
+      );
+    }
+
+    if (filters.categoryId != null) {
+      result = result.filter(
+        (product) => product.category?.id === filters.categoryId
+      );
+    }
+
+    if (filters.categoryTitles.length > 0) {
+      result = result.filter(
+        (product) =>
+          product.category && filters.categoryTitles.includes(product.category.title)
+      );
+    }
+
+    if (filters.vendorTitles.length > 0) {
+      result = result.filter((product) =>
+        filters.vendorTitles.includes(product?.vendor?.title)
+      );
+    }
+
+    if (filters.tags.length > 0) {
+      result = result.filter((product) =>
+        product.tags?.some((tag) => filters.tags.includes(tag.name))
+      );
+    }
+
+    if (filters.maxPrice != null && filters.maxPrice > 0) {
+      result = result.filter((product) => product.price <= filters.maxPrice);
+    }
+
+    if (filters.rating !== "All") {
+      result = result.filter(
+        (product) => product.average_rating >= Number(filters.rating)
+      );
+    }
+
+    if (filters.discount !== "") {
+      const threshold = parseInt(filters.discount, 10);
+      result =
+        threshold === 0
+          ? result.filter((product) => !product.discount_percentage)
+          : result.filter(
+              (product) => (product.discount_percentage || 0) >= threshold
+            );
+    }
+
+    if (filters.sortOrder === "priceLowToHigh") {
+      result = [...result].sort((a, b) => a.price - b.price);
+    } else if (filters.sortOrder === "priceHighToLow") {
+      result = [...result].sort((a, b) => b.price - a.price);
+    }
+
+    return result;
+  }, [products, searchTerm, selectedCategory, filters]);
+
   return (
     <ProductContext.Provider
       value={{
@@ -80,8 +160,10 @@ function ProductProvider({ children }) {
         setLoading,
         getProducts: getProducts,
         filteredProducts,
+        filters,
+        setFilter,
+        resetFilters,
         selectedProduct,
-        onFilterProducts: handleFilterProduct,
         onSetProduct: handleSetProduct,
       }}
     >

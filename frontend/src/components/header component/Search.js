@@ -1,31 +1,10 @@
-import React, { useContext, useEffect } from "react";
+import React, { useContext } from "react";
 import { FaSearch } from "react-icons/fa";
 import { ProductContext } from "../../contexts/ProductContext";
 import CategoriesSelect from "../select components/CategoriesSelect";
 
 function Search() {
-  const {
-    products,
-    searchTerm,
-    selectedCategory,
-    setSearchTerm,
-    onFilterProducts,
-  } = useContext(ProductContext);
-
-  useEffect(() => {
-    const filteredProducts = products.filter((product) => {
-      const matchesTitle = product.title
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase());
-      if (selectedCategory !== "All") {
-        const matchesCategory = product.category?.title === selectedCategory;
-        return matchesTitle && matchesCategory;
-      }
-      return matchesTitle;
-    });
-
-    onFilterProducts(filteredProducts);
-  }, [searchTerm, selectedCategory, products]);
+  const { searchTerm, setSearchTerm } = useContext(ProductContext);
 
   const handleFilterChange = (e) => {
     setSearchTerm(e.target.value);

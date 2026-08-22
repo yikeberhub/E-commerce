@@ -1,21 +1,42 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
+import { FiStar, FiMessageSquare } from "react-icons/fi";
 import { useAuth } from "../contexts/AuthContext";
-import SummaryApi from "../common";
+import { inputClass } from "../common/formStyles";
+import AccountIcon from "../assets/icons/user.svg";
 
 const API_URL = process.env.REACT_APP_API_URL;
 
+const StarPicker = ({ value, onChange }) => (
+  <div className="flex items-center gap-1">
+    {[1, 2, 3, 4, 5].map((num) => (
+      <button
+        type="button"
+        key={num}
+        onClick={() => onChange(num)}
+        aria-label={`${num} star${num > 1 ? "s" : ""}`}
+        className="text-xl transition"
+      >
+        <FiStar
+          className={
+            num <= value
+              ? "fill-current text-amber-400"
+              : "text-slate-300 hover:text-amber-300"
+          }
+        />
+      </button>
+    ))}
+  </div>
+);
+
 const ReviewSection = () => {
   const { id } = useParams();
-  const { user } = useAuth();
+  const { user, authTokens } = useAuth();
   const [reviews, setReviews] = useState([]);
   const [newReview, setNewReview] = useState("");
   const [rating, setRating] = useState(0);
   const [loading, setLoading] = useState(false);
 
-  console.log("product id is", id);
-
-  // Fetch reviews on component mount or when product id changes
   useEffect(() => {
     fetchReviews();
   }, [id]);
@@ -33,33 +54,24 @@ const ReviewSection = () => {
 
   const handleReviewSubmit = async (e) => {
     e.preventDefault();
-    if (!user) {
-      alert("You need to be logged in to submit a review.");
-      return;
-    }
+    if (!user || !rating) return;
 
     const reviewData = {
       comment: newReview,
       rating,
-      //   user: user.id,
       product: id,
     };
 
-    console.log("review data is", reviewData);
     try {
-      const token = localStorage.getItem("access");
       setLoading(true);
-      const response = await fetch(
-        `${API_URL}/products/${id}/reviews/add/`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(reviewData),
-        }
-      );
+      const response = await fetch(`${API_URL}/products/${id}/reviews/add/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${authTokens.access}`,
+        },
+        body: JSON.stringify(reviewData),
+      });
       if (!response.ok) throw new Error("Failed to submit review");
 
       const newReviewData = await response.json();
@@ -74,83 +86,89 @@ const ReviewSection = () => {
   };
 
   return (
-    <div className="mt-6">
-      <h2 className="text-2xl font-semibold mb-4">Reviews</h2>
+    <div className="bg-white rounded-xl border border-slate-100 shadow-card p-5 mt-6">
+      <h2 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+        <FiMessageSquare className="text-primary-500" /> Reviews
+      </h2>
 
-      {/* Existing Reviews */}
-      <div className="space-y-4 mb-4">
+      <div className="flex flex-col gap-4 mb-6">
         {reviews.length ? (
           reviews.map((review) => (
-            <div key={review.id} className="border-b border-gray-300 pb-4">
-              <div className="flex flex-row space-x-2">
-                <img
-                  src={review.user.profile_image}
-                  alt="img"
-                  className="h-7 w-7 rounded-full"
-                />
-                <p className="text-lg font-semibold">
-                  {review.user.first_name}
+            <div
+              key={review.id}
+              className="flex gap-3 pb-4 border-b border-slate-100 last:border-b-0 last:pb-0"
+            >
+              <img
+                src={review.user?.profile_image || AccountIcon}
+                alt=""
+                className="h-9 w-9 rounded-full object-cover shrink-0"
+              />
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-slate-800">
+                  {review.user?.first_name || review.user?.username || "Anonymous"}
+                </p>
+                <div className="flex items-center gap-0.5 text-amber-400 my-0.5">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <FiStar
+                      key={i}
+                      className={
+                        i < review.rating ? "fill-current" : "text-slate-200"
+                      }
+                    />
+                  ))}
+                </div>
+                <p className="text-sm text-slate-600">{review.comment}</p>
+                <p className="text-xs text-slate-400 mt-1">
+                  {new Date(review.created_at).toLocaleDateString()}
                 </p>
               </div>
-              <p className="text-yellow-500">
-                {"⭐".repeat(review.rating)}( {review.rating})
-              </p>
-              <p className="text-gray-700">{review.comment}</p>
-              <small className="text-gray-500">
-                {new Date(review.created_at).toLocaleDateString()}
-              </small>
             </div>
           ))
         ) : (
-          <p>No reviews yet. Be the first to review this product!</p>
+          <p className="text-sm text-slate-400">
+            No reviews yet. Be the first to review this product!
+          </p>
         )}
       </div>
 
-      {/* New Review Form */}
-      <div className="border-t border-gray-300 pt-4">
-        <h3 className="text-xl font-semibold mb-2">Add a Review</h3>
-        <form onSubmit={handleReviewSubmit} className="space-y-3">
-          <div>
-            <label htmlFor="rating" className="block text-gray-700">
-              Rating:
-            </label>
-            <select
-              id="rating"
-              value={rating}
-              onChange={(e) => setRating(Number(e.target.value))}
-              required
-              className="w-full border border-gray-300 rounded-md p-2"
+      <div className="border-t border-slate-100 pt-4">
+        <h3 className="text-sm font-semibold text-slate-800 mb-3">
+          Add a Review
+        </h3>
+
+        {!user ? (
+          <p className="text-sm text-slate-500">
+            Please log in to write a review.
+          </p>
+        ) : (
+          <form onSubmit={handleReviewSubmit} className="flex flex-col gap-3">
+            <div>
+              <label className="block text-xs font-medium text-slate-600 mb-1.5">
+                Your Rating
+              </label>
+              <StarPicker value={rating} onChange={setRating} />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-slate-600 mb-1.5">
+                Your Review
+              </label>
+              <textarea
+                value={newReview}
+                onChange={(e) => setNewReview(e.target.value)}
+                required
+                placeholder="Write your review here"
+                className={`${inputClass} min-h-[90px]`}
+              />
+            </div>
+            <button
+              type="submit"
+              disabled={loading || !rating}
+              className="self-start bg-primary-600 hover:bg-primary-700 disabled:opacity-60 disabled:cursor-not-allowed text-white text-sm font-medium px-5 py-2 rounded-lg transition"
             >
-              <option value="">Select Rating</option>
-              {[1, 2, 3, 4, 5].map((num) => (
-                <option key={num} value={num}>
-                  {"⭐".repeat(num)}({num})
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label htmlFor="review" className="block text-gray-700">
-              Review:
-            </label>
-            <textarea
-              id="review"
-              value={newReview}
-              onChange={(e) => setNewReview(e.target.value)}
-              required
-              placeholder="Write your review here"
-              className="w-full border border-gray-300 rounded-md p-2"
-              rows="4"
-            />
-          </div>
-          <button
-            type="submit"
-            className="bg-blue-600 text-white rounded-md px-4 py-2 hover:bg-blue-700 transition"
-            disabled={loading}
-          >
-            {loading ? "Submitting..." : "Submit Review"}
-          </button>
-        </form>
+              {loading ? "Submitting..." : "Submit Review"}
+            </button>
+          </form>
+        )}
       </div>
     </div>
   );

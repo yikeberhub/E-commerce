@@ -1,66 +1,63 @@
 import React, { useContext, useEffect } from "react";
-import { Link } from "react-router-dom";
 import Breadcrumb from "../components/BreadCrumb";
 import { useParams } from "react-router-dom";
 import { ProductContext } from "../contexts/ProductContext";
 import { useBreadcrumb } from "../contexts/BreadCrumbContext";
 import CategoryLists from "../components/CategoryLists";
+import EmptyState from "../common/EmptyState";
 
 import Product from "../components/Product";
 
 function ProductCategory() {
-  const { products, filteredProducts, onFilterProducts } =
+  const { filteredProducts, setFilter, resetFilters } =
     useContext(ProductContext);
   const { addBreadcrumb, clearBreadcrumbs } = useBreadcrumb();
   const { id } = useParams("id");
-  console.log("filtered context", products);
 
   useEffect(() => {
-    const fetchProductsByCategory = () => {
-      console.log("i am called");
-      const productsInCategory = products.filter(
-        (product) => product.category?.id === Number(id)
-      );
-      console.log("products filterred is", productsInCategory);
-      onFilterProducts(productsInCategory);
-    };
-
-    fetchProductsByCategory();
+    setFilter("categoryId", Number(id));
+    return () => resetFilters();
   }, [id]);
 
   useEffect(() => {
     clearBreadcrumbs();
     addBreadcrumb({ label: "Home", path: "/" });
     addBreadcrumb({ label: "Categories", path: "/categories" });
-    addBreadcrumb({ label: filteredProducts[0]?.category?.title });
-  }, []);
+    if (filteredProducts[0]?.category?.title) {
+      addBreadcrumb({ label: filteredProducts[0].category.title });
+    }
+  }, [id, filteredProducts]);
 
-  console.log("param", id);
   return (
-    <div className=" min-h-screen mx-auto text-black container my-1">
-      <div className="w-full mb-4 bg-gray-200 rounded-md py-6 mx-auto shadow-lg px-2 lg:px-10">
-        <h2 className="text-3xl font-mono font-semibold mb-2">Categories</h2>
+    <div className="max-w-7xl mx-auto px-4 py-4">
+      <div className="bg-white rounded-xl shadow-card px-4 py-3 mb-4">
         <Breadcrumb />
       </div>
-      <div className="mx-auto px-3  w-full shadow-sm bg-gray-50">
-        <p className="text-md  px-2 py-1 text-fuchsia-500">
-          We found {filteredProducts.length} products for you!
-        </p>
-      </div>
-      <div className="flex flex-row gap-2 w-full">
-        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-4 gap-6 p-6 w-4/5">
-          {filteredProducts.map((product) => (
-            <div
-              key={product.id}
-              className="bg-white rounded-lg shadow-md overflow-hidden transition-transform transform hover:scale-105"
-            >
-              <Product product={product} />
+
+      <div className="flex flex-col lg:flex-row gap-6">
+        <div className="flex-1 min-w-0">
+          <p className="text-sm text-slate-500 mb-4">
+            We found {filteredProducts.length} product
+            {filteredProducts.length === 1 ? "" : "s"} for you!
+          </p>
+
+          {filteredProducts.length === 0 ? (
+            <EmptyState
+              title="No products in this category"
+              description="Check back later or browse other categories."
+            />
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+              {filteredProducts.map((product) => (
+                <Product product={product} key={product.id} />
+              ))}
             </div>
-          ))}
+          )}
         </div>
-        <div className="w-1/5 ">
+
+        <aside className="w-full lg:w-64 shrink-0">
           <CategoryLists />
-        </div>
+        </aside>
       </div>
     </div>
   );

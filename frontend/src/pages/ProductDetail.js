@@ -1,16 +1,31 @@
 import { React, useContext, useEffect, useState, useRef } from "react";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { ProductContext } from "../contexts/ProductContext";
 import CategoryLists from "../components/CategoryLists";
 import ProductLists from "../components/ProductList";
-import { FiShoppingBag, FiCheck, FiHeart } from "react-icons/fi";
-import { FaHeart } from "react-icons/fa";
+import { FiShoppingBag, FiCheck, FiHeart, FiMapPin } from "react-icons/fi";
+import { FaHeart, FaStar } from "react-icons/fa";
 import { useCart } from "../contexts/cartContext";
+import { useAuth } from "../contexts/AuthContext";
 import SummaryApi from "../common";
 import { useWishlist } from "../contexts/WishlistContext";
 import ProductReview from "../components/ProductReview";
 import VendorComponent from "../components/VendorComponent";
 import { ProductDetailSkeleton } from "../common/Skeleton";
+
+const StarRating = ({ rating = 0, count = 0 }) => (
+  <div className="flex items-center gap-1 mt-1">
+    <div className="flex text-amber-400 text-xs gap-0.5">
+      {Array.from({ length: 5 }).map((_, i) => (
+        <FaStar
+          key={i}
+          className={i < Math.round(rating) ? "text-amber-400" : "text-slate-200"}
+        />
+      ))}
+    </div>
+    <span className="text-xs text-slate-400">({count} Reviewed)</span>
+  </div>
+);
 
 const VendorDetails = ({ vendor }) => {
   return (
@@ -190,6 +205,7 @@ const ProductImageZoom = ({ product }) => {
 const ProductDetail = () => {
   const { id } = useParams();
   const { products, loading, setLoading } = useContext(ProductContext);
+  const { user } = useAuth();
   const [product, setProduct] = useState(null);
 
   const { newItem, addCartItem, removeCartItem, checkItemInCart } = useCart();
@@ -298,10 +314,10 @@ const ProductDetail = () => {
             <p className="text-xs uppercase tracking-wide text-slate-400 font-medium">
               {product?.category?.title}
             </p>
-            <p className="text-amber-500 text-sm mt-1">
-              ⭐⭐⭐ {product?.average_rating} ({product.number_of_reviews}{" "}
-              Reviewed)
-            </p>
+            <StarRating
+              rating={product?.average_rating}
+              count={product?.number_of_reviews}
+            />
             <h1 className="text-xl font-semibold text-slate-800 my-1">
               {product?.title}
             </h1>
@@ -411,23 +427,42 @@ const ProductDetail = () => {
 
       <div className="col-span-1 md:col-span-2 flex flex-col gap-4">
         <div className="bg-white border border-slate-100 shadow-card rounded-xl p-4">
-          <h2 className="font-semibold text-slate-800 mb-1">Delivery</h2>
-          <p className="text-sm text-slate-500">📍 Location</p>
-          <div className="my-3 flex justify-between items-center">
-            <p className="text-sm text-red-500">Unverified address</p>
-            <p className="text-primary-600 text-sm cursor-pointer hover:underline">
+          <h2 className="font-semibold text-slate-800 mb-1 flex items-center gap-1.5">
+            <FiMapPin className="text-primary-500" /> Delivery
+          </h2>
+          <div className="my-3 flex justify-between items-center gap-2">
+            {(() => {
+              const defaultAddress =
+                user?.addresses?.find((a) => a.is_default) ||
+                user?.addresses?.[0];
+              return defaultAddress ? (
+                <p className="text-sm text-slate-600 truncate">
+                  {defaultAddress.city}, {defaultAddress.region}
+                </p>
+              ) : (
+                <p className="text-sm text-red-500">No address on file</p>
+              );
+            })()}
+            <Link
+              to="/user-dashboard/address"
+              className="text-primary-600 text-sm shrink-0 hover:underline"
+            >
               Change
-            </p>
+            </Link>
           </div>
-          <hr className="border-slate-100" />
-          <h3 className="font-semibold text-slate-800 mt-3">
-            Return &amp; Warranty
-          </h3>
-          <ul className="text-sm text-slate-500 mt-1 space-y-1">
-            <li>✓ 100% Authentic</li>
-            <li>✓ 100 Days Return</li>
-            <li>✓ 100 Months Warranty</li>
-          </ul>
+          {product.vendor && (
+            <>
+              <hr className="border-slate-100" />
+              <h3 className="font-semibold text-slate-800 mt-3">
+                Return &amp; Warranty
+              </h3>
+              <ul className="text-sm text-slate-500 mt-1 space-y-1">
+                <li>✓ {product.vendor.authentic_rating}/100 Authentic Rating</li>
+                <li>✓ {product.vendor.days_return} Days Return</li>
+                <li>✓ {product.vendor.warranty_period} Months Warranty</li>
+              </ul>
+            </>
+          )}
         </div>
 
         <div className="bg-white border border-slate-100 shadow-card rounded-xl p-4">

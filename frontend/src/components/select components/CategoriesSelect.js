@@ -7,12 +7,10 @@ const embeddedClass =
 
 function CategoriesSelect({ embedded = false }) {
   const {
-    products,
     categories,
     selectedCategory,
     setSelectedCategory,
     fetchCategories,
-    onFilterProducts,
   } = useContext(ProductContext);
 
   useEffect(() => {
@@ -21,15 +19,6 @@ function CategoriesSelect({ embedded = false }) {
 
   const handleCategoryChange = (category) => {
     setSelectedCategory(category);
-
-    if (category === "All") {
-      onFilterProducts(products);
-    } else {
-      const filteredProducts = products.filter(
-        (product) => product?.category?.title === category
-      );
-      onFilterProducts(filteredProducts);
-    }
   };
 
   return (

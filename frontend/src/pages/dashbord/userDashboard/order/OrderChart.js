@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Bar } from "react-chartjs-2";
+import { FiBarChart2 } from "react-icons/fi";
 import { useAuth } from "../../../../contexts/AuthContext";
-import Spinner from "../../../../common/Spinner";
+import { RowSkeleton } from "../../../../common/Skeleton";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -23,16 +24,23 @@ ChartJS.register(
 
 const API_URL = process.env.REACT_APP_API_URL;
 
+const statusColors = {
+  pending: "rgba(250, 176, 5, 0.7)",
+  completed: "rgba(37, 134, 172, 0.7)",
+  payment_failed: "rgba(239, 68, 68, 0.7)",
+  processing: "rgba(139, 92, 246, 0.7)",
+};
+
 const OrderChart = () => {
-  const { user } = useAuth();
+  const { user, authTokens } = useAuth();
   const [orders, setOrders] = useState([]);
   const [sales, setSales] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const token = localStorage.getItem("access");
-
   useEffect(() => {
+    const token = authTokens?.access;
+
     const fetchOrders = async () => {
       try {
         const response = await fetch(
@@ -85,24 +93,17 @@ const OrderChart = () => {
 
     fetchOrders();
     fetchSales();
-  }, [user.id, token]);
+  }, [user.id, authTokens?.access]);
 
-  const statusColors = {
-    pending: "rgba(255, 206, 86, 0.6)", // Yellow
-    completed: "rgba(75, 192, 192, 0.6)", // Teal
-    payment_failed: "rgba(255, 99, 132, 0.6)", // Red
-    processing: "rgba(153, 102, 255, 0.6)", // Purple
-  };
-
-  // Prepare data for the order status chart
   const orderChartData = {
-    labels: orders.map((order) => order.month), // Month labels
+    labels: orders.map((order) => order.month),
     datasets: Object.keys(statusColors).map((status) => ({
       label: status.charAt(0).toUpperCase() + status.slice(1).replace("_", " "),
       data: orders.map((order) => order[status] || 0),
       backgroundColor: statusColors[status],
-      borderColor: statusColors[status].replace(/0.6/, "1"),
+      borderColor: statusColors[status].replace(/0\.7/, "1"),
       borderWidth: 1,
+      borderRadius: 4,
     })),
   };
 
@@ -110,87 +111,65 @@ const OrderChart = () => {
     labels: sales.map((sale) => sale.month),
     datasets: [
       {
-        label: "Total Amount spent to buy products",
+        label: "Total spent",
         data: sales.map((sale) => sale.total_sales || 0),
-        backgroundColor: "rgba(54, 162, 235, 0.6)", // Blue
-        borderColor: "rgba(54, 162, 235, 1)",
+        backgroundColor: "rgba(37, 134, 172, 0.7)",
+        borderColor: "rgba(37, 134, 172, 1)",
         borderWidth: 1,
+        borderRadius: 4,
       },
     ],
   };
 
-  const options = {
-    responsive: true,
-    maintainAspectRatio: false, // Allow height to be specified
-    plugins: {
-      legend: {
-        position: "top",
-      },
-      title: {
-        display: true,
-        text: "User Orders Per Month by Status",
-      },
-    },
-    scales: {
-      x: {
-        ticks: {
-          autoSkip: false, // Show all labels
-        },
-      },
-      y: {
-        beginAtZero: true, // Start y-axis at 0
-      },
-    },
-  };
-
-  const salesOptions = {
+  const baseOptions = (titleText) => ({
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
-      legend: {
-        position: "top",
-      },
-      title: {
-        display: true,
-        text: "Total Sales Per Month",
-      },
+      legend: { position: "top" },
+      title: { display: true, text: titleText },
     },
     scales: {
-      x: {
-        ticks: {
-          autoSkip: false,
-        },
-      },
-      y: {
-        beginAtZero: true,
-      },
+      x: { ticks: { autoSkip: false } },
+      y: { beginAtZero: true },
     },
-  };
+  });
 
-  if (loading) return <Spinner />;
+  if (loading) {
+    return (
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div className="bg-white rounded-xl border border-slate-100 shadow-card p-5">
+          <RowSkeleton count={4} />
+        </div>
+        <div className="bg-white rounded-xl border border-slate-100 shadow-card p-5">
+          <RowSkeleton count={4} />
+        </div>
+      </div>
+    );
+  }
+
   if (error)
     return (
-      <div className="text-center text-red-500">Error: {error.message}</div>
+      <div className="bg-white rounded-xl border border-slate-100 shadow-card p-5 text-center text-red-500 text-sm">
+        Error: {error.message}
+      </div>
     );
 
   return (
-    <div className="flex flex-row gap-6">
-      <div className="max-w-lg mx-auto p-6 bg-white shadow-lg rounded-lg">
-        <h2 className="text-2xl font-bold text-center mb-4">
-          Order Status Chart
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div className="bg-white rounded-xl border border-slate-100 shadow-card p-5">
+        <h2 className="text-sm font-semibold text-slate-800 mb-3 flex items-center gap-2">
+          <FiBarChart2 className="text-primary-500" /> Order Status
         </h2>
-        <div style={{ height: "300px" }}>
-          {" "}
-          {/* Set height for the chart */}
-          <Bar data={orderChartData} options={options} />
+        <div style={{ height: "280px" }}>
+          <Bar data={orderChartData} options={baseOptions("Orders per month by status")} />
         </div>
       </div>
-      <div className="max-w-lg mx-auto p-6 bg-white shadow-lg rounded-lg">
-        <h2 className="text-2xl font-bold text-center mb-4">Sales Chart</h2>
-        <div style={{ height: "300px" }}>
-          {" "}
-          {/* Set height for the chart */}
-          <Bar data={salesChartData} options={salesOptions} />
+      <div className="bg-white rounded-xl border border-slate-100 shadow-card p-5">
+        <h2 className="text-sm font-semibold text-slate-800 mb-3 flex items-center gap-2">
+          <FiBarChart2 className="text-primary-500" /> Spending
+        </h2>
+        <div style={{ height: "280px" }}>
+          <Bar data={salesChartData} options={baseOptions("Total spent per month")} />
         </div>
       </div>
     </div>

@@ -5,7 +5,7 @@ import Checkbox from "../../common/Checkbox";
 import { ProductContext } from "../../contexts/ProductContext";
 
 function FilterByVendor() {
-  const { products, onFilterProducts } = useContext(ProductContext);
+  const { products, setFilter } = useContext(ProductContext);
   const [checkedVendors, setCheckedVendors] = useState({});
 
   useEffect(() => {
@@ -33,14 +33,7 @@ function FilterByVendor() {
       (vendor) => checkedVendorsState[vendor]
     );
 
-    const filteredProducts =
-      selectedVendors.length === 0
-        ? products
-        : products.filter((product) =>
-            selectedVendors.includes(product?.vendor?.title)
-          );
-
-    onFilterProducts(filteredProducts);
+    setFilter("vendorTitles", selectedVendors);
   };
 
   return (

@@ -7,11 +7,15 @@ import OrderDetail from "../pages/dashbord/userDashboard/order/OrderDetail";
 import Address from "../pages/dashbord/userDashboard/address/Address";
 import AccountDetail from "../pages/dashbord/userDashboard/AccountDetail";
 import OrderChart from "../pages/dashbord/userDashboard/order/OrderChart";
+import ProtectedRoute from "./ProtectedRoute";
 
 const UserRoutes = () => {
   return (
     <Routes>
-      <Route path="/" element={<UserDashboard />}>
+      <Route
+        path="/"
+        element={<ProtectedRoute element={<UserDashboard />} />}
+      >
         <Route index element={<UserProfile />} />
         <Route path="profile" element={<UserProfile />} />
         <Route path="orders" element={<Orders />} />

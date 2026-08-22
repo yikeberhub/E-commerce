@@ -12,9 +12,13 @@ import DiscountFilter from "../components/filters/DiscountFilter";
 import { selectClass } from "../common/formStyles";
 import Drawer from "../common/Drawer";
 
-function FilterByRating({ onRatingChange }) {
+function FilterByRating({ rating, onRatingChange }) {
   return (
-    <select className={selectClass} onChange={(e) => onRatingChange(e.target.value)}>
+    <select
+      className={selectClass}
+      value={rating}
+      onChange={(e) => onRatingChange(e.target.value)}
+    >
       <option value="All">All Ratings</option>
       <option value="1">1 Star &amp; Up</option>
       <option value="2">2 Stars &amp; Up</option>
@@ -26,65 +30,27 @@ function FilterByRating({ onRatingChange }) {
 }
 
 function Products() {
-  const { products, filteredProducts, onFilterProducts } =
+  const { filteredProducts, filters, setFilter, resetFilters } =
     useContext(ProductContext);
   const { addBreadcrumb, clearBreadcrumbs } = useBreadcrumb();
   const [currentPage, setCurrentPage] = useState(1);
   const [productsPerPage] = useState(20);
-  const [sortOrder, setSortOrder] = useState("default");
-  const [rating, setRating] = useState("All");
-  const [discountFilter, setDiscountFilter] = useState("");
   const [filtersOpen, setFiltersOpen] = useState(false);
 
   useEffect(() => {
+    resetFilters();
     clearBreadcrumbs();
     addBreadcrumb({ label: "Home", path: "/" });
     addBreadcrumb({ label: "Products", path: "/products" });
+    return () => resetFilters();
   }, []);
 
   useEffect(() => {
-    const sortProducts = () => {
-      const sorted = [...filteredProducts].sort((a, b) => {
-        if (sortOrder === "priceLowToHigh") return a.price - b.price;
-        if (sortOrder === "priceHighToLow") return b.price - a.price;
-        return 0;
-      });
-      onFilterProducts(sorted);
-    };
-
-    sortProducts();
-  }, [sortOrder]);
-
-  useEffect(() => {
-    const filterByRating = () => {
-      let filtered = filteredProducts;
-      if (rating !== "All") {
-        filtered = filtered.filter(
-          (product) => product.average_rating <= Number(rating)
-        );
-      }
-
-      onFilterProducts(filtered);
-    };
-
-    filterByRating();
-  }, [rating]);
-
-  useEffect(() => {
-    const applyFilter = () => {
-      const newFilteredProducts = products.filter((product) => {
-        if (discountFilter === "") return true;
-        const discountThreshold = parseInt(discountFilter, 10);
-        return product.discount_percentage >= discountThreshold;
-      });
-      onFilterProducts(newFilteredProducts);
-    };
-
-    applyFilter();
-  }, [discountFilter]);
+    setCurrentPage(1);
+  }, [filteredProducts]);
 
   const handleDiscountChange = (value) => {
-    setDiscountFilter(value);
+    setFilter("discount", value);
   };
 
   // Pagination logic
@@ -97,7 +63,7 @@ function Products() {
   const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
 
   const handleFilterByRating = (newRating) => {
-    setRating(newRating);
+    setFilter("rating", newRating);
   };
 
   const filterPanels = (
@@ -110,7 +76,7 @@ function Products() {
         <h3 className="text-sm font-semibold text-slate-800 mb-3 pb-2 border-b border-slate-100">
           Rating
         </h3>
-        <FilterByRating onRatingChange={handleFilterByRating} />
+        <FilterByRating rating={filters.rating} onRatingChange={handleFilterByRating} />
       </div>
     </>
   );
@@ -139,7 +105,8 @@ function Products() {
             </button>
             <select
               className={selectClass}
-              onChange={(e) => setSortOrder(e.target.value)}
+              value={filters.sortOrder}
+              onChange={(e) => setFilter("sortOrder", e.target.value)}
             >
               <option value="default">Sort by featured</option>
               <option value="priceLowToHigh">Price: Low to High</option>
@@ -151,7 +118,7 @@ function Products() {
             </span>
             <div className="ml-auto sm:ml-0">
               <DiscountFilter
-                selectedDiscount={discountFilter}
+                selectedDiscount={filters.discount}
                 onDiscountChange={handleDiscountChange}
               />
             </div>

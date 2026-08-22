@@ -1,20 +1,27 @@
 import React from "react";
+import { Link } from "react-router-dom";
+import { FiHome, FiAlertTriangle } from "react-icons/fi";
 
 function PageNotFound() {
   return (
-    <div className="flex items-center justify-center h-screen bg-gradient-to-r from-blue-300 to-purple-300 text-white text-center">
-      <div>
-        <h1 className="text-6xl font-bold mb-4">404</h1>
-        <h2 className="text-3xl mb-2">Page Not Found</h2>
-        <p className="mb-6">
+    <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center bg-slate-50 px-4">
+      <div className="text-center">
+        <span className="flex items-center justify-center w-16 h-16 rounded-full bg-primary-50 text-primary-600 mx-auto mb-5">
+          <FiAlertTriangle className="text-2xl" />
+        </span>
+        <h1 className="text-6xl font-bold text-slate-900 mb-2">404</h1>
+        <h2 className="text-xl font-semibold text-slate-700 mb-2">
+          Page Not Found
+        </h2>
+        <p className="text-sm text-slate-500 mb-6">
           Oops! It looks like the page you're looking for doesn't exist.
         </p>
-        <a
-          href="/"
-          className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded shadow-lg transition duration-300"
+        <Link
+          to="/"
+          className="inline-flex items-center gap-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-semibold px-5 py-2.5 rounded-lg transition"
         >
-          Go Back to Home
-        </a>
+          <FiHome /> Go Back to Home
+        </Link>
       </div>
     </div>
   );

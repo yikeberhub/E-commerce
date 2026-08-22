@@ -1,124 +1,105 @@
-import React, { useState } from "react";
+import React from "react";
+import { FiMail, FiPhone, FiCalendar, FiShield, FiMapPin } from "react-icons/fi";
 import { useAuth } from "../../../contexts/AuthContext";
 import { TextBlockSkeleton, Skeleton } from "../../../common/Skeleton";
+import AccountIcon from "../../../assets/icons/user.svg";
+
+const InfoItem = ({ icon: Icon, label, value }) => (
+  <p className="flex items-center gap-2 text-sm text-slate-600 mt-2">
+    <Icon className="text-slate-400 shrink-0" />
+    {label}: <span className="font-medium text-slate-800">{value || "N/A"}</span>
+  </p>
+);
 
 const AccountDetail = () => {
   const { user } = useAuth();
-  const [error, setError] = useState(null);
 
   if (!user)
     return (
-      <div className="max-w-5xl mx-auto p-8 bg-white rounded-lg shadow-xl mt-8">
-        <div className="flex flex-col md:flex-row items-center gap-6 mb-10">
-          <Skeleton className="w-36 h-36 rounded-full shrink-0" />
+      <div className="bg-white rounded-xl border border-slate-100 shadow-card p-6">
+        <div className="flex flex-col md:flex-row items-center gap-6">
+          <Skeleton className="w-28 h-28 rounded-full shrink-0" />
           <div className="w-full">
             <TextBlockSkeleton lines={4} />
           </div>
         </div>
       </div>
     );
-  if (error) return <p className="text-center text-red-500">{error}</p>;
 
   return (
-    <div className="max-w-5xl mx-auto p-8 bg-white rounded-lg shadow-xl mt-8">
-      <h2 className="text-3xl font-extrabold text-center mb-8 text-gray-800">
-        Account Details
-      </h2>
+    <div className="bg-white rounded-xl border border-slate-100 shadow-card p-6">
+      <h2 className="text-lg font-bold text-slate-900 mb-6">Account Details</h2>
 
-      {user && (
-        <>
-          <div className="flex flex-col md:flex-row items-center mb-10">
-            <img
-              src={user.profile_image}
-              alt="Profile"
-              className="w-36 h-36 rounded-full border-4 border-primary-200 mb-4 md:mb-0 md:mr-8 shadow-md object-cover"
-            />
-            <div className="text-center md:text-left">
-              <h3 className="text-2xl font-semibold text-gray-900">
-                {user.first_name} {user.last_name}
-              </h3>
-              <p className="text-gray-700 mt-2">
-                Email:{" "}
-                <span className="font-medium text-gray-800">{user.email}</span>
-              </p>
-              <p className="text-gray-700">
-                Phone:{" "}
-                <span className="font-medium text-gray-800">
-                  {user.phone_number || "N/A"}
-                </span>
-              </p>
-              <p className="text-gray-700">
-                Date of Birth:{" "}
-                <span className="font-medium text-gray-800">
-                  {user.date_of_birth || "N/A"}
-                </span>
-              </p>
-              <p className="text-gray-700">
-                Role:{" "}
-                <span className="font-medium text-gray-800">{user.role}</span>
-              </p>
-              <p
-                className={`text-lg font-semibold ${
-                  user.account_status === "active"
-                    ? "text-green-500"
-                    : "text-red-500"
-                }`}
-              >
-                Status: {user.account_status}
-              </p>
-            </div>
-          </div>
+      <div className="flex flex-col md:flex-row items-center md:items-start gap-6 mb-8">
+        <img
+          src={user.profile_image || AccountIcon}
+          alt="Profile"
+          className="w-28 h-28 rounded-full border-2 border-slate-100 shrink-0 object-cover"
+        />
+        <div className="text-center md:text-left">
+          <h3 className="text-xl font-semibold text-slate-900">
+            {user.first_name || user.last_name
+              ? `${user.first_name} ${user.last_name}`.trim()
+              : user.username}
+          </h3>
+          <InfoItem icon={FiMail} label="Email" value={user.email} />
+          <InfoItem icon={FiPhone} label="Phone" value={user.phone_number} />
+          <InfoItem
+            icon={FiCalendar}
+            label="Date of Birth"
+            value={user.date_of_birth}
+          />
+          <p className="flex items-center gap-2 text-sm mt-2">
+            <FiShield className="text-slate-400 shrink-0" />
+            Status:{" "}
+            <span
+              className={`font-medium capitalize ${
+                user.account_status === "active"
+                  ? "text-emerald-600"
+                  : "text-red-500"
+              }`}
+            >
+              {user.account_status}
+            </span>
+          </p>
+        </div>
+      </div>
 
-          <h3 className="text-2xl font-bold mb-6 text-gray-800">Addresses</h3>
-          {user.addresses && user.addresses.length > 0 ? (
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {user.addresses.map((address) => (
-                <div
-                  key={address.id}
-                  className="bg-gray-50 p-5 rounded-lg border border-gray-200 shadow-md hover:shadow-lg transform transition duration-200 hover:scale-105"
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <p className="font-semibold text-lg text-primary-700">
-                      {address.full_name}
-                    </p>
-                    {address.is_default && (
-                      <span className="px-2 py-1 text-sm font-semibold text-white bg-green-500 rounded-full">
-                        Default
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-gray-700 mb-1">
-                    <strong>Phone:</strong> {address.phone_number}
-                  </p>
-                  <p className="text-gray-700 mb-1">
-                    <strong>Street Address:</strong> {address.street_address}
-                  </p>
-                  <p className="text-gray-700 mb-1">
-                    <strong>City:</strong> {address.city}
-                  </p>
-                  <p className="text-gray-700 mb-1">
-                    <strong>Region:</strong> {address.region}
-                  </p>
-                  <p className="text-gray-700 mb-1">
-                    <strong>Woreda:</strong> {address.woreda}
-                  </p>
-                  <p className="text-gray-700 mb-1">
-                    <strong>Kebele:</strong> {address.kebele}
-                  </p>
-                  <p className="text-gray-700 mb-1">
-                    <strong>Postal Code:</strong> {address.postal_code || "N/A"}
-                  </p>
-                  <p className="text-gray-700">
-                    <strong>Delivery Instructions:</strong>{" "}
-                    {address.delivery_instruction || "N/A"}
-                  </p>
-                </div>
-              ))}
+      <h3 className="text-base font-semibold text-slate-800 mb-4 flex items-center gap-2">
+        <FiMapPin className="text-primary-500" /> Addresses
+      </h3>
+      {user.addresses && user.addresses.length > 0 ? (
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {user.addresses.map((address) => (
+            <div
+              key={address.id}
+              className="bg-slate-50 p-4 rounded-xl border border-slate-100"
+            >
+              <div className="flex items-center justify-between mb-2">
+                <p className="font-semibold text-slate-800">
+                  {address.full_name}
+                </p>
+                {address.is_default && (
+                  <span className="px-2 py-0.5 text-xs font-medium text-white bg-primary-600 rounded-full">
+                    Default
+                  </span>
+                )}
+              </div>
+              <div className="text-sm text-slate-600 space-y-0.5">
+                <p>Phone: {address.phone_number}</p>
+                <p>Street: {address.street_address}</p>
+                <p>City: {address.city}</p>
+                <p>Region: {address.region}</p>
+                <p>Woreda: {address.woreda}</p>
+                <p>Kebele: {address.kebele}</p>
+                <p>Postal Code: {address.postal_code || "N/A"}</p>
+                <p>Delivery Notes: {address.delivery_instruction || "N/A"}</p>
+              </div>
             </div>
-          ) : (
-            <p className="text-gray-500 mt-4">No addresses available.</p>
-          )}
-        </>
+          ))}
+        </div>
+      ) : (
+        <p className="text-sm text-slate-400">No addresses available.</p>
       )}
     </div>
   );

@@ -1,73 +1,70 @@
 import React from "react";
+import { FiUsers, FiTarget, FiAward, FiClock } from "react-icons/fi";
+
+const Section = ({ icon: Icon, title, children }) => (
+  <section className="bg-white rounded-xl border border-slate-100 shadow-card p-6">
+    <h2 className="text-lg font-bold text-slate-900 mb-3 flex items-center gap-2">
+      <Icon className="text-primary-500" /> {title}
+    </h2>
+    {children}
+  </section>
+);
 
 const AboutUs = () => {
   return (
-    <div className="container mx-auto my-6 px-4">
-      <h1 className="text-3xl font-bold text-center mb-6">About Us</h1>
-
-      <section className="mb-6 p-6 bg-gray-100 rounded-lg shadow-md">
-        <h2 className="text-2xl font-semibold mb-4">Our History</h2>
-        <p className="text-gray-700">
-          Founded in 2020, our company started with a simple vision: to provide
-          high-quality products at affordable prices. Over the years, we have
-          grown into a trusted name in the e-commerce industry, serving
-          thousands of satisfied customers.
+    <div className="max-w-4xl mx-auto px-4 py-6 flex flex-col gap-5">
+      <div className="text-center mb-2">
+        <h1 className="text-3xl font-bold text-slate-900">About Us</h1>
+        <p className="text-sm text-slate-500 mt-1">
+          Getting to know the team behind the marketplace
         </p>
-      </section>
+      </div>
 
-      <section className="mb-6 p-6 bg-gray-100 rounded-lg shadow-md">
-        <h2 className="text-2xl font-semibold mb-4">Our Mission</h2>
-        <p className="text-gray-700">
+      <Section icon={FiClock} title="Our History">
+        <p className="text-sm text-slate-600 leading-relaxed">
+          Founded in 2020, our company started with a simple vision: to
+          provide high-quality products at affordable prices. Over the years,
+          we have grown into a trusted name in the e-commerce industry,
+          serving thousands of satisfied customers.
+        </p>
+      </Section>
+
+      <Section icon={FiTarget} title="Our Mission">
+        <p className="text-sm text-slate-600 leading-relaxed">
           Our mission is to empower consumers by offering a diverse range of
           products that meet their needs while providing exceptional customer
           service. We believe in transparency, quality, and sustainability.
         </p>
-      </section>
+      </Section>
 
-      <section className="mb-6 p-6 bg-gray-100 rounded-lg shadow-md">
-        <h2 className="text-2xl font-semibold mb-4">Meet the Team</h2>
-        <div className="grid md:grid-cols-3 gap-6">
-          <div className="bg-white p-4 rounded-lg shadow-lg border border-gray-300 hover:shadow-xl transition">
-            <h3 className="font-semibold">John Doe</h3>
-            <p className="text-gray-600">CEO & Founder</p>
-            <p>A visionary dedicated to creating a customer-centric culture.</p>
-          </div>
-          <div className="bg-white p-4 rounded-lg shadow-lg border border-gray-300 hover:shadow-xl transition">
-            <h3 className="font-semibold">Jane Smith</h3>
-            <p className="text-gray-600">Chief Operating Officer</p>
-            <p>Ensuring our operations run smoothly and efficiently.</p>
-          </div>
-          <div className="bg-white p-4 rounded-lg shadow-lg border border-gray-300 hover:shadow-xl transition">
-            <h3 className="font-semibold">Emily Johnson</h3>
-            <p className="text-gray-600">Head of Marketing</p>
-            <p>Driving our marketing strategies to reach new customers.</p>
-          </div>
+      <Section icon={FiUsers} title="Meet the Team">
+        <div className="grid sm:grid-cols-3 gap-4">
+          {[
+            { name: "John Doe", role: "CEO & Founder", blurb: "A visionary dedicated to creating a customer-centric culture." },
+            { name: "Jane Smith", role: "Chief Operating Officer", blurb: "Ensuring our operations run smoothly and efficiently." },
+            { name: "Emily Johnson", role: "Head of Marketing", blurb: "Driving our marketing strategies to reach new customers." },
+          ].map((member) => (
+            <div
+              key={member.name}
+              className="bg-slate-50 rounded-xl border border-slate-100 p-4"
+            >
+              <h3 className="font-semibold text-slate-800">{member.name}</h3>
+              <p className="text-xs text-primary-600 font-medium mt-0.5">
+                {member.role}
+              </p>
+              <p className="text-sm text-slate-500 mt-2">{member.blurb}</p>
+            </div>
+          ))}
         </div>
-      </section>
+      </Section>
 
-      <section className="mb-6 p-6 bg-gray-100 rounded-lg shadow-md">
-        <h2 className="text-2xl font-semibold mb-4">Achievements</h2>
-        <ul className="list-disc pl-5 text-gray-700">
+      <Section icon={FiAward} title="Achievements">
+        <ul className="text-sm text-slate-600 space-y-1.5 list-disc pl-5">
           <li>Over 100,000 satisfied customers.</li>
           <li>Featured in major publications for our innovative products.</li>
           <li>Recognized as a top e-commerce platform in 2023.</li>
         </ul>
-      </section>
-
-      <section className="p-6 bg-gray-100 rounded-lg shadow-md">
-        <h2 className="text-2xl font-semibold mb-4">Videos</h2>
-        <p className="text-gray-700 mb-2">Watch our story:</p>
-        {/* Placeholder for video */}
-        <iframe
-          width="100%"
-          height="315"
-          src="https://www.youtube.com/embed/your_video_id"
-          title="About Us Video"
-          frameBorder="0"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          allowFullScreen
-        ></iframe>
-      </section>
+      </Section>
     </div>
   );
 };

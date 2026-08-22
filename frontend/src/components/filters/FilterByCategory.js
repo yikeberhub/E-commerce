@@ -7,7 +7,7 @@ import { ProductContext } from "../../contexts/ProductContext";
 const API_URL = process.env.REACT_APP_API_URL;
 
 function FilterByCategory() {
-  const { products, onFilterProducts } = useContext(ProductContext);
+  const { setFilter } = useContext(ProductContext);
   const [categories, setCategories] = useState([]);
   const [checkedCategories, setCheckedCategories] = useState({});
 
@@ -43,16 +43,7 @@ function FilterByCategory() {
         (cat) => newChecked[cat]
       );
 
-      const filteredProducts =
-        selectedCategories.length === 0
-          ? products
-          : products.filter(
-              (product) =>
-                product.category &&
-                selectedCategories.includes(product.category.title)
-            );
-
-      onFilterProducts(filteredProducts);
+      setFilter("categoryTitles", selectedCategories);
       return newChecked;
     });
   };

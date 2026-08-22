@@ -1,25 +1,16 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect } from "react";
 import { ProductContext } from "../contexts/ProductContext";
 
 function HomeNavLink() {
-  const { products, categories, fetchCategories, onFilterProducts } =
+  const { categories, fetchCategories, selectedCategory, setSelectedCategory } =
     useContext(ProductContext);
-  const [active, setActive] = useState("All");
 
   useEffect(() => {
     fetchCategories();
   }, []);
 
   const handleCategoryClick = (category) => {
-    setActive(category);
-    if (category === "All") {
-      onFilterProducts(products);
-    } else {
-      const filteredProducts = products.filter(
-        (product) => product?.category?.title === category
-      );
-      onFilterProducts(filteredProducts);
-    }
+    setSelectedCategory(category);
   };
 
   return (
@@ -33,7 +24,7 @@ function HomeNavLink() {
                 type="button"
                 onClick={() => handleCategoryClick(category)}
                 className={`text-sm font-medium px-3 py-1.5 rounded-full transition ${
-                  active === category
+                  selectedCategory === category
                     ? "bg-primary-600 text-white"
                     : "text-slate-600 hover:bg-slate-100"
                 }`}

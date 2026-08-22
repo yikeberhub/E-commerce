@@ -6,7 +6,7 @@ import { ProductContext } from "../../contexts/ProductContext";
 const API_URL = process.env.REACT_APP_API_URL;
 
 function FilterByTag() {
-  const { products, onFilterProducts } = useContext(ProductContext);
+  const { setFilter } = useContext(ProductContext);
   const [tags, setTags] = useState([]);
   const [selectedTags, setSelectedTags] = useState([]);
 
@@ -33,16 +33,7 @@ function FilterByTag() {
         ? prev.filter((t) => t !== tag)
         : [...prev, tag];
 
-      const filteredProducts =
-        newSelectedTags.length === 0
-          ? products
-          : products.filter((product) =>
-              product.tags.some((productTag) =>
-                newSelectedTags.includes(productTag.name)
-              )
-            );
-
-      onFilterProducts(filteredProducts);
+      setFilter("tags", newSelectedTags);
       return newSelectedTags;
     });
   };

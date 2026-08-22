@@ -1,11 +1,22 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import loginIcons from "../assets/icons/images/signin.gif";
+import {
+  FiUser,
+  FiMail,
+  FiLock,
+  FiEye,
+  FiEyeOff,
+  FiCamera,
+  FiUserPlus,
+} from "react-icons/fi";
 import SummaryApi from "../common";
+import { inputClass } from "../common/formStyles";
+import defaultAvatar from "../assets/icons/images/signin.gif";
 
 const SignUp = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({
     email_error: "",
     user_name_error: "",
@@ -42,7 +53,7 @@ const SignUp = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setMessage({ email_error: "", user_name_error: "", password_error: "" }); // Clear previous messages
+    setMessage({ email_error: "", user_name_error: "", password_error: "" });
 
     if (data.password !== data.confirmPassword) {
       setMessage((prev) => ({
@@ -56,9 +67,12 @@ const SignUp = () => {
     formData.append("username", data.username);
     formData.append("email", data.email);
     formData.append("password", data.password);
-    formData.append("profile_image", data.profile_image);
+    if (data.profile_image) {
+      formData.append("profile_image", data.profile_image);
+    }
 
     try {
+      setLoading(true);
       const response = await fetch(SummaryApi.signUp.url, {
         method: "POST",
         body: formData,
@@ -68,7 +82,6 @@ const SignUp = () => {
         navigate("/login");
       } else {
         const errorData = await response.json();
-        console.log("error", errorData);
 
         if (errorData.email) {
           setMessage((prev) => ({ ...prev, email_error: errorData.email[0] }));
@@ -92,129 +105,169 @@ const SignUp = () => {
         ...prev,
         password_error: "An error occurred. Please try again.",
       }));
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <section id="signup">
-      <div className="mx-auto container p-4">
-        <div className="bg-white p-5 w-full max-w-sm mx-auto">
-          <div className="w-20 h-20 mx-auto relative overflow-hidden rounded-full">
+    <section className="min-h-[calc(100vh-4rem)] flex items-center justify-center bg-slate-50 px-4 py-12">
+      <div className="w-full max-w-md">
+        <div className="bg-white rounded-2xl border border-slate-100 shadow-card p-8">
+          <div className="flex flex-col items-center text-center mb-6">
+            <span className="flex items-center justify-center w-12 h-12 rounded-full bg-primary-50 text-primary-600 mb-3">
+              <FiUserPlus className="text-xl" />
+            </span>
+            <h1 className="text-2xl font-bold text-slate-900">
+              Create your account
+            </h1>
+            <p className="text-sm text-slate-500 mt-1">
+              Join us and start shopping today
+            </p>
+          </div>
+
+          <div className="w-20 h-20 mx-auto relative overflow-hidden rounded-full border-2 border-slate-100 mb-6 group">
             <img
               src={
                 data.profile_image
                   ? URL.createObjectURL(data.profile_image)
-                  : loginIcons
+                  : defaultAvatar
               }
               alt="Profile"
+              className="w-full h-full object-cover"
             />
-            <label>
-              <div className="text-xs bg-opacity-80 bg-slate-200 pb-4 pt-2 cursor-pointer text-center absolute bottom-0 w-full">
-                Upload Photo
-              </div>
+            <label className="absolute inset-0 flex items-center justify-center bg-slate-900/0 group-hover:bg-slate-900/40 transition-colors cursor-pointer">
+              <FiCamera className="text-white text-lg opacity-0 group-hover:opacity-100 transition-opacity" />
               <input
                 type="file"
                 name="profile_image"
+                accept="image/*"
                 className="hidden"
                 onChange={handleFileChange}
               />
             </label>
           </div>
 
-          <form className="pt-6 flex flex-col gap-2" onSubmit={handleSubmit}>
-            <div className="grid">
-              <label>Username:</label>
-              <div className="bg-slate-100 p-2">
+          <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                Username
+              </label>
+              <div className="relative">
+                <FiUser className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm" />
                 <input
                   type="text"
-                  placeholder="Enter your username"
+                  placeholder="Choose a username"
                   name="username"
                   value={data.username}
                   onChange={handleOnChange}
                   required
-                  className="w-full h-full outline-none bg-transparent"
+                  className={`${inputClass} pl-9`}
                 />
               </div>
               {message.user_name_error && (
-                <p className="text-red-600 mt-1">{message.user_name_error}</p>
+                <p className="text-red-500 text-xs mt-1.5">
+                  {message.user_name_error}
+                </p>
               )}
             </div>
-            <div className="grid">
-              <label>Email:</label>
-              <div className="bg-slate-100 p-2">
+
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                Email
+              </label>
+              <div className="relative">
+                <FiMail className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm" />
                 <input
                   type="email"
-                  placeholder="Enter email"
+                  placeholder="you@example.com"
                   name="email"
                   value={data.email}
                   onChange={handleOnChange}
                   required
-                  className="w-full h-full outline-none bg-transparent"
+                  className={`${inputClass} pl-9`}
                 />
               </div>
               {message.email_error && (
-                <p className="text-red-600 mt-1">{message.email_error}</p>
+                <p className="text-red-500 text-xs mt-1.5">
+                  {message.email_error}
+                </p>
               )}
             </div>
 
             <div>
-              <label>Password:</label>
-              <div className="bg-slate-100 p-2 flex">
+              <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                Password
+              </label>
+              <div className="relative">
+                <FiLock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm" />
                 <input
                   type={showPassword ? "text" : "password"}
-                  placeholder="Enter password"
+                  placeholder="Create a password"
                   value={data.password}
                   name="password"
                   onChange={handleOnChange}
                   required
-                  className="w-full h-full outline-none bg-transparent"
+                  className={`${inputClass} pl-9 pr-9`}
                 />
-                <div
-                  className="cursor-pointer text-xl"
+                <button
+                  type="button"
                   onClick={() => setShowPassword((prev) => !prev)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
                 >
-                  <span>🔑</span>
-                </div>
+                  {showPassword ? <FiEyeOff /> : <FiEye />}
+                </button>
               </div>
-              {message.password_error && (
-                <p className="text-red-600 mt-1">{message.password_error}</p>
-              )}
             </div>
 
             <div>
-              <label>Confirm Password:</label>
-              <div className="bg-slate-100 p-2 flex">
+              <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                Confirm Password
+              </label>
+              <div className="relative">
+                <FiLock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm" />
                 <input
                   type={showConfirmPassword ? "text" : "password"}
-                  placeholder="Enter confirm password"
+                  placeholder="Re-enter your password"
                   value={data.confirmPassword}
                   name="confirmPassword"
                   onChange={handleOnChange}
                   required
-                  className="w-full h-full outline-none bg-transparent"
+                  className={`${inputClass} pl-9 pr-9`}
                 />
-                <div
-                  className="cursor-pointer text-xl"
+                <button
+                  type="button"
                   onClick={() => setShowConfirmPassword((prev) => !prev)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition"
+                  aria-label={
+                    showConfirmPassword ? "Hide password" : "Show password"
+                  }
                 >
-                  <span>🔑</span>
-                </div>
+                  {showConfirmPassword ? <FiEyeOff /> : <FiEye />}
+                </button>
               </div>
               {message.password_error && (
-                <p className="text-red-600 mt-1">{message.password_error}</p>
+                <p className="text-red-500 text-xs mt-1.5">
+                  {message.password_error}
+                </p>
               )}
             </div>
 
-            <button className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 w-full max-w-[150px] rounded-full hover:scale-110 transition-all mx-auto block mt-6">
-              Sign Up
+            <button
+              type="submit"
+              disabled={loading}
+              className="mt-2 bg-primary-600 hover:bg-primary-700 disabled:opacity-60 disabled:cursor-not-allowed text-white text-sm font-semibold py-2.5 rounded-lg transition"
+            >
+              {loading ? "Creating account..." : "Sign Up"}
             </button>
           </form>
 
-          <p className="my-5">
-            Already have an account?
+          <p className="text-sm text-slate-500 text-center mt-6">
+            Already have an account?{" "}
             <Link
               to={"/login/"}
-              className="text-red-600 hover:text-red-700 hover:underline"
+              className="text-primary-600 font-medium hover:text-primary-700 hover:underline"
             >
               Login
             </Link>

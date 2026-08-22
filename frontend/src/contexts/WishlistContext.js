@@ -1,5 +1,6 @@
 import React, { createContext, useState, useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "./AuthContext";
 
 const API_URL = process.env.REACT_APP_API_URL;
 
@@ -17,12 +18,18 @@ export const WishlistProvider = ({ children }) => {
 
   const [addedToWishlist, setAddedToWishlist] = useState(false);
   const navigate = useNavigate();
+  const { authTokens } = useAuth();
 
-  const token = localStorage.getItem("access");
+  const token = authTokens?.access;
 
   useEffect(() => {
+    if (!token) {
+      setWishlist([]);
+      setLoading(false);
+      return;
+    }
     fetchWishlist();
-  }, []);
+  }, [token]);
 
   const checkItemInWishlist = (product_id) => {
     let result = { isAdded: false, item: null };
@@ -52,8 +59,6 @@ export const WishlistProvider = ({ children }) => {
         },
       });
       if (!response.ok) {
-        setMessage("please Login first!");
-        navigate("/");
         throw new Error("failed to fetch wishlist");
       }
       const data = await response.json();

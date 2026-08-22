@@ -1,7 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { FaTimes } from "react-icons/fa";
-import { FiShoppingBag, FiCheck } from "react-icons/fi";
+import { FiShoppingBag, FiCheck, FiX } from "react-icons/fi";
 import { useWishlist } from "../contexts/WishlistContext";
 import { useCart } from "../contexts/cartContext";
 
@@ -77,7 +76,7 @@ function WishlistItem({ wishlistItem }) {
         title="Remove from wishlist"
         className="text-slate-400 hover:text-red-500 transition shrink-0"
       >
-        <FaTimes />
+        <FiX />
       </button>
     </div>
   );

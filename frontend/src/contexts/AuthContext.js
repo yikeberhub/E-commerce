@@ -60,8 +60,6 @@ export const AuthProvider = ({ children }) => {
       if (response.ok) {
         const data = await response.json();
         setUser(data);
-        console.log("role is", data.role);
-        console.log("window path name", window.location.pathname);
         if (window.location.pathname === "/login") {
           if (
             data.role === "admin" &&
@@ -73,7 +71,10 @@ export const AuthProvider = ({ children }) => {
             window.location.pathname !== "/vendor-dashboard"
           ) {
             navigate("/vendor-dashboard");
-          } else if (data.role === "user" && window.location.pathname !== "/") {
+          } else if (
+            data.role === "customer" &&
+            window.location.pathname !== "/"
+          ) {
             navigate("/");
           }
         }

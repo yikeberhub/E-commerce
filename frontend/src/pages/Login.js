@@ -1,31 +1,22 @@
-import React, { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import loginIcons from "../assets/icons/images/signin.gif";
+import React, { useState } from "react";
+import { Link } from "react-router-dom";
+import { FiMail, FiLock, FiEye, FiEyeOff, FiLogIn } from "react-icons/fi";
 import { useAuth } from "../contexts/AuthContext";
-import Spinner from "../common/Spinner";
-import AlertModal from "../common/AlertModal"; // adjust the import path if needed
+import AlertModal from "../common/AlertModal";
+import { inputClass } from "../common/formStyles";
 
 const API_URL = process.env.REACT_APP_API_URL;
 
 const Login = () => {
-  const { setTokens, user } = useAuth();
+  const { setTokens } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [data, setData] = useState({ email: "", password: "" });
   const [messages, setMessages] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
 
-  // State for AlertModal
   const [alertVisible, setAlertVisible] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
   const [alertType, setAlertType] = useState("success");
-
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    if (user) {
-      navigate("/"); // Redirect to home if user is already authenticated
-    }
-  }, [user, navigate]);
 
   const handleOnChange = (e) => {
     const { name, value } = e.target;
@@ -36,7 +27,7 @@ const Login = () => {
     e.preventDefault();
     try {
       setLoading(true);
-      setMessages({});
+      setMessages({ email: "", password: "" });
       const response = await fetch(`${API_URL}/users/login/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -44,12 +35,11 @@ const Login = () => {
       });
 
       if (response.ok) {
-        const data = await response.json();
-        localStorage.setItem("access", data.access);
-        localStorage.setItem("refresh", data.refresh);
-        setTokens(data); // Role-based redirect handled in setTokens
+        const responseData = await response.json();
+        localStorage.setItem("access", responseData.access);
+        localStorage.setItem("refresh", responseData.refresh);
+        await setTokens(responseData); // Role-based redirect handled in AuthContext
 
-        // Show success message in AlertModal
         setAlertMessage("Login successful!");
         setAlertType("success");
         setAlertVisible(true);
@@ -57,24 +47,21 @@ const Login = () => {
         const errorData = await response.json();
         setMessages({
           email:
-            errorData.errors[0]?.field === "email"
+            errorData.errors?.[0]?.field === "email"
               ? errorData.errors[0]?.message
               : "",
           password:
-            errorData.errors[0]?.field === "password"
+            errorData.errors?.[0]?.field === "password"
               ? errorData.errors[0]?.message
               : "",
         });
 
-        // Show error message in AlertModal
         setAlertMessage("Login failed. Please check your credentials.");
         setAlertType("error");
         setAlertVisible(true);
       }
     } catch (error) {
       console.error("An error occurred:", error);
-
-      // Show error message in AlertModal
       setAlertMessage("An unexpected error occurred. Please try again later.");
       setAlertType("error");
       setAlertVisible(true);
@@ -85,89 +72,104 @@ const Login = () => {
 
   return (
     <>
-      {loading ? (
-        <Spinner />
-      ) : (
-        <section id="login">
-          <div className="mx-auto container p-4">
-            <div className="bg-white text-black rounded-sm p-5 w-full max-w-sm mx-auto">
-              <div className="w-20 h-20 mx-auto">
-                <img src={loginIcons} alt="login icons" />
-              </div>
-
-              <form
-                className="pt-6 flex flex-col gap-2"
-                onSubmit={handleSubmit}
-              >
-                {/* Email Input */}
-                <div className="grid">
-                  <label>Email : </label>
-                  <div className="bg-slate-100 p-2">
-                    <input
-                      type="email"
-                      placeholder="enter email"
-                      name="email"
-                      value={data.email}
-                      onChange={handleOnChange}
-                      className="w-full h-full outline-none bg-transparent"
-                    />
-                  </div>
-                  <small className="text-red-400 text-xs">
-                    {messages["email"]}
-                  </small>
-                </div>
-
-                {/* Password Input */}
-                <div>
-                  <label>Password : </label>
-                  <div className="bg-slate-100 p-2 flex">
-                    <input
-                      type={showPassword ? "text" : "password"}
-                      placeholder="enter password"
-                      value={data.password}
-                      name="password"
-                      onChange={handleOnChange}
-                      className="w-full h-full outline-none bg-transparent"
-                    />
-                    <div
-                      className="cursor-pointer text-xl"
-                      onClick={() => setShowPassword((prev) => !prev)}
-                    >
-                      <span>🔑</span>
-                    </div>
-                  </div>
-                  <small className="text-red-400 text-xs">
-                    {messages["password"]}
-                  </small>
-
-                  <Link
-                    to={"/forgot-password"}
-                    className="block w-fit ml-auto hover:underline hover:text-red-600"
-                  >
-                    Forgot password ?
-                  </Link>
-                </div>
-
-                <button className="bg-red-500 hover:bg-red-700 text-white px-6 py-2 w-full max-w-[150px] rounded-full hover:scale-110 transition-all mx-auto block mt-6">
-                  Login
-                </button>
-              </form>
-
-              <p className="my-5">
-                Don't have an account?{" "}
-                <Link
-                  to={"/signup/"}
-                  className="text-red-600 hover:text-red-700 hover:underline"
-                >
-                  Sign up
-                </Link>
+      <section className="min-h-[calc(100vh-4rem)] flex items-center justify-center bg-slate-50 px-4 py-12">
+        <div className="w-full max-w-md">
+          <div className="bg-white rounded-2xl border border-slate-100 shadow-card p-8">
+            <div className="flex flex-col items-center text-center mb-6">
+              <span className="flex items-center justify-center w-12 h-12 rounded-full bg-primary-50 text-primary-600 mb-3">
+                <FiLogIn className="text-xl" />
+              </span>
+              <h1 className="text-2xl font-bold text-slate-900">
+                Welcome back
+              </h1>
+              <p className="text-sm text-slate-500 mt-1">
+                Log in to continue to your account
               </p>
             </div>
-          </div>
-        </section>
-      )}
 
-      {/* Render AlertModal */}
+            <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                  Email
+                </label>
+                <div className="relative">
+                  <FiMail className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm" />
+                  <input
+                    type="email"
+                    placeholder="you@example.com"
+                    name="email"
+                    value={data.email}
+                    onChange={handleOnChange}
+                    required
+                    className={`${inputClass} pl-9`}
+                  />
+                </div>
+                {messages.email && (
+                  <p className="text-red-500 text-xs mt-1.5">{messages.email}</p>
+                )}
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="block text-sm font-medium text-slate-700">
+                    Password
+                  </label>
+                  <Link
+                    to={"/forgot-password"}
+                    className="text-xs font-medium text-primary-600 hover:text-primary-700 hover:underline"
+                  >
+                    Forgot password?
+                  </Link>
+                </div>
+                <div className="relative">
+                  <FiLock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm" />
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Enter your password"
+                    value={data.password}
+                    name="password"
+                    onChange={handleOnChange}
+                    required
+                    className={`${inputClass} pl-9 pr-9`}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((prev) => !prev)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition"
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                  >
+                    {showPassword ? <FiEyeOff /> : <FiEye />}
+                  </button>
+                </div>
+                {messages.password && (
+                  <p className="text-red-500 text-xs mt-1.5">
+                    {messages.password}
+                  </p>
+                )}
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="mt-2 bg-primary-600 hover:bg-primary-700 disabled:opacity-60 disabled:cursor-not-allowed text-white text-sm font-semibold py-2.5 rounded-lg transition"
+              >
+                {loading ? "Logging in..." : "Login"}
+              </button>
+            </form>
+
+            <p className="text-sm text-slate-500 text-center mt-6">
+              Don't have an account?{" "}
+              <Link
+                to={"/signup/"}
+                className="text-primary-600 font-medium hover:text-primary-700 hover:underline"
+              >
+                Sign up
+              </Link>
+            </p>
+          </div>
+        </div>
+      </section>
+
       {alertVisible && (
         <AlertModal
           message={alertMessage}

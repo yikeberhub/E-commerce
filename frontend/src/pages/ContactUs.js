@@ -1,19 +1,13 @@
 import React, { useState } from "react";
-import {
-  FaPhone,
-  FaEnvelope,
-  FaMapMarkerAlt,
-  FaFacebook,
-  FaTwitter,
-  FaInstagram,
-  FaLinkedin,
-} from "react-icons/fa";
+import { FiPhone, FiMail, FiMapPin, FiCheckCircle } from "react-icons/fi";
+import { inputClass } from "../common/formStyles";
 
 const ContactUs = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [sent, setSent] = useState(false);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -21,108 +15,122 @@ const ContactUs = () => {
       setError("All fields are required.");
       return;
     }
-    // Handle form submission logic here
-    console.log("Form submitted:", { name, email, message });
+    setError("");
+    setSent(true);
     setName("");
     setEmail("");
     setMessage("");
-    setError("");
   };
 
   return (
-    <div className="container mx-auto my-6 px-4">
-      <h1 className="text-3xl font-bold text-center mb-6">Contact Us</h1>
+    <div className="max-w-5xl mx-auto px-4 py-6">
+      <div className="text-center mb-6">
+        <h1 className="text-3xl font-bold text-slate-900">Contact Us</h1>
+        <p className="text-sm text-slate-500 mt-1">
+          We'd love to hear from you
+        </p>
+      </div>
 
-      <div className="md:flex md:justify-between">
-        <div className="md:w-1/2 mb-6">
-          <h2 className="text-2xl font-semibold mb-4">Get in Touch</h2>
-          {error && <p className="text-red-500 mb-4">{error}</p>}
-          <form
-            onSubmit={handleSubmit}
-            className="bg-white p-6 rounded-lg shadow-md"
-          >
-            <div className="mb-4">
-              <label className="block text-gray-700">Name</label>
-              <input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="mt-1 p-2 border border-gray-300 rounded w-full"
-                placeholder="Your Name"
-                required
-              />
+      <div className="grid md:grid-cols-2 gap-6">
+        <div className="bg-white rounded-xl border border-slate-100 shadow-card p-6">
+          <h2 className="text-lg font-bold text-slate-900 mb-4">
+            Get in Touch
+          </h2>
+
+          {sent ? (
+            <div className="flex flex-col items-center text-center gap-2 py-6">
+              <FiCheckCircle className="text-emerald-500 text-4xl" />
+              <p className="text-sm text-slate-600">
+                Thanks for reaching out! We'll get back to you soon.
+              </p>
+              <button
+                type="button"
+                onClick={() => setSent(false)}
+                className="text-sm font-medium text-primary-600 hover:text-primary-700 hover:underline mt-2"
+              >
+                Send another message
+              </button>
             </div>
-            <div className="mb-4">
-              <label className="block text-gray-700">Email</label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="mt-1 p-2 border border-gray-300 rounded w-full"
-                placeholder="Your Email"
-                required
-              />
-            </div>
-            <div className="mb-4">
-              <label className="block text-gray-700">Message</label>
-              <textarea
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                className="mt-1 p-2 border border-gray-300 rounded w-full"
-                rows="4"
-                placeholder="Your Message"
-                required
-              />
-            </div>
-            <button
-              type="submit"
-              className="bg-blue-500 text-white p-2 rounded hover:bg-blue-600 transition duration-200 w-full"
-            >
-              Send Message
-            </button>
-          </form>
+          ) : (
+            <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+              {error && (
+                <p className="text-red-500 text-xs bg-red-50 rounded-lg px-3 py-2">
+                  {error}
+                </p>
+              )}
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                  Name
+                </label>
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className={inputClass}
+                  placeholder="Your Name"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className={inputClass}
+                  placeholder="Your Email"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                  Message
+                </label>
+                <textarea
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  className={`${inputClass} min-h-[110px]`}
+                  placeholder="Your Message"
+                  required
+                />
+              </div>
+              <button
+                type="submit"
+                className="bg-primary-600 hover:bg-primary-700 text-white text-sm font-semibold py-2.5 rounded-lg transition"
+              >
+                Send Message
+              </button>
+            </form>
+          )}
         </div>
 
-        <div className="md:w-1/2 md:ml-6">
-          <h2 className="text-2xl font-semibold mb-4">Contact Information</h2>
-          <div className="flex items-center mb-4">
-            <FaMapMarkerAlt className="text-blue-500 mr-2" />
-            <p>123 Shopify , Ethiopia City, Bahirdar</p>
-          </div>
-          <div className="flex items-center mb-4">
-            <FaPhone className="text-blue-500 mr-2" />
-            <p>(+251) 946472687</p>
-          </div>
-          <div className="flex items-center mb-4">
-            <FaEnvelope className="text-blue-500 mr-2" />
-            <p>shopify@gmail.com</p>
-          </div>
-          <div className="mt-6">
-            <h3 className="text-lg font-semibold">Follow Us</h3>
-            <div className="flex space-x-4 mt-2">
-              <a
-                href="facebook link"
-                className="flex items-center text-blue-600 hover:text-blue-800"
-              >
-                <FaFacebook className="mr-1" /> Facebook
+        <div className="bg-white rounded-xl border border-slate-100 shadow-card p-6">
+          <h2 className="text-lg font-bold text-slate-900 mb-4">
+            Contact Information
+          </h2>
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center gap-3">
+              <span className="flex items-center justify-center w-9 h-9 rounded-lg bg-primary-50 text-primary-600 shrink-0">
+                <FiMapPin className="text-sm" />
+              </span>
+              <p className="text-sm text-slate-700">Bahir Dar, Ethiopia</p>
+            </div>
+            <div className="flex items-center gap-3">
+              <span className="flex items-center justify-center w-9 h-9 rounded-lg bg-primary-50 text-primary-600 shrink-0">
+                <FiPhone className="text-sm" />
+              </span>
+              <a href="tel:+251946472687" className="text-sm text-slate-700 hover:text-primary-600 transition">
+                +251 94 647 2687
               </a>
-              <a
-                href="twitter link"
-                className="flex items-center text-blue-600 hover:text-blue-800"
-              >
-                <FaTwitter className="mr-1" /> Twitter
-              </a>
-              <a
-                href="Instagram link"
-                className="flex items-center text-blue-600 hover:text-blue-800"
-              >
-                <FaInstagram className="mr-1" /> Instagram
-              </a>
-              <a
-                href="linkdin link"
-                className="flex items-center text-blue-600 hover:text-blue-800"
-              >
-                <FaLinkedin className="mr-1" /> LinkedIn
+            </div>
+            <div className="flex items-center gap-3">
+              <span className="flex items-center justify-center w-9 h-9 rounded-lg bg-primary-50 text-primary-600 shrink-0">
+                <FiMail className="text-sm" />
+              </span>
+              <a href="mailto:yikeber50@gmail.com" className="text-sm text-slate-700 hover:text-primary-600 transition">
+                yikeber50@gmail.com
               </a>
             </div>
           </div>
