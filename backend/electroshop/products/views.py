@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.exceptions import PermissionDenied
 from .models import Product, ProductReview,Category,Tag
-from .serializers import ProductSerializer,ProductDetailSerializer, ProductReviewSerializer,CategorySerializer,TagSerializer
+from .serializers import ProductSerializer,ProductDetailSerializer,ProductWriteSerializer, ProductReviewSerializer,CategorySerializer,TagSerializer
 from rest_framework.decorators import api_view, parser_classes, permission_classes
 from rest_framework.parsers import MultiPartParser, FormParser
 from vendors.models import Vendor
@@ -21,7 +21,9 @@ def _vendor_for(user):
 # Product Views
 class ProductListView(generics.ListCreateAPIView):
     queryset = Product.objects.all()
-    serializer_class = ProductSerializer
+
+    def get_serializer_class(self):
+        return ProductWriteSerializer if self.request.method == 'POST' else ProductSerializer
 
     def get_permissions(self):
         if self.request.method == 'POST':
@@ -36,8 +38,10 @@ class ProductListView(generics.ListCreateAPIView):
 
 class ProductDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Product.objects.all()
-    serializer_class = ProductDetailSerializer
     permission_classes = [IsOwnerOrAdminOrReadOnly]
+
+    def get_serializer_class(self):
+        return ProductWriteSerializer if self.request.method in ('PUT', 'PATCH') else ProductDetailSerializer
 
 class ProductReviewCreateUpdateView(generics.CreateAPIView):
     serializer_class = ProductReviewSerializer

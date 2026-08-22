@@ -77,6 +77,28 @@ class ProductSerializer(serializers.ModelSerializer):
     def get_number_of_reviews(self, obj):
         return obj.number_of_reviews()
     
+class ProductWriteSerializer(serializers.ModelSerializer):
+    """Used for create/update by the owning vendor (or admin). Unlike
+    ProductSerializer/ProductDetailSerializer, category and tags are
+    writable (by id) rather than read-only nested objects."""
+
+    category = serializers.PrimaryKeyRelatedField(
+        queryset=Category.objects.all(), required=False, allow_null=True
+    )
+    tags = serializers.PrimaryKeyRelatedField(
+        queryset=Tag.objects.all(), many=True, required=False
+    )
+
+    class Meta:
+        model = Product
+        fields = [
+            'id', 'title', 'image', 'description', 'category', 'tags',
+            'price', 'old_price', 'specifications', 'product_status',
+            'stock_quantity', 'featured', 'digital',
+        ]
+        read_only_fields = ['id']
+
+
 class ProductDetailSerializer(serializers.ModelSerializer):
     reviews = ProductReviewSerializer(many=True, read_only=True)
     tags = TagSerializer(many=True)

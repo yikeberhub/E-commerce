@@ -2,6 +2,7 @@ from django.shortcuts import render
 from rest_framework import generics
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.exceptions import NotFound
 
 
 from rest_framework.permissions import AllowAny
@@ -14,6 +15,18 @@ from orders.serializers import OrderSerializer
 from products.serializers import ProductSerializer
 from products.models import Product
 from electroshop.permissions import IsAdmin, IsOwnerOrAdminOrReadOnly
+
+
+class MyVendorView(generics.RetrieveAPIView):
+    """Returns the authenticated user's own vendor profile."""
+    serializer_class = VendorSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self):
+        vendor = Vendor.objects.filter(user=self.request.user).first()
+        if vendor is None:
+            raise NotFound("You don't have a vendor profile.")
+        return vendor
 
 
 # List and Create Vendors
@@ -45,6 +58,9 @@ class VendorRegistrationView(generics.CreateAPIView):
     def perform_create(self, serializer):
         # Save the vendor with the authenticated user and set is_active to False
         vendor = serializer.save(user=self.request.user, is_active=False)
+        if self.request.user.role != 'vendor':
+            self.request.user.role = 'vendor'
+            self.request.user.save(update_fields=['role'])
         return vendor
 
     def create(self, request, *args, **kwargs):

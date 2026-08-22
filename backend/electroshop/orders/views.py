@@ -11,7 +11,7 @@ from rest_framework.views import APIView
 from collections import defaultdict
 import logging
 import uuid
-from .models import Order,OrderItem
+from .models import Order,OrderItem,ORDER_STATUS
 from cart.models import Cart
 from users.models import CustomUser,Address
 from vendors.models import Vendor
@@ -231,6 +231,51 @@ class OrderUpdateView(generics.UpdateAPIView):
     serializer_class = OrderDetailSerializer
     permission_classes = [IsAuthenticated, IsOwnerOrAdmin]
     lookup_url_kwarg = 'order_id'
+
+
+# Statuses a vendor is allowed to move an order into, keyed by the order's
+# current status. Payment-driven statuses (payment_failed, refunded) and
+# post-cancellation states are deliberately not vendor-editable here.
+VENDOR_STATUS_TRANSITIONS = {
+    'pending': ['processing', 'canceled'],
+    'payment_processing': ['processing', 'canceled'],
+    'processing': ['shipped', 'canceled'],
+    'shipped': ['delivered'],
+    'delivered': ['completed'],
+}
+
+VALID_STATUSES = dict(ORDER_STATUS)
+
+
+class OrderStatusUpdateView(generics.UpdateAPIView):
+    """Lets the owning vendor (or an admin) move an order to its next
+    fulfillment status, e.g. mark it processing/shipped/delivered."""
+    queryset = Order.objects.all()
+    serializer_class = OrderDetailSerializer
+    permission_classes = [IsAuthenticated, IsOwnerOrAdmin]
+    lookup_url_kwarg = 'order_id'
+
+    def patch(self, request, *args, **kwargs):
+        order = self.get_object()
+        new_status = request.data.get('status')
+
+        if not new_status:
+            return Response({'detail': 'status is required.'}, status=status.HTTP_400_BAD_REQUEST)
+        if new_status not in VALID_STATUSES:
+            return Response({'detail': 'Invalid status.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if request.user.role != 'admin':
+            allowed_next = VENDOR_STATUS_TRANSITIONS.get(order.status, [])
+            if new_status not in allowed_next:
+                return Response(
+                    {'detail': f"Can't move an order from '{VALID_STATUSES[order.status]}' to '{VALID_STATUSES[new_status]}'."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+        order.status = new_status
+        order.save(update_fields=['status', 'updated_at'])
+        serializer = self.get_serializer(order)
+        return Response(serializer.data)
 
     def put(self, request, *args, **kwargs):
         try:
