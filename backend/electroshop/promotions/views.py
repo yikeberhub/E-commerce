@@ -23,11 +23,14 @@ class PromotionList(APIView):
 
     def get(self, request):
         promotions = Promotion.objects.all()
+        vendor_id = request.query_params.get('vendor')
+        if vendor_id:
+            promotions = promotions.filter(product__vendor_id=vendor_id)
         serializer = PromotionSerializer(promotions, many=True)
         return Response(serializer.data)
 
     def post(self, request):
-        product = Product.objects.filter(id=request.data.get('product')).first()
+        product = Product.objects.filter(id=request.data.get('product_id')).first()
         if not _can_manage(request.user, product):
             return Response({'error': 'You can only create promotions for your own products.'}, status=status.HTTP_403_FORBIDDEN)
         serializer = PromotionSerializer(data=request.data)

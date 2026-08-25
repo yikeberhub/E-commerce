@@ -8,6 +8,8 @@ import VendorFeedback from "../pages/vendorDashboard/components/VendorFeedback";
 import VendorChat from "../pages/vendorDashboard/components/VendorChat";
 import VendorPayments from "../pages/vendorDashboard/components/VendorPayments";
 import VendorStatistics from "../pages/vendorDashboard/components/VendorStatistics";
+import VendorPromotions from "../pages/vendorDashboard/components/VendorPromotions";
+import VendorProfile from "../pages/vendorDashboard/components/VendorProfile";
 import ProtectedRoute from "./ProtectedRoute";
 
 const VendorRoutes = () => {
@@ -25,6 +27,8 @@ const VendorRoutes = () => {
         <Route path="feedback" element={<VendorFeedback />} />
         <Route path="chats" element={<VendorChat />} />
         <Route path="payments" element={<VendorPayments />} />
+        <Route path="promotions" element={<VendorPromotions />} />
+        <Route path="profile" element={<VendorProfile />} />
       </Route>
     </Routes>
   );

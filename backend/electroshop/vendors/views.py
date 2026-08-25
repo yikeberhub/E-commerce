@@ -11,7 +11,7 @@ from rest_framework import status
 from django.db.models import Sum, Count, Avg
 from django.db.models.functions import TruncMonth
 from .models import Vendor
-from .serializer import VendorSerializer, MyVendorSerializer
+from .serializer import VendorSerializer, MyVendorSerializer, VendorProfileUpdateSerializer
 from orders.models import Order,OrderItem
 from orders.serializers import OrderSerializer
 from products.serializers import ProductSerializer
@@ -48,7 +48,12 @@ class VendorListView(generics.ListCreateAPIView):
 class VendorDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Vendor.objects.all()
     permission_classes = [IsOwnerOrAdminOrReadOnly]
-    serializer_class = VendorSerializer
+
+    def get_serializer_class(self):
+        is_write = self.request.method in ('PUT', 'PATCH')
+        if is_write and self.request.user.role != 'admin':
+            return VendorProfileUpdateSerializer
+        return VendorSerializer
  
  
  

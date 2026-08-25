@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { NavLink, Outlet } from "react-router-dom";
 import {
   FiBarChart2,
@@ -8,6 +8,8 @@ import {
   FiMessageSquare,
   FiMessageCircle,
   FiCreditCard,
+  FiSettings,
+  FiTag,
 } from "react-icons/fi";
 import { useAuth } from "../../contexts/AuthContext";
 import NotificationBell from "../../common/NotificationBell";
@@ -22,27 +24,30 @@ const navItems = [
   { to: "feedback", label: "Feedback", icon: FiMessageSquare },
   { to: "chats", label: "Chats", icon: FiMessageCircle },
   { to: "payments", label: "Payments", icon: FiCreditCard },
+  { to: "promotions", label: "Promotions", icon: FiTag },
+  { to: "profile", label: "Shop Settings", icon: FiSettings },
 ];
 
 const VendorAdminDashboard = () => {
   const { authTokens } = useAuth();
   const [vendor, setVendor] = useState(null);
 
-  useEffect(() => {
-    const fetchVendor = async () => {
-      try {
-        const response = await fetch(`${API_URL}/vendors/me/`, {
-          headers: { Authorization: `Bearer ${authTokens.access}` },
-        });
-        if (response.ok) {
-          setVendor(await response.json());
-        }
-      } catch (error) {
-        console.error("Failed to fetch vendor profile:", error);
+  const fetchVendor = useCallback(async () => {
+    try {
+      const response = await fetch(`${API_URL}/vendors/me/`, {
+        headers: { Authorization: `Bearer ${authTokens.access}` },
+      });
+      if (response.ok) {
+        setVendor(await response.json());
       }
-    };
-    fetchVendor();
+    } catch (error) {
+      console.error("Failed to fetch vendor profile:", error);
+    }
   }, [authTokens?.access]);
+
+  useEffect(() => {
+    fetchVendor();
+  }, [fetchVendor]);
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-4">
@@ -90,7 +95,7 @@ const VendorAdminDashboard = () => {
         </aside>
 
         <div className="flex-1 min-w-0">
-          <Outlet context={{ vendor }} />
+          <Outlet context={{ vendor, refetchVendor: fetchVendor }} />
         </div>
       </div>
     </div>
