@@ -41,8 +41,11 @@ function EditAddress({
   let value = user.addresses.filter((address) => address.id === id);
   let address = value[0];
   if (use) {
+    // Fall back to the first address when none is flagged default yet
+    // (e.g. a brand-new address created before the backend had a chance
+    // to mark it default) so the shipping form isn't left blank.
     value = user.addresses.filter((address) => address.is_default);
-    address = value[0];
+    address = value[0] || user.addresses[0];
   }
 
   useEffect(() => {

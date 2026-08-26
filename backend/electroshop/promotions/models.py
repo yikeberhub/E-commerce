@@ -10,8 +10,9 @@ class Promotion(models.Model):
     discount_percentage = models.DecimalField(max_digits=5, decimal_places=2)
     start_date = models.DateTimeField(default=timezone.now)
     end_date = models.DateTimeField()
-    product = models.OneToOneField(Product, related_name='promotion',on_delete=models.CASCADE, blank=True,null=True) 
+    product = models.OneToOneField(Product, related_name='promotion',on_delete=models.CASCADE, blank=True,null=True)
     active = models.BooleanField(default=True)
+    banner_image = models.ImageField(upload_to='promotions/banner_images/', null=True, blank=True)
 
     def is_active(self):
         """Check if the promotion is currently active."""

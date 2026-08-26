@@ -51,7 +51,11 @@ class CreateAddressView(generics.CreateAPIView):
         print('user',request.user)          
         try:
             user = CustomUser.objects.get(id = request.user.id)
-            address= Address.objects.create(user = user,**request.data)
+            is_first_address = not Address.objects.filter(user=user).exists()
+            address_data = {**request.data}
+            if is_first_address:
+                address_data['is_default'] = True
+            address= Address.objects.create(user = user,**address_data)
             serializer =AddressSerializer(address)
             return Response(serializer.data,status=status.HTTP_201_CREATED)
         except CustomUser.DoesNotExist:

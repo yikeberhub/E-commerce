@@ -18,6 +18,7 @@ class PromotionSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'title', 'description', 'discount_percentage',
             'start_date', 'end_date', 'product', 'product_id', 'active',
+            'banner_image',
         ]
 
     def get_discount_percentage(self, obj):

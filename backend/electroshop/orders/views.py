@@ -223,10 +223,29 @@ class OrderDetailView(generics.RetrieveUpdateDestroyAPIView):
         return Response(serializer.data)
 
 class OrderUpdateView(generics.UpdateAPIView):
+    """Used by checkout to attach the chosen shipping address to an order
+    before payment. Deliberately not a plain serializer-driven update:
+    OrderDetailSerializer's `address` field is read-only (it's a nested
+    SerializerMethodField), and a full PUT of every order field is not
+    what the checkout page sends — it only sends `address_id`."""
     queryset = Order.objects.all()
     serializer_class = OrderDetailSerializer
     permission_classes = [IsAuthenticated, IsOwnerOrAdmin]
     lookup_url_kwarg = 'order_id'
+
+    def put(self, request, *args, **kwargs):
+        order = self.get_object()
+        address_id = request.data.get('address_id')
+        if address_id:
+            try:
+                address = Address.objects.get(id=address_id, user=order.user)
+            except Address.DoesNotExist:
+                return Response({'error': 'Address not found.'}, status=status.HTTP_404_NOT_FOUND)
+            order.address = address
+            order.save(update_fields=['address'])
+
+        serializer = self.get_serializer(order)
+        return Response(serializer.data)
 
 
 # Statuses a vendor is allowed to move an order into, keyed by the order's

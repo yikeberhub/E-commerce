@@ -4,6 +4,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from products.models import Product
 from .models import Promotion
 from .serializers import PromotionSerializer
@@ -16,6 +17,8 @@ def _can_manage(user, product):
 
 
 class PromotionList(APIView):
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
+
     def get_permissions(self):
         if self.request.method == 'POST':
             return [IsAuthenticated()]
@@ -26,14 +29,14 @@ class PromotionList(APIView):
         vendor_id = request.query_params.get('vendor')
         if vendor_id:
             promotions = promotions.filter(product__vendor_id=vendor_id)
-        serializer = PromotionSerializer(promotions, many=True)
+        serializer = PromotionSerializer(promotions, many=True, context={'request': request})
         return Response(serializer.data)
 
     def post(self, request):
         product = Product.objects.filter(id=request.data.get('product_id')).first()
         if not _can_manage(request.user, product):
             return Response({'error': 'You can only create promotions for your own products.'}, status=status.HTTP_403_FORBIDDEN)
-        serializer = PromotionSerializer(data=request.data)
+        serializer = PromotionSerializer(data=request.data, context={'request': request})
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -44,6 +47,8 @@ class PromotionDetail(APIView):
     """
     Retrieve, update or delete a promotion instance.
     """
+
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
 
     def get_permissions(self):
         if self.request.method == 'GET':
@@ -60,7 +65,7 @@ class PromotionDetail(APIView):
         promotion = self.get_object(pk)
         if promotion is None:
             return Response(status=status.HTTP_404_NOT_FOUND)
-        serializer = PromotionSerializer(promotion)
+        serializer = PromotionSerializer(promotion, context={'request': request})
         return Response(serializer.data)
 
     def put(self, request, pk):
@@ -69,7 +74,7 @@ class PromotionDetail(APIView):
             return Response(status=status.HTTP_404_NOT_FOUND)
         if not _can_manage(request.user, promotion.product):
             return Response({'error': 'You can only edit promotions for your own products.'}, status=status.HTTP_403_FORBIDDEN)
-        serializer = PromotionSerializer(promotion, data=request.data)
+        serializer = PromotionSerializer(promotion, data=request.data, partial=True, context={'request': request})
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)

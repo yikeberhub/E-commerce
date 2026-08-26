@@ -13,6 +13,7 @@ import AdminOrderDetail from "../pages/AdminDashboard/components/AdminOrderDetai
 import AdminPayments from "../pages/AdminDashboard/components/AdminPayments";
 import AdminPaymentDetail from "../pages/AdminDashboard/components/AdminPaymentDetail";
 import AdminCategories from "../pages/AdminDashboard/components/AdminCategories";
+import AdminPromotions from "../pages/AdminDashboard/components/AdminPromotions";
 import AdminReviews from "../pages/AdminDashboard/components/AdminReviews";
 import AdminContact from "../pages/AdminDashboard/components/AdminContact";
 import AdminSettings from "../pages/AdminDashboard/components/AdminSettings";
@@ -38,6 +39,7 @@ const SuperAdminRoutes = () => {
         <Route path="payments" element={<AdminPayments />} />
         <Route path="payments/:id" element={<AdminPaymentDetail />} />
         <Route path="categories" element={<AdminCategories />} />
+        <Route path="promotions" element={<AdminPromotions />} />
         <Route path="reviews" element={<AdminReviews />} />
         <Route path="contact" element={<AdminContact />} />
         <Route path="settings" element={<AdminSettings />} />

@@ -24,6 +24,8 @@ const emptyForm = {
   start_date: toLocalInput(new Date().toISOString()),
   end_date: "",
   active: true,
+  banner_image: null,
+  banner_image_url: "",
 };
 
 function PromotionForm({ initial, products, onCancel, onSaved }) {
@@ -33,6 +35,9 @@ function PromotionForm({ initial, products, onCancel, onSaved }) {
   const [error, setError] = useState("");
   const isEdit = Boolean(initial.id);
   const selectedProduct = products.find((p) => String(p.id) === String(data.product_id));
+  const bannerPreview = data.banner_image
+    ? URL.createObjectURL(data.banner_image)
+    : data.banner_image_url;
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -47,25 +52,22 @@ function PromotionForm({ initial, products, onCancel, onSaved }) {
     setError("");
     try {
       setSaving(true);
-      const payload = {
-        title: data.title,
-        description: data.description,
-        start_date: new Date(data.start_date).toISOString(),
-        end_date: new Date(data.end_date).toISOString(),
-        active: data.active,
-      };
-      if (!isEdit) payload.product_id = data.product_id;
+      const formData = new FormData();
+      formData.append("title", data.title);
+      formData.append("description", data.description);
+      formData.append("start_date", new Date(data.start_date).toISOString());
+      formData.append("end_date", new Date(data.end_date).toISOString());
+      formData.append("active", data.active);
+      if (!isEdit) formData.append("product_id", data.product_id);
+      if (data.banner_image) formData.append("banner_image", data.banner_image);
 
       const url = isEdit
         ? `${API_URL}/promotions/${initial.id}/`
         : `${API_URL}/promotions/`;
       const response = await fetch(url, {
         method: isEdit ? "PUT" : "POST",
-        headers: {
-          Authorization: `Bearer ${authTokens.access}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
+        headers: { Authorization: `Bearer ${authTokens.access}` },
+        body: formData,
       });
 
       if (!response.ok) {
@@ -152,6 +154,31 @@ function PromotionForm({ initial, products, onCancel, onSaved }) {
               onChange={handleChange}
               className={`${inputClass} min-h-[70px]`}
             />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1.5">
+              Banner image (optional)
+            </label>
+            {bannerPreview && (
+              <img
+                src={bannerPreview}
+                alt=""
+                className="w-full h-28 object-cover rounded-lg mb-2 border border-slate-100"
+              />
+            )}
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) =>
+                setData((prev) => ({ ...prev, banner_image: e.target.files[0] || null }))
+              }
+              className="text-xs text-slate-500 w-full"
+            />
+            <p className="text-xs text-slate-400 mt-1">
+              A wide image shown on the homepage promo banner. Falls back to the product's
+              own photo if not set.
+            </p>
           </div>
 
           <div>
@@ -299,6 +326,8 @@ function VendorPromotions() {
       start_date: toLocalInput(promotion.start_date),
       end_date: toLocalInput(promotion.end_date),
       active: promotion.active,
+      banner_image: null,
+      banner_image_url: promotion.banner_image || "",
     });
     setFormOpen(true);
   };
@@ -370,7 +399,7 @@ function VendorPromotions() {
                 className="flex flex-col sm:flex-row sm:items-center gap-3 border border-slate-100 rounded-xl p-3"
               >
                 <img
-                  src={promotion.product?.image}
+                  src={promotion.banner_image || promotion.product?.image}
                   alt=""
                   className="w-14 h-14 rounded-lg object-cover shrink-0 bg-slate-50"
                 />
