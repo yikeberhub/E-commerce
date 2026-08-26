@@ -69,6 +69,34 @@ class AdminUserSerializer(UserSerializer):
     class Meta(UserSerializer.Meta):
         read_only_fields = ['is_staff', 'is_superuser', 'date_joined', 'last_login']
 
+
+class AdminUserCreateSerializer(serializers.ModelSerializer):
+    """Used only by an admin to create a new user account directly (unlike
+    RegisterSerializer, it also lets the admin set the role up front)."""
+
+    password = serializers.CharField(write_only=True, min_length=8)
+
+    class Meta:
+        model = CustomUser
+        fields = ['id', 'username', 'email', 'password', 'role', 'phone_number']
+
+    def validate_email(self, value):
+        if CustomUser.objects.filter(email=value).exists():
+            raise serializers.ValidationError("This email is already in use.")
+        return value
+
+    def validate_username(self, value):
+        if CustomUser.objects.filter(username=value).exists():
+            raise serializers.ValidationError("This username is already taken.")
+        return value
+
+    def create(self, validated_data):
+        password = validated_data.pop('password')
+        user = CustomUser(**validated_data)
+        user.set_password(password)
+        user.save()
+        return user
+
 class RegisterSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser

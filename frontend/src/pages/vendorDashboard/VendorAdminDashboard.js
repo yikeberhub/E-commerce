@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { NavLink, Outlet } from "react-router-dom";
+import { NavLink, Link, Outlet } from "react-router-dom";
 import {
   FiBarChart2,
   FiBox,
@@ -10,6 +10,7 @@ import {
   FiCreditCard,
   FiSettings,
   FiTag,
+  FiExternalLink,
 } from "react-icons/fi";
 import { useAuth } from "../../contexts/AuthContext";
 import NotificationBell from "../../common/NotificationBell";
@@ -53,7 +54,15 @@ const VendorAdminDashboard = () => {
     <div className="max-w-7xl mx-auto px-4 py-4">
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-lg font-bold text-slate-900">Vendor Dashboard</h1>
-        <NotificationBell />
+        <div className="flex items-center gap-3">
+          <Link
+            to="/"
+            className="flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-primary-600 transition"
+          >
+            <FiExternalLink className="text-sm" /> View Public Site
+          </Link>
+          <NotificationBell />
+        </div>
       </div>
 
       <div className="flex flex-col lg:flex-row gap-6">

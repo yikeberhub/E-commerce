@@ -2,24 +2,40 @@ import React, { useState } from "react";
 import { FiPhone, FiMail, FiMapPin, FiCheckCircle } from "react-icons/fi";
 import { inputClass } from "../common/formStyles";
 
+const API_URL = process.env.REACT_APP_API_URL;
+
 const ContactUs = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [sent, setSent] = useState(false);
+  const [sending, setSending] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!name || !email || !message) {
       setError("All fields are required.");
       return;
     }
     setError("");
-    setSent(true);
-    setName("");
-    setEmail("");
-    setMessage("");
+    setSending(true);
+    try {
+      const response = await fetch(`${API_URL}/contact/`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, message }),
+      });
+      if (!response.ok) throw new Error("Failed to send your message. Please try again.");
+      setSent(true);
+      setName("");
+      setEmail("");
+      setMessage("");
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setSending(false);
+    }
   };
 
   return (
@@ -98,9 +114,10 @@ const ContactUs = () => {
               </div>
               <button
                 type="submit"
-                className="bg-primary-600 hover:bg-primary-700 text-white text-sm font-semibold py-2.5 rounded-lg transition"
+                disabled={sending}
+                className="bg-primary-600 hover:bg-primary-700 disabled:opacity-60 text-white text-sm font-semibold py-2.5 rounded-lg transition"
               >
-                Send Message
+                {sending ? "Sending..." : "Send Message"}
               </button>
             </form>
           )}

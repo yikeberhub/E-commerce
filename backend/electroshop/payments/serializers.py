@@ -29,21 +29,31 @@ class TransactionSerializer(serializers.ModelSerializer):
 class PaymentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Payment
-        fields = ['order', 'payment_status', 'transaction_id', 'amount', 'currency', 'payment_method',
+        fields = ['id', 'order', 'payment_status', 'transaction_id', 'amount', 'currency', 'payment_method',
                   'chapa_sub_method', 'charge', 'payment_gateway', 'created_at', 'updated_at']
 
 
 class VendorPaymentSerializer(serializers.ModelSerializer):
     order_id = serializers.IntegerField(source='order.id', read_only=True)
     customer = serializers.CharField(source='order.user.username', read_only=True)
+    customer_id = serializers.IntegerField(source='order.user.id', read_only=True)
+    vendor = serializers.SerializerMethodField()
+    vendor_id = serializers.SerializerMethodField()
 
     class Meta:
         model = Payment
         fields = [
-            'id', 'order_id', 'customer', 'payment_status', 'transaction_id',
+            'id', 'order_id', 'customer', 'customer_id', 'vendor', 'vendor_id',
+            'payment_status', 'transaction_id',
             'amount', 'currency', 'payment_method', 'chapa_sub_method',
             'payment_gateway', 'created_at',
         ]
+
+    def get_vendor(self, obj):
+        return obj.order.vendor.title if obj.order and obj.order.vendor else None
+
+    def get_vendor_id(self, obj):
+        return obj.order.vendor_id if obj.order else None
         
    
     def create(self, validated_data):

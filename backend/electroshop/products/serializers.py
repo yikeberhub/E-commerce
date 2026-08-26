@@ -5,6 +5,7 @@ from rest_framework import serializers
 from .models import Category,Product,ProductImages,ProductReview,Tag
 from users.serializers import PublicUserSerializer
 from vendors.serializer import VendorSerializer
+from vendors.models import Vendor
 
   
 class CategorySerializer(ModelSerializer):
@@ -96,11 +97,17 @@ class ProductWriteSerializer(serializers.ModelSerializer):
     tags = serializers.PrimaryKeyRelatedField(
         queryset=Tag.objects.all(), many=True, required=False
     )
+    # Only used when an admin creates a product on a vendor's behalf; a
+    # vendor's own product list always ignores this and uses their own
+    # vendor profile instead (see ProductListView.perform_create).
+    vendor = serializers.PrimaryKeyRelatedField(
+        queryset=Vendor.objects.all(), required=False, allow_null=True
+    )
 
     class Meta:
         model = Product
         fields = [
-            'id', 'title', 'image', 'description', 'category', 'tags',
+            'id', 'title', 'image', 'description', 'category', 'tags', 'vendor',
             'price', 'old_price', 'specifications', 'product_status',
             'stock_quantity', 'featured', 'digital',
         ]

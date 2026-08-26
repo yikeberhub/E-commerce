@@ -44,7 +44,6 @@ class CheckoutView(generics.CreateAPIView):
 
             orders = []
             order_ids = []
-            print('printed here')
 
             for vendor, items in vendor_orders.items():
                 vendor_total = sum(item.product.price * item.quantity for item in items)
@@ -55,7 +54,6 @@ class CheckoutView(generics.CreateAPIView):
                     total_price=vendor_total,
                     vendor=vendor
                 )
-                print('Order created:', order)
 
                 # Add items to the order
                 for item in items:
@@ -63,7 +61,6 @@ class CheckoutView(generics.CreateAPIView):
 
                 # Generate a unique transaction ID
                 transaction_id = str(uuid.uuid4())
-                print('transaction_id:', transaction_id)
 
                 # Create a Payment record for the order
                 try:
@@ -73,9 +70,8 @@ class CheckoutView(generics.CreateAPIView):
                         payment_status='pending',
                         transaction_id=transaction_id
                     )
-                    print('Payment created for order:', order)
                 except Exception as payment_error:
-                    print('Payment creation failed:', payment_error)
+                    logger.exception('Payment creation failed for order %s', order.id)
                     return Response({"error": "Payment creation failed."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
                 orders.append(order)
@@ -93,8 +89,6 @@ class CheckoutView(generics.CreateAPIView):
                     except Exception:
                         pass
 
-            print('Orders before serialization:', orders)
-
             # The cart's contents are now committed to orders — clear it.
             cart.items.all().delete()
 
@@ -106,10 +100,9 @@ class CheckoutView(generics.CreateAPIView):
             }, status=status.HTTP_201_CREATED)
 
         except Cart.DoesNotExist:
-            print('Cart does not exist for user:', request.user)
             return Response({"error": "Cart doesn't exist."}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
-            print('Exception occurred:', str(e))
+            logger.exception('Checkout failed for user %s', request.user.id)
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         
@@ -126,16 +119,13 @@ class OrderListView(generics.ListAPIView):
             vendor = Vendor.objects.filter(user=user).first()
             return Order.objects.filter(vendor=vendor) if vendor else Order.objects.none()
         elif user.role == 'customer':
-            print('it is user')
             return Order.objects.filter(user=user)
         else:
             return Order.objects.none()
 
-        
+
     def get(self, request, *args, **kwargs):
-        print('hello i am called')
         orders = self.get_queryset()
-        print('orders',orders)
         serializer = self.get_serializer(orders, many=True,context={'request':request})
         return Response(serializer.data)
 
@@ -152,11 +142,9 @@ class UserOrderStatusListView(generics.ListAPIView):
         else:
             user = self.request.user
 
-        print('user id',user.id)
         order =  Order.objects .filter(user=user).annotate(month=TruncMonth('created_at')).values('month', 'status') .annotate(count=Count('id')).order_by('month', 'status')
-        print('order found is',order)
         return (
-           order 
+           order
         )
 
     def list(self, request, *args, **kwargs):
@@ -167,12 +155,10 @@ class UserOrderStatusListView(generics.ListAPIView):
             month = order['month'].strftime("%B")
             status = order['status']
             count = order['count']
-            print('count',count)
 
             if month not in data:
                 data[month] = {}
             data[month][status] = count
-            print('data',data)
 
         # Prepare the response data
         response_data = []
@@ -184,7 +170,6 @@ class UserOrderStatusListView(generics.ListAPIView):
                 'payment_failed': statuses.get('payment_failed', 0),
                 'processing': statuses.get('processing', 0),
             })
-            print('response data',response_data)
         return Response(response_data)
     
 class UserSalesChartView(APIView):
@@ -308,7 +293,6 @@ class OrderStatusUpdateView(generics.UpdateAPIView):
                 try:
                     address = Address.objects.get(id=address_id)
                     order.address = address
-                    print('address',address)
                 except Address.DoesNotExist:
                     return Response({'error': 'Address not found.'}, status=status.HTTP_404_NOT_FOUND)
             

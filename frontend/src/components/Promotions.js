@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Slider from "react-slick";
-import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
+import { FiChevronLeft, FiChevronRight, FiZap, FiHeart, FiShoppingBag, FiCheck } from "react-icons/fi";
+import { FaHeart } from "react-icons/fa";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import { useWishlist } from "../contexts/WishlistContext";
@@ -44,46 +45,92 @@ const PromotedProduct = ({ promotion }) => {
     navigate(`/product/${id}`);
   };
 
-  return (
-    <div
-      className="relative mb-1 rounded-xl overflow-hidden cursor-pointer"
-      onClick={() => handleNavigate(promotion.product.id)}
-    >
-      <img
-        src={promotion.product.image}
-        alt={promotion.product.title}
-        className="w-full h-56 sm:h-72 object-cover"
-      />
+  // The product's own price vs. old price is the single source of truth for
+  // discount — the same numbers the Featured Products badge uses — so a
+  // promoted product never shows a different % or price than its own card.
+  const price = Number(promotion.product.price) || 0;
+  const oldPrice = Number(promotion.product.old_price) || 0;
+  const discountPct = Number(promotion.discount_percentage) || 0;
+  const hasDiscount = discountPct > 0 && oldPrice > price;
 
-      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent flex flex-col justify-end items-start text-white p-4 sm:p-6">
-        <span className="bg-red-500 text-white text-xs font-bold px-2.5 py-1 rounded-full mb-2">
-          {promotion.discount_percentage}% OFF
-        </span>
-        <h2 className="text-lg sm:text-2xl font-bold mb-1">
-          {promotion.product.title}
-        </h2>
-        <p className="text-sm text-white/80 mb-3 max-w-md line-clamp-2">
-          {promotion.description}
-        </p>
-        <div className="flex flex-wrap gap-2">
-          <button
-            className="bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition"
-            onClick={(e) => {
-              e.stopPropagation();
-              handleAddToCart();
-            }}
-          >
-            {!addedToCart ? "Add to Cart" : "Remove from Cart"}
-          </button>
-          <button
-            className="bg-white/90 hover:bg-white text-slate-800 text-sm font-medium px-4 py-2 rounded-lg transition"
-            onClick={(e) => {
-              e.stopPropagation();
-              handleAddToWishlist();
-            }}
-          >
-            {!addedToWishlist ? "Add to Wishlist" : "Remove from Wishlist"}
-          </button>
+  return (
+    <div className="px-1">
+      <div
+        className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-900 via-primary-900 to-slate-950 cursor-pointer shadow-soft"
+        onClick={() => handleNavigate(promotion.product.id)}
+      >
+        <div className="pointer-events-none absolute -top-24 -right-16 w-72 h-72 bg-primary-400/20 rounded-full blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-24 -left-16 w-72 h-72 bg-amber-400/10 rounded-full blur-3xl" />
+
+        <div className="relative grid grid-cols-1 lg:grid-cols-2 items-center gap-6 lg:gap-10 p-6 sm:p-8 lg:p-12">
+          <div className="order-2 lg:order-1 text-white">
+            <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest text-amber-300 mb-3">
+              <FiZap className="text-xs" /> Limited-Time Offer
+            </span>
+
+            {hasDiscount && (
+              <div className="inline-flex items-center gap-1 bg-amber-400 text-slate-900 rounded-lg px-3 py-1 mb-4 font-extrabold text-base shadow-lg shadow-amber-500/20">
+                -{discountPct.toFixed(0)}% <span className="text-[11px] font-bold">OFF</span>
+              </div>
+            )}
+
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold leading-tight mb-2 line-clamp-2">
+              {promotion.product.title}
+            </h2>
+
+            {promotion.description && (
+              <p className="text-sm sm:text-base text-white/60 mb-5 max-w-md line-clamp-2">
+                {promotion.description}
+              </p>
+            )}
+
+            <div className="flex items-end gap-3 mb-6">
+              <span className="text-3xl sm:text-4xl font-extrabold tracking-tight">
+                {price.toLocaleString()} ETB
+              </span>
+              {hasDiscount && (
+                <span className="text-base text-white/40 line-through mb-1">
+                  {oldPrice.toLocaleString()} ETB
+                </span>
+              )}
+            </div>
+
+            <div className="flex flex-wrap gap-3">
+              <button
+                className="flex items-center gap-2 bg-white text-slate-900 hover:bg-amber-300 font-semibold text-sm px-5 py-2.5 rounded-full transition shadow-lg"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleAddToCart();
+                }}
+              >
+                {addedToCart ? <FiCheck /> : <FiShoppingBag />}
+                {addedToCart ? "In Your Cart" : "Shop Now"}
+              </button>
+              <button
+                className="flex items-center gap-1.5 border border-white/25 text-white hover:bg-white/10 text-sm font-medium px-5 py-2.5 rounded-full transition"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleAddToWishlist();
+                }}
+              >
+                {addedToWishlist ? <FaHeart className="text-rose-400" /> : <FiHeart />}
+                Wishlist
+              </button>
+            </div>
+          </div>
+
+          <div className="order-1 lg:order-2 flex justify-center">
+            <div className="relative w-44 h-44 sm:w-60 sm:h-60 lg:w-80 lg:h-80">
+              <div className="absolute inset-0 rounded-full bg-white/10 blur-2xl" />
+              <div className="relative w-full h-full rounded-2xl bg-white/[0.06] backdrop-blur-sm border border-white/10 p-5 sm:p-7 flex items-center justify-center shadow-2xl">
+                <img
+                  src={promotion.product.image}
+                  alt={promotion.product.title}
+                  className="max-w-full max-h-full object-contain drop-shadow-2xl"
+                />
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -103,7 +150,6 @@ const Promotions = () => {
           throw new Error("Network response was not ok");
         }
         const data = await response.json();
-        console.log("Fetched Promotions:", data);
         setPromotions(data);
       } catch (error) {
         setError(error.message);
@@ -116,12 +162,7 @@ const Promotions = () => {
   }, []);
 
   if (loading) {
-    return (
-      <div className="bg-white rounded-xl shadow-card p-4 sm:p-5 my-4">
-        <Skeleton className="h-4 w-32 mb-4" />
-        <Skeleton className="w-full h-56 sm:h-72 rounded-xl" />
-      </div>
-    );
+    return <Skeleton className="w-full h-64 sm:h-80 rounded-2xl my-4" />;
   }
 
   if (error) {
@@ -157,7 +198,7 @@ const Promotions = () => {
     slidesToShow: Math.min(promotions.length, 1),
     slidesToScroll: 1,
     autoplay: true,
-    autoplaySpeed: 3000,
+    autoplaySpeed: 4000,
     nextArrow: <SampleNextArrow />,
     prevArrow: <SamplePrevArrow />,
     responsive: [
@@ -180,8 +221,7 @@ const Promotions = () => {
 
   return (
     promotions.length !== 0 && (
-      <div className="bg-white rounded-xl shadow-card p-4 sm:p-5 my-4">
-        <h2 className="text-xl font-bold text-slate-900 mb-2">Promotions</h2>
+      <div className="my-4 promo-slider">
         <Slider {...settings}>
           {promotions.map((promotion) => (
             <PromotedProduct key={promotion.id} promotion={promotion} />

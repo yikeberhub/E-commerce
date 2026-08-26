@@ -21,7 +21,6 @@ const emptyForm = {
   product_id: "",
   title: "",
   description: "",
-  discount_percentage: "",
   start_date: toLocalInput(new Date().toISOString()),
   end_date: "",
   active: true,
@@ -33,6 +32,7 @@ function PromotionForm({ initial, products, onCancel, onSaved }) {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const isEdit = Boolean(initial.id);
+  const selectedProduct = products.find((p) => String(p.id) === String(data.product_id));
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -50,7 +50,6 @@ function PromotionForm({ initial, products, onCancel, onSaved }) {
       const payload = {
         title: data.title,
         description: data.description,
-        discount_percentage: data.discount_percentage,
         start_date: new Date(data.start_date).toISOString(),
         end_date: new Date(data.end_date).toISOString(),
         active: data.active,
@@ -157,19 +156,32 @@ function PromotionForm({ initial, products, onCancel, onSaved }) {
 
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1.5">
-              Discount Percentage
+              Discount
             </label>
-            <input
-              type="number"
-              name="discount_percentage"
-              min="0"
-              max="100"
-              step="0.01"
-              value={data.discount_percentage}
-              onChange={handleChange}
-              required
-              className={inputClass}
-            />
+            {!selectedProduct ? (
+              <p className="text-xs text-slate-400 bg-slate-50 rounded-lg px-3 py-2">
+                Select a product to see its discount.
+              </p>
+            ) : selectedProduct.discount_percentage > 0 ? (
+              <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-100 rounded-lg px-3 py-2">
+                <span className="text-sm font-semibold text-emerald-700">
+                  {Number(selectedProduct.discount_percentage).toFixed(0)}% off
+                </span>
+                <span className="text-xs text-emerald-600">
+                  {Number(selectedProduct.price).toLocaleString()} ETB (was{" "}
+                  {Number(selectedProduct.old_price).toLocaleString()} ETB)
+                </span>
+              </div>
+            ) : (
+              <p className="text-xs text-amber-600 bg-amber-50 rounded-lg px-3 py-2">
+                This product has no discount — its price and old price are the same. Set a
+                higher old price on the product to give this promotion a discount.
+              </p>
+            )}
+            <p className="text-xs text-slate-400 mt-1">
+              A promotion's discount always matches the product's own price vs. old price —
+              it's not set separately.
+            </p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -284,7 +296,6 @@ function VendorPromotions() {
       product_id: promotion.product?.id,
       title: promotion.title,
       description: promotion.description || "",
-      discount_percentage: promotion.discount_percentage,
       start_date: toLocalInput(promotion.start_date),
       end_date: toLocalInput(promotion.end_date),
       active: promotion.active,
@@ -377,9 +388,18 @@ function VendorPromotions() {
                     </p>
                   </div>
                   <div>
-                    <p className="text-xs text-slate-400">Discount</p>
+                    <p className="text-xs text-slate-400">Sale Price</p>
                     <p className="font-medium text-slate-800">
-                      {promotion.discount_percentage}%
+                      {promotion.product?.price !== undefined
+                        ? (
+                            Number(promotion.product.price) *
+                            (1 - (Number(promotion.discount_percentage) || 0) / 100)
+                          ).toFixed(2)
+                        : "—"}{" "}
+                      ETB
+                      <span className="text-xs text-slate-400 ml-1">
+                        (-{promotion.discount_percentage}%)
+                      </span>
                     </p>
                   </div>
                   <div>

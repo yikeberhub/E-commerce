@@ -1,9 +1,7 @@
-# from django.urls import path
+from django.urls import path
 
-# from .views import AnalyticsSalesView,AnalyticsUserActivityView,AnalyticsProductPerformanceView
+from .views import AdminAnalyticsOverviewView
 
-# urlpatterns = [
-#     path('sales/', AnalyticsSalesView.as_view(), name='sales-analytics'),
-#     path('user-activity/', AnalyticsUserActivityView.as_view(), name='user-activity'),
-#     path('product-performance/', AnalyticsProductPerformanceView.as_view(), name='product-performance'),
-# ]
+urlpatterns = [
+    path('overview/', AdminAnalyticsOverviewView.as_view(), name='admin-analytics-overview'),
+]

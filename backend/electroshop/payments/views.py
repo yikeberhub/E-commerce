@@ -7,11 +7,12 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.exceptions import PermissionDenied
 from rest_framework import status
 
 from orders.models import Order
 from vendors.models import Vendor
-from .models import Payment
+from .models import Payment, PAYMENT_STATUS
 from .serializers import PaymentSerializer, VendorPaymentSerializer
 from chapa import Chapa
 from .check_payment import verify_payment
@@ -146,3 +147,49 @@ class VendorPaymentsView(generics.ListAPIView):
         if not vendor:
             return Payment.objects.none()
         return Payment.objects.select_related('order', 'order__user').filter(order__vendor=vendor)
+
+
+class PaymentDetailView(generics.RetrieveAPIView):
+    """A single payment's detail — an admin can view any payment, a vendor
+    only one on their own order. PATCH is a manual admin-only status
+    override for reconciliation (e.g. marking a payment refunded) — it
+    updates local bookkeeping only and never calls out to the payment
+    gateway."""
+    serializer_class = VendorPaymentSerializer
+    queryset = Payment.objects.select_related('order', 'order__user', 'order__vendor')
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self):
+        obj = super().get_object()
+        user = self.request.user
+        if user.role == 'admin':
+            return obj
+        vendor = Vendor.objects.filter(user=user).first()
+        if obj.order and vendor and obj.order.vendor_id == vendor.id:
+            return obj
+        raise PermissionDenied("You can't view another vendor's payment.")
+
+    def patch(self, request, *args, **kwargs):
+        if request.user.role != 'admin':
+            raise PermissionDenied('Only an admin can change a payment status.')
+
+        payment = self.get_object()
+        new_status = request.data.get('payment_status')
+        valid_statuses = dict(PAYMENT_STATUS)
+        if new_status not in valid_statuses:
+            return Response({'detail': 'Invalid payment status.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        old_status = payment.payment_status
+        payment.payment_status = new_status
+        payment.save(update_fields=['payment_status', 'updated_at'])
+
+        if new_status == 'refunded' and old_status != 'refunded' and payment.order:
+            order = payment.order
+            order.status = 'refunded'
+            order.save(update_fields=['status', 'updated_at'])
+            vendor = order.vendor
+            if vendor:
+                vendor.balance = max(vendor.balance - payment.amount, 0)
+                vendor.save(update_fields=['balance'])
+
+        return Response(self.get_serializer(payment).data)

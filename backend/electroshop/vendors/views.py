@@ -17,6 +17,7 @@ from orders.serializers import OrderSerializer
 from products.serializers import ProductSerializer
 from products.models import Product, ProductReview
 from electroshop.permissions import IsAdmin, IsOwnerOrAdminOrReadOnly
+from notifications.utils import notify
 
 
 class MyVendorView(generics.RetrieveAPIView):
@@ -53,10 +54,43 @@ class VendorDetailView(generics.RetrieveUpdateDestroyAPIView):
         is_write = self.request.method in ('PUT', 'PATCH')
         if is_write and self.request.user.role != 'admin':
             return VendorProfileUpdateSerializer
+        # An admin may see the vendor's balance (customers/other vendors may not).
+        if self.request.user.is_authenticated and self.request.user.role == 'admin':
+            return MyVendorSerializer
         return VendorSerializer
- 
- 
- 
+
+    def perform_update(self, serializer):
+        was_active = serializer.instance.is_active
+        old_status = serializer.instance.account_status
+        vendor = serializer.save()
+
+        if self.request.user.role != 'admin' or not vendor.user:
+            return
+
+        if not was_active and vendor.is_active:
+            try:
+                notify(
+                    recipient=vendor.user,
+                    notification_type='system',
+                    title='Your shop was approved!',
+                    message=f'{vendor.title} is now live on the marketplace.',
+                    link='/vendor-dashboard/profile',
+                )
+            except Exception:
+                pass
+        elif old_status != vendor.account_status and vendor.account_status == 'suspended':
+            try:
+                notify(
+                    recipient=vendor.user,
+                    notification_type='system',
+                    title='Your shop was suspended',
+                    message='Contact support for more information.',
+                    link='/vendor-dashboard/profile',
+                )
+            except Exception:
+                pass
+
+
 class VendorRegistrationView(generics.CreateAPIView):
     queryset = Vendor.objects.all()
     serializer_class = VendorSerializer
@@ -106,13 +140,11 @@ class VendorProductsView(generics.ListAPIView):
 
     def get_queryset(self):
         vendor_id = self.kwargs['vendor_id']
-        print('vendor id is ',vendor_id)
         return Product.objects.filter(vendor=vendor_id)
 
     def list(self, request, *args, **kwargs):
         vendor = generics.get_object_or_404(Vendor, id=self.kwargs['vendor_id'])
         queryset = self.get_queryset()
-        print('query set is ',queryset)
         serializer = self.get_serializer(queryset, many=True)
         return Response({
             "vendor": vendor.title,

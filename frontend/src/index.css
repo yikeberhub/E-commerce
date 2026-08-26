@@ -17,6 +17,18 @@
   content: none !important;
 }
 
+/* Promotions banner slider: default slick dots are dark-on-dark against our
+   premium dark banner background — recolor them so they stay visible. */
+.promo-slider .slick-dots li button:before {
+  color: #ffffff;
+  opacity: 0.4;
+  font-size: 8px;
+}
+.promo-slider .slick-dots li.slick-active button:before {
+  color: #fbbf24;
+  opacity: 1;
+}
+
 /* Custom-styled <input type="range"> thumb for a premium look — Tailwind
    has no utility for range thumbs, so this is plain CSS. */
 .premium-range {

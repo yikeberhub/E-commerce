@@ -1,5 +1,6 @@
 import React from "react";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
 import Home from "../pages/Home";
 import Login from "../pages/Login";
 import SignUp from "../pages/SignUp";
@@ -20,10 +21,21 @@ import PageNotFound from "../pages/PageNotFound";
 import PaymentDetail from "../pages/dashbord/userDashboard/order/PaymentDetail";
 import ProductCategory from "../pages/ProductCategory";
 
+// Admins and vendors land on their own dashboard by default (including on
+// a hard refresh of "/") rather than the public storefront — they can still
+// get to the storefront deliberately via the "View Public Site" button in
+// their dashboard.
+const RoleAwareHome = () => {
+  const { user } = useAuth();
+  if (user?.role === "admin") return <Navigate to="/admin-dashboard" replace />;
+  if (user?.role === "vendor") return <Navigate to="/vendor-dashboard" replace />;
+  return <Home />;
+};
+
 const PageRoutes = () => {
   return (
     <Routes>
-      <Route path="/" element={<Home />} />
+      <Route path="/" element={<RoleAwareHome />} />
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<SignUp />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { FiShoppingBag, FiHeart } from "react-icons/fi";
+import { FiShoppingBag, FiHeart, FiGrid } from "react-icons/fi";
 import AccountIcon from "../../assets/icons/user.svg";
 import { useAuth } from "../../contexts/AuthContext";
 import { useCart } from "../../contexts/cartContext";
@@ -84,6 +84,15 @@ function RightContent() {
         >
           <FiHeart className="text-lg text-slate-600" />
           <IconBadge count={wishlist?.items?.length} />
+        </Link>
+      )}
+
+      {user && (user.role === "admin" || user.role === "vendor") && (
+        <Link
+          to={user.role === "admin" ? "/admin-dashboard" : "/vendor-dashboard"}
+          className="hidden sm:flex items-center gap-1.5 text-sm font-medium text-primary-600 border border-primary-200 bg-primary-50 rounded-full px-3 py-1.5 hover:bg-primary-100 transition"
+        >
+          <FiGrid className="text-sm" /> Go to Dashboard
         </Link>
       )}
 

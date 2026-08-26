@@ -11,7 +11,7 @@ from .serializers import ProductSerializer,ProductDetailSerializer,ProductWriteS
 from rest_framework.decorators import api_view, parser_classes, permission_classes
 from rest_framework.parsers import MultiPartParser, FormParser
 from vendors.models import Vendor
-from electroshop.permissions import IsOwnerOrAdminOrReadOnly, IsAdminOrReadOnly
+from electroshop.permissions import IsOwnerOrAdminOrReadOnly, IsAdminOrReadOnly, IsAdmin
 from notifications.utils import notify
 from django.utils import timezone
 
@@ -33,6 +33,12 @@ class ProductListView(generics.ListCreateAPIView):
         return [AllowAny()]
 
     def perform_create(self, serializer):
+        if self.request.user.role == 'admin':
+            vendor = serializer.validated_data.get('vendor')
+            if vendor is None:
+                raise PermissionDenied('Select a vendor for this product.')
+            serializer.save(user=self.request.user, vendor=vendor)
+            return
         vendor = _vendor_for(self.request.user)
         if self.request.user.role != 'vendor' or vendor is None:
             raise PermissionDenied('Only an approved vendor can add products.')
@@ -150,6 +156,19 @@ class ReviewReplyView(generics.UpdateAPIView):
         return Response(self.get_serializer(review).data)
 
 
+class AdminReviewListView(generics.ListAPIView):
+    """All reviews across the marketplace, for admin moderation."""
+    serializer_class = ProductReviewSerializer
+    permission_classes = [IsAuthenticated, IsAdmin]
+    queryset = ProductReview.objects.select_related('product', 'user').order_by('-created_at')
+
+
+class AdminReviewDetailView(generics.DestroyAPIView):
+    """Lets an admin remove any review, regardless of which product it's on."""
+    queryset = ProductReview.objects.all()
+    permission_classes = [IsAuthenticated, IsAdmin]
+
+
 class CategoryList(generics.ListCreateAPIView):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
@@ -162,6 +181,12 @@ class CategoryDetail(generics.RetrieveUpdateDestroyAPIView):
 
 
 class TagList(generics.ListCreateAPIView):
+    queryset = Tag.objects.all()
+    serializer_class = TagSerializer
+    permission_classes = [IsAdminOrReadOnly]
+
+
+class TagDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
     permission_classes = [IsAdminOrReadOnly]

@@ -8,10 +8,12 @@ from .views import (
     ProductReviewCreateUpdateView,
     VendorReviewsView,
     ReviewReplyView,
+    AdminReviewListView,
+    AdminReviewDetailView,
     add_product,
     add_product_image,
     delete_product_image,
-FeaturedProductsView,CategoryList,CategoryDetail,TagList
+FeaturedProductsView,CategoryList,CategoryDetail,TagList,TagDetail
 )
 
 urlpatterns = [
@@ -25,6 +27,7 @@ urlpatterns = [
 
     #tags
     path('tags/', TagList.as_view(), name='tag-list'),  # List and create tags
+    path('tags/<int:pk>/', TagDetail.as_view(), name='tag-detail'),  # Retrieve, update, delete tag
 
 
     #category review url
@@ -32,6 +35,8 @@ urlpatterns = [
     path('categories/<int:pk>/', CategoryDetail.as_view(), name='category-detail'),  # Retrieve, update, delete category
 
     # Product Review URLs
+    path('reviews/admin/', AdminReviewListView.as_view(), name='admin-review-list'),
+    path('reviews/admin/<int:pk>/', AdminReviewDetailView.as_view(), name='admin-review-detail'),
     path('reviews/mine/', VendorReviewsView.as_view(), name='vendor-reviews'),
     path('reviews/<int:pk>/reply/', ReviewReplyView.as_view(), name='review-reply'),
     path('<int:product_id>/reviews/', ProductReviewListView.as_view(), name='product-review-list'),  # List/Create
