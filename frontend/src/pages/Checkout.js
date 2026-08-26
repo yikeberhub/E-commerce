@@ -120,10 +120,18 @@ const Checkout = () => {
     const defaultAddress =
       user.addresses?.find((addr) => addr.is_default) || user.addresses?.[0];
 
+    // Registration never collects first/last name, so user.first_name is
+    // empty for most accounts — Chapa requires one, so fall back to the
+    // shipping address's full name (always required), then the username.
+    const [addressFirstName, ...addressRest] = (defaultAddress?.full_name || "")
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean);
+
     const paymentData = {
       total_amount: totalAmount,
-      first_name: user.first_name,
-      last_name: user.last_name,
+      first_name: user.first_name || addressFirstName || user.username,
+      last_name: user.last_name || addressRest.join(" "),
       email: user.email,
       phone_number: defaultAddress?.phone_number,
     };
