@@ -2,6 +2,7 @@
 from django.contrib import admin
 from django.urls import path,re_path,include
 from django.views.generic import TemplateView
+from django.views.static import serve
 from django.conf import settings
 from django.conf.urls.static import static
 
@@ -22,6 +23,15 @@ urlpatterns = [
     path('chats/', include('chats.urls')),
 
 ]
-if settings.DEBUG:  
+if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+else:
+    # static() no-ops outside DEBUG by design (Django docs say a real web
+    # server/CDN should serve media in production). This project has no
+    # such thing in front of it on Render, so without this every product,
+    # category, vendor, and profile image 404s and the frontend falls
+    # back to its placeholder — serve media directly instead.
+    urlpatterns += [
+        re_path(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
+    ]
 
