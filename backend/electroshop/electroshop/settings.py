@@ -13,6 +13,13 @@ SECRET_KEY = config("SECRET_KEY")
 DEBUG = config("DEBUG", default=False, cast=bool)
 ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="127.0.0.1,localhost", cast=Csv())
 
+# Render (and most PaaS hosts) terminate HTTPS at the proxy and forward
+# plain HTTP internally. Without this, request.is_secure() and
+# request.build_absolute_uri() (used for the Chapa webhook callback_url)
+# would think every request is HTTP, generating URLs with the wrong
+# scheme. Harmless locally since the dev server never sets this header.
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+
 # Application definition
 INSTALLED_APPS = [
     "django.contrib.admin",
