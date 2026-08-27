@@ -49,7 +49,7 @@ class Vendor(models.Model):
 
 
 class VendorPayment(models.Model):
-    vendor = models.ForeignKey(Vendor, on_delete=models.CASCADE)
+    vendor = models.ForeignKey(Vendor, on_delete=models.CASCADE, related_name='subscription_payments')
     subscription_fee = models.DecimalField(max_digits=10, decimal_places=2, default=9.99) 
     subscription_start_date = models.DateTimeField(null=True, blank=True)  
     subscription_end_date = models.DateTimeField(null=True, blank=True)     

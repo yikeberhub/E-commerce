@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from django.db.models import F, ExpressionWrapper, DecimalField
+from django.db.models import F, Q, ExpressionWrapper, DecimalField
 
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated, AllowAny
@@ -23,6 +23,15 @@ def _vendor_for(user):
 # Product Views
 class ProductListView(generics.ListCreateAPIView):
     queryset = Product.objects.all()
+
+    def get_queryset(self):
+        if self.request.method != 'GET':
+            return Product.objects.all()
+        # Public browsing only ever shows products from a vendor whose
+        # shop is actually live (approved and, if subscription-tracked,
+        # not lapsed) — a product with no vendor (admin-created) is
+        # always shown.
+        return Product.objects.filter(Q(vendor__isnull=True) | Q(vendor__is_active=True))
 
     def get_serializer_class(self):
         return ProductWriteSerializer if self.request.method == 'POST' else ProductSerializer
@@ -247,6 +256,7 @@ class FeaturedProductsView(generics.ListAPIView):
         queryset = (
             Product.objects
             .filter(featured=True)
+            .filter(Q(vendor__isnull=True) | Q(vendor__is_active=True))
             .annotate(
                 calculated_discount_percentage=ExpressionWrapper(
                     (F('old_price') - F('price')) / F('old_price') * 100,

@@ -1,5 +1,7 @@
+from django.utils import timezone
 from rest_framework import serializers
 from .models import Vendor,VendorPayment
+from .utils import latest_subscription_payment
 from users.serializers import PublicUserSerializer
 
 
@@ -23,9 +25,23 @@ class VendorSerializer(serializers.ModelSerializer):
 
 class MyVendorSerializer(VendorSerializer):
     """Same as VendorSerializer but includes balance — safe here since
-    this is only ever used to show a vendor their own profile."""
+    this is only ever used to show a vendor their own profile (or an
+    admin viewing a vendor's detail page)."""
+    subscription_end_date = serializers.SerializerMethodField()
+    subscription_status = serializers.SerializerMethodField()
+
     class Meta(VendorSerializer.Meta):
         exclude = []
+
+    def get_subscription_end_date(self, obj):
+        latest = latest_subscription_payment(obj)
+        return latest.subscription_end_date if latest else None
+
+    def get_subscription_status(self, obj):
+        latest = latest_subscription_payment(obj)
+        if not latest:
+            return 'none'
+        return 'active' if latest.subscription_end_date >= timezone.now() else 'expired'
 
 
 class VendorProfileUpdateSerializer(serializers.ModelSerializer):

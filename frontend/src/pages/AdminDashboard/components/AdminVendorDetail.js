@@ -14,15 +14,19 @@ import {
   FiDollarSign,
   FiMail,
   FiPhone,
+  FiCalendar,
+  FiPlus,
 } from "react-icons/fi";
 import { useAuth } from "../../../contexts/AuthContext";
 import { RowSkeleton } from "../../../common/Skeleton";
 import EmptyState from "../../../common/EmptyState";
+import { inputClass, selectClass } from "../../../common/formStyles";
 
 const API_URL = process.env.REACT_APP_API_URL;
 
 function vendorStatus(vendor) {
   if (vendor.account_status === "suspended") return "suspended";
+  if (!vendor.is_active && vendor.subscription_status === "expired") return "expired";
   if (!vendor.is_active) return "pending";
   return "active";
 }
@@ -31,20 +35,35 @@ const STATUS_STYLES = {
   pending: "bg-amber-50 text-amber-600",
   active: "bg-emerald-50 text-emerald-600",
   suspended: "bg-red-50 text-red-600",
+  expired: "bg-red-50 text-red-600",
 };
 
 const STATUS_LABELS = {
   pending: "Pending Approval",
   active: "Active",
   suspended: "Suspended",
+  expired: "Subscription Expired",
 };
+
+const PLAN_DAYS = { weekly: 7, monthly: 30, yearly: 365 };
 
 const TABS = [
   { key: "products", label: "Products", icon: FiBox },
   { key: "orders", label: "Orders", icon: FiShoppingBag },
   { key: "reviews", label: "Reviews", icon: FiStar },
   { key: "payments", label: "Payments", icon: FiCreditCard },
+  { key: "subscription", label: "Subscription", icon: FiCalendar },
 ];
+
+const toDateInput = (date) => date.toISOString().slice(0, 10);
+
+function suggestEndDate(plan, startDate) {
+  const days = PLAN_DAYS[plan] || 30;
+  const start = startDate ? new Date(startDate) : new Date();
+  const end = new Date(start);
+  end.setDate(end.getDate() + days);
+  return toDateInput(end);
+}
 
 function AdminVendorDetail() {
   const { id } = useParams();
@@ -56,12 +75,33 @@ function AdminVendorDetail() {
   const [orders, setOrders] = useState([]);
   const [reviews, setReviews] = useState([]);
   const [payments, setPayments] = useState([]);
+  const [subscriptionHistory, setSubscriptionHistory] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [actionError, setActionError] = useState("");
   const [updating, setUpdating] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [tab, setTab] = useState("products");
+  const [subForm, setSubForm] = useState({
+    subscription_fee: "9.99",
+    payment_method: "bank_transfer",
+    subscription_start_date: toDateInput(new Date()),
+    subscription_end_date: suggestEndDate("monthly", new Date()),
+  });
+  const [subPlan, setSubPlan] = useState("monthly");
+  const [subSaving, setSubSaving] = useState(false);
+  const [subError, setSubError] = useState("");
+
+  const fetchSubscriptionHistory = async () => {
+    try {
+      const response = await fetch(`${API_URL}/vendors/${id}/subscription/`, {
+        headers: { Authorization: `Bearer ${authTokens.access}` },
+      });
+      if (response.ok) setSubscriptionHistory(await response.json());
+    } catch {
+      // non-fatal — the rest of the vendor detail page still works
+    }
+  };
 
   useEffect(() => {
     const fetchAll = async () => {
@@ -84,6 +124,7 @@ function AdminVendorDetail() {
           const allPayments = await paymentsRes.json();
           setPayments(allPayments.filter((p) => p.vendor_id === Number(id)));
         }
+        await fetchSubscriptionHistory();
       } catch (err) {
         setError(err.message);
       } finally {
@@ -128,6 +169,49 @@ function AdminVendorDetail() {
     } catch (err) {
       setActionError(err.message);
       setUpdating(false);
+    }
+  };
+
+  const handleSubPlanChange = (plan) => {
+    setSubPlan(plan);
+    setSubForm((prev) => ({
+      ...prev,
+      subscription_end_date: suggestEndDate(plan, prev.subscription_start_date),
+    }));
+  };
+
+  const recordSubscription = async (e) => {
+    e.preventDefault();
+    setSubError("");
+    setSubSaving(true);
+    try {
+      const response = await fetch(`${API_URL}/vendors/${id}/subscription/`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${authTokens.access}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ...subForm,
+          subscription_start_date: new Date(subForm.subscription_start_date).toISOString(),
+          subscription_end_date: new Date(subForm.subscription_end_date).toISOString(),
+        }),
+      });
+      if (!response.ok) {
+        const errData = await response.json().catch(() => null);
+        throw new Error(
+          errData ? Object.values(errData).flat().join(" ") : "Failed to record subscription payment."
+        );
+      }
+      await fetchSubscriptionHistory();
+      const vendorRes = await fetch(`${API_URL}/vendors/${id}/`, {
+        headers: { Authorization: `Bearer ${authTokens.access}` },
+      });
+      if (vendorRes.ok) setVendor(await vendorRes.json());
+    } catch (err) {
+      setSubError(err.message);
+    } finally {
+      setSubSaving(false);
     }
   };
 
@@ -307,6 +391,109 @@ function AdminVendorDetail() {
               ))}
             </div>
           ) : <EmptyState title="No payments yet" description="Payments for this vendor's orders will show up here." />
+        )}
+
+        {tab === "subscription" && (
+          <div className="flex flex-col gap-5">
+            <form onSubmit={recordSubscription} className="flex flex-col gap-3 max-w-md">
+              {subError && (
+                <p className="text-sm text-red-500 bg-red-50 rounded-lg px-3 py-2">{subError}</p>
+              )}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs font-medium text-slate-500">Plan</label>
+                  <select
+                    value={subPlan}
+                    onChange={(e) => handleSubPlanChange(e.target.value)}
+                    className={`${selectClass} w-full`}
+                  >
+                    <option value="weekly">Weekly</option>
+                    <option value="monthly">Monthly</option>
+                    <option value="yearly">Yearly</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-slate-500">Fee (ETB)</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={subForm.subscription_fee}
+                    onChange={(e) => setSubForm((p) => ({ ...p, subscription_fee: e.target.value }))}
+                    className={inputClass}
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-slate-500">Start Date</label>
+                  <input
+                    type="date"
+                    value={subForm.subscription_start_date}
+                    onChange={(e) => {
+                      const start = e.target.value;
+                      setSubForm((p) => ({
+                        ...p,
+                        subscription_start_date: start,
+                        subscription_end_date: suggestEndDate(subPlan, start),
+                      }));
+                    }}
+                    className={inputClass}
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-slate-500">End Date</label>
+                  <input
+                    type="date"
+                    value={subForm.subscription_end_date}
+                    onChange={(e) => setSubForm((p) => ({ ...p, subscription_end_date: e.target.value }))}
+                    className={inputClass}
+                  />
+                </div>
+                <div className="col-span-2">
+                  <label className="text-xs font-medium text-slate-500">Payment Method</label>
+                  <select
+                    value={subForm.payment_method}
+                    onChange={(e) => setSubForm((p) => ({ ...p, payment_method: e.target.value }))}
+                    className={`${selectClass} w-full`}
+                  >
+                    <option value="bank_transfer">Bank Transfer</option>
+                    <option value="paypal">PayPal</option>
+                    <option value="stripe">Stripe</option>
+                  </select>
+                </div>
+              </div>
+              <button
+                type="submit"
+                disabled={subSaving}
+                className="self-start flex items-center gap-1.5 bg-primary-600 hover:bg-primary-700 disabled:opacity-60 text-white text-sm font-medium px-4 py-2 rounded-lg transition"
+              >
+                <FiPlus className="text-xs" /> {subSaving ? "Recording..." : "Record Payment"}
+              </button>
+              <p className="text-xs text-slate-400">
+                Recording a payment reactivates this vendor immediately if their subscription had lapsed.
+              </p>
+            </form>
+
+            <div>
+              <h3 className="text-sm font-semibold text-slate-700 mb-2">History</h3>
+              {subscriptionHistory.length ? (
+                <div className="flex flex-col gap-2">
+                  {subscriptionHistory.map((sp) => (
+                    <div key={sp.id} className="flex items-center justify-between text-sm bg-slate-50 rounded-lg px-3 py-2">
+                      <span className="font-medium text-slate-800 capitalize">{sp.payment_method?.replace(/_/g, " ")}</span>
+                      <span className="text-slate-600">{sp.subscription_fee} ETB</span>
+                      <span className="text-xs text-slate-400">
+                        {sp.subscription_start_date && new Date(sp.subscription_start_date).toLocaleDateString()}
+                        {" → "}
+                        {sp.subscription_end_date && new Date(sp.subscription_end_date).toLocaleDateString()}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <EmptyState title="No subscription history" description="Recorded subscription payments will show up here." />
+              )}
+            </div>
+          </div>
         )}
       </div>
     </div>

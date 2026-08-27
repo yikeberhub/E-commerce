@@ -1,10 +1,22 @@
 import React, { useEffect, useState } from "react";
 import { useOutletContext } from "react-router-dom";
-import { FiSettings, FiCamera, FiCheckCircle } from "react-icons/fi";
+import { FiSettings, FiCamera, FiCheckCircle, FiCalendar } from "react-icons/fi";
 import { useAuth } from "../../../contexts/AuthContext";
 import { inputClass } from "../../../common/formStyles";
 
 const API_URL = process.env.REACT_APP_API_URL;
+
+const SUBSCRIPTION_STYLES = {
+  active: "bg-emerald-50 text-emerald-600",
+  expired: "bg-red-50 text-red-600",
+  none: "bg-slate-100 text-slate-500",
+};
+
+const SUBSCRIPTION_LABELS = {
+  active: "Active",
+  expired: "Expired",
+  none: "No subscription on file",
+};
 
 const emptyForm = {
   title: "",
@@ -78,8 +90,36 @@ function VendorProfile() {
 
   if (!vendor) return null;
 
+  const subscriptionStatus = vendor.subscription_status || "none";
+
   return (
-    <div className="bg-white rounded-xl border border-slate-100 shadow-card p-5">
+    <div className="flex flex-col gap-4">
+      <div className="bg-white rounded-xl border border-slate-100 shadow-card p-5">
+        <h2 className="text-sm font-semibold text-slate-800 mb-3 flex items-center gap-2">
+          <FiCalendar className="text-primary-500" /> Subscription
+        </h2>
+        <div className="flex flex-wrap items-center gap-3">
+          <span className="text-xs font-medium capitalize text-slate-600 bg-slate-50 rounded-full px-2.5 py-1">
+            {vendor.subscription_plan} plan
+          </span>
+          <span
+            className={`text-xs font-medium px-2.5 py-1 rounded-full ${SUBSCRIPTION_STYLES[subscriptionStatus]}`}
+          >
+            {SUBSCRIPTION_LABELS[subscriptionStatus]}
+          </span>
+          {vendor.subscription_end_date && (
+            <span className="text-xs text-slate-400">
+              {subscriptionStatus === "expired" ? "Expired" : "Renews"} on{" "}
+              {new Date(vendor.subscription_end_date).toLocaleDateString()}
+            </span>
+          )}
+        </div>
+        <p className="text-xs text-slate-400 mt-2">
+          Contact support to renew or change your plan — subscription payments are recorded by an admin.
+        </p>
+      </div>
+
+      <div className="bg-white rounded-xl border border-slate-100 shadow-card p-5">
       <h1 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
         <FiSettings className="text-primary-500" /> Shop Settings
       </h1>
@@ -247,6 +287,7 @@ function VendorProfile() {
           {saving ? "Saving..." : "Save Changes"}
         </button>
       </form>
+      </div>
     </div>
   );
 }

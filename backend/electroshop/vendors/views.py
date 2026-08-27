@@ -1,8 +1,9 @@
 from django.shortcuts import render
+from django.utils import timezone
 from rest_framework import generics
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.exceptions import NotFound
+from rest_framework.exceptions import NotFound, PermissionDenied
 
 
 from rest_framework.permissions import AllowAny
@@ -10,8 +11,9 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.db.models import Sum, Count, Avg
 from django.db.models.functions import TruncMonth
-from .models import Vendor
-from .serializer import VendorSerializer, MyVendorSerializer, VendorProfileUpdateSerializer
+from .models import Vendor, VendorPayment
+from .serializer import VendorSerializer, MyVendorSerializer, VendorProfileUpdateSerializer, VendorPaymentSerializer
+from .utils import sync_subscription_status
 from orders.models import Order,OrderItem
 from orders.serializers import OrderSerializer
 from products.serializers import ProductSerializer
@@ -29,7 +31,7 @@ class MyVendorView(generics.RetrieveAPIView):
         vendor = Vendor.objects.filter(user=self.request.user).first()
         if vendor is None:
             raise NotFound("You don't have a vendor profile.")
-        return vendor
+        return sync_subscription_status(vendor)
 
 
 # List and Create Vendors
@@ -49,6 +51,10 @@ class VendorListView(generics.ListCreateAPIView):
 class VendorDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Vendor.objects.all()
     permission_classes = [IsOwnerOrAdminOrReadOnly]
+
+    def get_object(self):
+        vendor = super().get_object()
+        return sync_subscription_status(vendor)
 
     def get_serializer_class(self):
         is_write = self.request.method in ('PUT', 'PATCH')
@@ -204,3 +210,38 @@ class VendorAnalyticsView(APIView):
                 for row in top_products
             ],
         })
+
+
+class VendorSubscriptionListCreateView(generics.ListCreateAPIView):
+    """A vendor's subscription billing history. Recording a payment here
+    is a manual admin action (no live billing API) that both creates the
+    record and immediately re-syncs is_active from it, so a lapsed
+    vendor is reactivated the moment a new payment is recorded."""
+    serializer_class = VendorPaymentSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_vendor(self):
+        return generics.get_object_or_404(Vendor, id=self.kwargs['vendor_id'])
+
+    def get_queryset(self):
+        vendor = self.get_vendor()
+        user = self.request.user
+        if user.role != 'admin' and vendor.user_id != user.id:
+            raise PermissionDenied("You can't view another vendor's subscription history.")
+        return VendorPayment.objects.filter(vendor=vendor).order_by('-subscription_start_date')
+
+    def create(self, request, *args, **kwargs):
+        if request.user.role != 'admin':
+            raise PermissionDenied('Only an admin can record a subscription payment.')
+
+        vendor = self.get_vendor()
+        data = request.data.copy()
+        data['vendor'] = vendor.id
+        data['status'] = 'completed'
+        serializer = self.get_serializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        sync_subscription_status(vendor)
+
+        return Response(serializer.data, status=status.HTTP_201_CREATED)

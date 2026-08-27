@@ -78,7 +78,7 @@ const VendorAdminDashboard = () => {
             </p>
             {vendor && !vendor.is_active && (
               <span className="text-[11px] font-medium text-amber-600 bg-amber-50 rounded-full px-2 py-0.5 mt-2">
-                Pending approval
+                {vendor.subscription_status === "expired" ? "Subscription expired" : "Pending approval"}
               </span>
             )}
           </div>
