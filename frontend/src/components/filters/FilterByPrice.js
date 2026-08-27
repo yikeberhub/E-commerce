@@ -8,9 +8,19 @@ function FilterByPrice() {
   const { setFilter } = useContext(ProductContext);
   const [price, setPrice] = useState(0);
 
-  const handleSearch = () => {
-    setFilter("maxPrice", Number(price) > 0 ? Number(price) : null);
+  const applyPrice = (value) => {
+    setFilter("maxPrice", Number(value) > 0 ? Number(value) : null);
   };
+
+  const handleSliderChange = (e) => {
+    setPrice(e.target.value);
+    // A range slider is expected to filter live as it's dragged — unlike
+    // the number input below, it has no separate "Go" affordance, so
+    // waiting for an explicit action here just looks broken.
+    applyPrice(e.target.value);
+  };
+
+  const handleSearch = () => applyPrice(price);
 
   return (
     <Card title="Price" icon={<FiDollarSign />}>
@@ -18,7 +28,7 @@ function FilterByPrice() {
         Up to <span className="text-slate-800 font-semibold">{price || 0} ETB</span>
       </label>
       <input
-        onChange={(e) => setPrice(e.target.value)}
+        onChange={handleSliderChange}
         type="range"
         min={0}
         value={price}
