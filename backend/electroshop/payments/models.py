@@ -52,6 +52,43 @@ class PaymentSession(models.Model):
         return f'PaymentSession {self.tx_ref}'
 
 
+WITHDRAWAL_STATUS = [
+    ('pending', 'Pending'),
+    ('paid', 'Paid'),
+    ('rejected', 'Rejected'),
+]
+
+WITHDRAWAL_METHODS = [
+    ('bank_transfer', 'Bank Transfer'),
+    ('telebirr', 'Telebirr'),
+    ('cbe', 'CBE'),
+]
+
+
+class WithdrawalRequest(models.Model):
+    """A vendor's request to cash out their balance. Manual queue, not a
+    live payout API — the amount is reserved (deducted) from the
+    vendor's balance immediately on request, refunded if an admin
+    rejects it, and left deducted once marked paid (the money has
+    actually left the platform outside the app, by whatever payout
+    method the vendor asked for)."""
+    vendor = models.ForeignKey('vendors.Vendor', on_delete=models.CASCADE, related_name='withdrawal_requests')
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    payout_method = models.CharField(max_length=20, choices=WITHDRAWAL_METHODS, default='bank_transfer')
+    account_details = models.CharField(max_length=255)
+    status = models.CharField(max_length=20, choices=WITHDRAWAL_STATUS, default='pending')
+    admin_note = models.CharField(max_length=255, blank=True)
+    reviewed_by = models.ForeignKey(CustomUser, null=True, blank=True, on_delete=models.SET_NULL, related_name='+')
+    requested_at = models.DateTimeField(auto_now_add=True)
+    reviewed_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ['-requested_at']
+
+    def __str__(self):
+        return f'Withdrawal {self.amount} for {self.vendor.title} ({self.status})'
+
+
 class Transaction(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='transactions')
     amount = models.DecimalField(max_digits=10, decimal_places=2)

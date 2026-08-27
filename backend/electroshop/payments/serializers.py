@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Payment,Transaction
+from .models import Payment,Transaction,WithdrawalRequest
 from orders.serializers import OrderSerializer
 
 from users.models import CustomUser
@@ -68,3 +68,15 @@ class VendorPaymentSerializer(serializers.ModelSerializer):
         instance.currency = validated_data.get('currency', instance.currency)
         instance.save()
         return instance
+
+
+class WithdrawalRequestSerializer(serializers.ModelSerializer):
+    vendor_title = serializers.CharField(source='vendor.title', read_only=True)
+
+    class Meta:
+        model = WithdrawalRequest
+        fields = [
+            'id', 'vendor', 'vendor_title', 'amount', 'payout_method', 'account_details',
+            'status', 'admin_note', 'requested_at', 'reviewed_at',
+        ]
+        read_only_fields = ['id', 'vendor', 'status', 'admin_note', 'requested_at', 'reviewed_at']

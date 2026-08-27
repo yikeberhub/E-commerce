@@ -1,7 +1,10 @@
 import uuid
 import logging
+from decimal import Decimal, InvalidOperation
+from django.db import transaction
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
+from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
 from rest_framework import generics
@@ -13,12 +16,14 @@ from rest_framework.exceptions import PermissionDenied
 from rest_framework import status
 
 from orders.models import Order
+from users.models import CustomUser
 from vendors.models import Vendor
-from .models import Payment, PaymentSession, PAYMENT_STATUS
-from .serializers import PaymentSerializer, VendorPaymentSerializer
+from .models import Payment, PaymentSession, WithdrawalRequest, PAYMENT_STATUS
+from .serializers import PaymentSerializer, VendorPaymentSerializer, WithdrawalRequestSerializer
 from .services import finalize_payment_session
 from chapa import Chapa
 from .check_payment import verify_payment
+from notifications.utils import notify
 
 logger = logging.getLogger(__name__)
 
@@ -225,3 +230,124 @@ class PaymentDetailView(generics.RetrieveAPIView):
                 vendor.save(update_fields=['balance'])
 
         return Response(self.get_serializer(payment).data)
+
+
+class WithdrawalRequestListCreateView(generics.ListCreateAPIView):
+    """A vendor's manual payout queue: they request a withdrawal, an
+    admin reviews it and marks it paid/rejected outside the app (no
+    live money-movement API involved)."""
+    serializer_class = WithdrawalRequestSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.role == 'admin':
+            qs = WithdrawalRequest.objects.select_related('vendor').all()
+            vendor_id = self.request.query_params.get('vendor')
+            return qs.filter(vendor_id=vendor_id) if vendor_id else qs
+        vendor = Vendor.objects.filter(user=user).first()
+        if not vendor:
+            return WithdrawalRequest.objects.none()
+        return WithdrawalRequest.objects.filter(vendor=vendor)
+
+    def create(self, request, *args, **kwargs):
+        vendor = Vendor.objects.filter(user=request.user).first()
+        if not vendor:
+            raise PermissionDenied('Only a vendor can request a withdrawal.')
+
+        try:
+            amount = Decimal(str(request.data.get('amount')))
+        except (InvalidOperation, TypeError):
+            return Response({'error': 'A valid amount is required.'}, status=status.HTTP_400_BAD_REQUEST)
+        if amount <= 0:
+            return Response({'error': 'Amount must be greater than zero.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        account_details = request.data.get('account_details')
+        if not account_details:
+            return Response({'error': 'Account details are required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        with transaction.atomic():
+            locked_vendor = Vendor.objects.select_for_update().get(id=vendor.id)
+            if amount > locked_vendor.balance:
+                return Response({'error': 'Amount exceeds your available balance.'}, status=status.HTTP_400_BAD_REQUEST)
+
+            locked_vendor.balance -= amount
+            locked_vendor.save(update_fields=['balance'])
+
+            withdrawal = WithdrawalRequest.objects.create(
+                vendor=locked_vendor,
+                amount=amount,
+                payout_method=request.data.get('payout_method', 'bank_transfer'),
+                account_details=account_details,
+            )
+
+        try:
+            for admin in CustomUser.objects.filter(role='admin'):
+                notify(
+                    recipient=admin,
+                    notification_type='system',
+                    title=f'{vendor.title} requested a withdrawal',
+                    message=f'{amount} ETB via {withdrawal.get_payout_method_display()}.',
+                    link='/admin-dashboard/payouts',
+                )
+        except Exception:
+            pass
+
+        return Response(self.get_serializer(withdrawal).data, status=status.HTTP_201_CREATED)
+
+
+class WithdrawalRequestDetailView(generics.RetrieveUpdateAPIView):
+    """Admin-only review of a single withdrawal request. Rejecting
+    refunds the reserved amount back to the vendor's balance; marking
+    paid leaves it deducted (the payout happened outside the app)."""
+    serializer_class = WithdrawalRequestSerializer
+    queryset = WithdrawalRequest.objects.select_related('vendor')
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self):
+        obj = super().get_object()
+        user = self.request.user
+        if user.role == 'admin':
+            return obj
+        vendor = Vendor.objects.filter(user=user).first()
+        if vendor and obj.vendor_id == vendor.id:
+            return obj
+        raise PermissionDenied("You can't view another vendor's withdrawal request.")
+
+    def patch(self, request, *args, **kwargs):
+        if request.user.role != 'admin':
+            raise PermissionDenied('Only an admin can review a withdrawal request.')
+
+        withdrawal = self.get_object()
+        if withdrawal.status != 'pending':
+            return Response({'error': 'This request was already reviewed.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        new_status = request.data.get('status')
+        if new_status not in ('paid', 'rejected'):
+            return Response({'error': 'status must be "paid" or "rejected".'}, status=status.HTTP_400_BAD_REQUEST)
+
+        withdrawal.status = new_status
+        withdrawal.admin_note = request.data.get('admin_note', '')
+        withdrawal.reviewed_by = request.user
+        withdrawal.reviewed_at = timezone.now()
+        withdrawal.save(update_fields=['status', 'admin_note', 'reviewed_by', 'reviewed_at'])
+
+        if new_status == 'rejected':
+            vendor = withdrawal.vendor
+            vendor.balance += withdrawal.amount
+            vendor.save(update_fields=['balance'])
+
+        try:
+            notify(
+                recipient=withdrawal.vendor.user,
+                notification_type='system',
+                title=f'Withdrawal {new_status}',
+                message=f'Your request for {withdrawal.amount} ETB was {new_status}.' + (
+                    f' Note: {withdrawal.admin_note}' if withdrawal.admin_note else ''
+                ),
+                link='/vendor-dashboard/payments',
+            )
+        except Exception:
+            pass
+
+        return Response(self.get_serializer(withdrawal).data)
