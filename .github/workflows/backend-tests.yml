@@ -29,6 +29,16 @@ jobs:
         # itself runs against sqlite.
         run: sudo apt-get update && sudo apt-get install -y libpq-dev
 
+      - name: Check requirements.txt encoding
+        # This file has twice been silently re-saved as UTF-16 (by an
+        # editor, not git) which pip can't parse and Render's build fails
+        # on. Catch it here loudly instead of at deploy time.
+        run: |
+          if grep -qP '\x00' requirements.txt; then
+            echo "::error file=requirements.txt::File contains null bytes — it's been saved as UTF-16, not UTF-8. Re-save as UTF-8."
+            exit 1
+          fi
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
