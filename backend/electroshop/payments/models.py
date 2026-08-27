@@ -34,9 +34,22 @@ class Payment(models.Model):
 
     def __str__(self):
         return f"Payment {self.transaction_id or 'N/A'} for Order  {self.chapa_sub_method or ''}"
-    
-    
-    
+
+
+class PaymentSession(models.Model):
+    """One record per Chapa charge. Checkout splits the cart into one
+    Order+Payment per vendor, but Chapa is charged once for the total —
+    this is the server-side link from that one tx_ref back to every
+    local Payment row it should mark paid, so the webhook (which has no
+    access to the browser's localStorage) can resolve it."""
+    tx_ref = models.CharField(max_length=255, unique=True)
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='payment_sessions')
+    payments = models.ManyToManyField(Payment, related_name='payment_sessions')
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'PaymentSession {self.tx_ref}'
 
 
 class Transaction(models.Model):

@@ -1,5 +1,7 @@
 import uuid
+import logging
 from django.shortcuts import get_object_or_404
+from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
 from rest_framework import generics
@@ -12,10 +14,13 @@ from rest_framework import status
 
 from orders.models import Order
 from vendors.models import Vendor
-from .models import Payment, PAYMENT_STATUS
+from .models import Payment, PaymentSession, PAYMENT_STATUS
 from .serializers import PaymentSerializer, VendorPaymentSerializer
+from .services import finalize_payment_session
 from chapa import Chapa
 from .check_payment import verify_payment
+
+logger = logging.getLogger(__name__)
 
 # Initialize Chapa with your secret key
 chapa = Chapa(settings.CHAPA_SECRET_KEY)
@@ -28,12 +33,25 @@ class CreatePaymentView(APIView):
         first_name = request.data.get('first_name')
         last_name = request.data.get('last_name')
         phone_number = request.data.get('phone_number')
+        transaction_ids = request.data.get('transaction_ids') or []
 
         if not all([amount, email,first_name]):
             print('not get email,amount,firstname')
             return Response({"error": "Amount, email, and first name are required."}, status=status.HTTP_400_BAD_REQUEST)
         frontend_url=settings.FRONTEND_URL
         payment_ref = f"multi-txn-{uuid.uuid4().hex[:8]}"
+
+        # Link this one Chapa charge back to the local Payment rows it
+        # covers (checkout splits the cart into one Order+Payment per
+        # vendor) so the webhook — which has no access to the browser —
+        # can later resolve which orders to mark paid.
+        payments = Payment.objects.filter(
+            transaction_id__in=transaction_ids, order__user=request.user
+        )
+        if payments.exists():
+            session = PaymentSession.objects.create(tx_ref=payment_ref, user=request.user, amount=amount)
+            session.payments.set(payments)
+
         payment_data = {
             "amount": amount,
             "currency": "ETB",
@@ -41,8 +59,9 @@ class CreatePaymentView(APIView):
             "first_name": first_name,
             "last_name": last_name,
             "phone_number": phone_number,
-            "tx_ref": payment_ref,  
-            "return_url": f"{frontend_url}/payment/confirm?txt_ref={payment_ref}"
+            "tx_ref": payment_ref,
+            "return_url": f"{frontend_url}/payment/confirm?txt_ref={payment_ref}",
+            "callback_url": request.build_absolute_uri(reverse('chapa-webhook', args=[payment_ref])),
         }
 
         try:
@@ -50,7 +69,7 @@ class CreatePaymentView(APIView):
             response = chapa.initialize(**payment_data)
             if response['status'] == 'success':
                 checkout_url = response['data']['checkout_url']
-                
+
                 print('success full initiation')
                 return Response({"data": {"checkout_url": checkout_url, "payment_ref": payment_ref}}, status=status.HTTP_200_OK)
 
@@ -58,10 +77,28 @@ class CreatePaymentView(APIView):
 
         except Exception as e:
             return Response({"error": "Payment initialization failed."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
 @csrf_exempt
-@api_view(['GET'])
-def chapa_callback(request):
-    pass
+@api_view(['POST'])
+def chapa_callback(request, tx_ref):
+    """Server-to-server webhook Chapa calls when a transaction's status
+    changes. Never trusts the POST body's claimed status — it's only a
+    trigger to re-verify with Chapa directly using our own secret key,
+    the same check the polling endpoint performs. Always acknowledges
+    with 200 so Chapa doesn't retry; failures are logged, not surfaced."""
+    session = PaymentSession.objects.filter(tx_ref=tx_ref).first()
+    if not session:
+        logger.warning('Chapa webhook for unknown tx_ref %s', tx_ref)
+        return Response(status=status.HTTP_200_OK)
+
+    try:
+        verification = verify_payment(tx_ref)
+        finalize_payment_session(session, verification or {})
+    except Exception:
+        logger.exception('Chapa webhook processing failed for tx_ref %s', tx_ref)
+
+    return Response(status=status.HTTP_200_OK)
 
 
 @api_view(['GET'])
@@ -76,60 +113,55 @@ def check_payment_status(request, payment_reference):
     lump payment should be applied to. So Chapa is verified once, against
     payment_reference, and on success every listed Payment is marked paid.
     """
-    transaction_ids = request.GET.get('transaction_ids')
-    if not transaction_ids:
+    transaction_ids_param = request.GET.get('transaction_ids')
+    if not transaction_ids_param:
         return Response({"error": "transaction_ids are required."}, status=status.HTTP_400_BAD_REQUEST)
 
-    transaction_ids = transaction_ids.split(",")
+    transaction_ids = transaction_ids_param.split(",")
 
     try:
         verification = verify_payment(payment_reference)
     except Exception as e:
         return Response({"error": f"Payment verification failed: {str(e)}"}, status=status.HTTP_502_BAD_GATEWAY)
 
-    payment_succeeded = bool(verification and verification.get('status') == 'success')
+    session = PaymentSession.objects.filter(tx_ref=payment_reference, user=request.user).first()
+    if not session:
+        # Legacy fallback: a payment initiated before PaymentSession
+        # existed has no session yet — create one now from the
+        # transaction_ids the client remembers, so this (and any later
+        # webhook hit for the same tx_ref) can use the same idempotent
+        # path going forward.
+        legacy_payments = Payment.objects.filter(
+            transaction_id__in=transaction_ids, order__user=request.user
+        )
+        if legacy_payments.exists():
+            session = PaymentSession.objects.create(
+                tx_ref=payment_reference,
+                user=request.user,
+                amount=sum(p.amount for p in legacy_payments),
+            )
+            session.payments.set(legacy_payments)
 
-    total_amount = 0
-    user = None
     payment_responses = []
+    if session:
+        # Idempotent — a no-op if a webhook already finalized this session.
+        finalize_payment_session(session, verification or {})
 
-    for tx_ref in transaction_ids:
-        payment = Payment.objects.filter(transaction_id=tx_ref).first()
-
-        if not payment:
-            payment_responses.append({"transaction_id": tx_ref, "status": "error", "message": "Payment not found"})
-            continue
-
-        if not payment.order or payment.order.user_id != request.user.id:
+        found_ids = set()
+        for payment in session.payments.filter(transaction_id__in=transaction_ids):
+            found_ids.add(payment.transaction_id)
+            if payment.payment_status == 'completed':
+                payment_responses.append({"transaction_id": payment.transaction_id, "status": "completed", "payment": PaymentSerializer(payment).data})
+            elif payment.payment_status == 'failed':
+                payment_responses.append({"transaction_id": payment.transaction_id, "status": "failed", "message": "Payment verification failed"})
+            else:
+                payment_responses.append({"transaction_id": payment.transaction_id, "status": "pending"})
+        for tx_ref in transaction_ids:
+            if tx_ref not in found_ids:
+                payment_responses.append({"transaction_id": tx_ref, "status": "error", "message": "Payment not found"})
+    else:
+        for tx_ref in transaction_ids:
             payment_responses.append({"transaction_id": tx_ref, "status": "error", "message": "Not authorized for this payment"})
-            continue
-
-        if payment_succeeded:
-            payment.payment_status = 'completed'
-            payment.save()
-
-            order = payment.order
-            order.status = 'completed'
-            order.save()
-
-            vendor = order.vendor
-            if vendor:
-                vendor.balance += payment.amount
-                vendor.save()
-
-            total_amount += payment.amount
-            if not user:
-                user = order.user
-
-            payment_responses.append({"transaction_id": tx_ref, "status": "completed", "payment": PaymentSerializer(payment).data})
-        else:
-            payment.payment_status = 'failed'
-            payment.save()
-            payment_responses.append({"transaction_id": tx_ref, "status": "failed", "message": "Payment verification failed"})
-
-    if user and total_amount:
-        user.balance -= total_amount
-        user.save()
 
     return Response({"payments": payment_responses}, status=status.HTTP_200_OK)
 

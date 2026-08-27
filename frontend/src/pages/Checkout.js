@@ -134,6 +134,10 @@ const Checkout = () => {
       last_name: user.last_name || addressRest.join(" "),
       email: user.email,
       phone_number: defaultAddress?.phone_number,
+      // Lets the backend record which local Payment rows this one Chapa
+      // charge covers, so its webhook can resolve them without relying
+      // on the browser's localStorage.
+      transaction_ids: transactionIds,
     };
 
     const response = await fetch(`${API_URL}/payments/create/`, {
