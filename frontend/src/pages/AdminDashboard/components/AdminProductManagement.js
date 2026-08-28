@@ -294,11 +294,19 @@ function AdminProductManagement() {
                 className={`${selectClass} w-full`}
               >
                 <option value="">Uncategorized</option>
-                {categories.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.title}
-                  </option>
-                ))}
+                {categories
+                  .filter((top) => !top.parent)
+                  .map((top) => (
+                    <optgroup key={top.id} label={top.title}>
+                      {categories
+                        .filter((c) => c.parent === top.id)
+                        .map((c) => (
+                          <option key={c.id} value={c.id}>
+                            {c.title}
+                          </option>
+                        ))}
+                    </optgroup>
+                  ))}
               </select>
             </div>
             <div className="grid grid-cols-3 gap-3">

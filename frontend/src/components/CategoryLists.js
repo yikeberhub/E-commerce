@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 import { FiLayers } from "react-icons/fi";
 import Category from "./Category";
 import Card from "../utilities/CardComp";
@@ -40,13 +39,16 @@ const CategoryLists = () => {
         </div>
       ) : (
         <ul className="flex flex-col">
-          {categories.map((category) => (
-            <li key={category.id}>
-              <Link to={`/categories/${category.id}`}>
-                <Category category={category} />
-              </Link>
-            </li>
-          ))}
+          {categories
+            .filter((c) => !c.parent)
+            .map((category) => (
+              <li key={category.id}>
+                <Category
+                  category={category}
+                  subcategories={categories.filter((c) => c.parent === category.id)}
+                />
+              </li>
+            ))}
         </ul>
       )}
     </Card>

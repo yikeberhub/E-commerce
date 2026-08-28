@@ -30,8 +30,21 @@ const Categories = () => {
     );
   }
 
-  const filteredCategories = categories.filter((category) =>
-    category.title.toLowerCase().includes(searchTerm.toLowerCase())
+  // The grid shows top-level categories only — each one's subcategories
+  // are listed as chips on its card. A search still matches a category
+  // by its own title or any of its subcategories' titles, so a search
+  // for "sneakers" surfaces the "Fashion" card rather than nothing.
+  const topLevelCategories = categories.filter((c) => !c.parent);
+  const subcategoriesOf = (parentId) =>
+    categories.filter((c) => c.parent === parentId);
+
+  const term = searchTerm.toLowerCase();
+  const filteredCategories = topLevelCategories.filter(
+    (category) =>
+      category.title.toLowerCase().includes(term) ||
+      subcategoriesOf(category.id).some((sub) =>
+        sub.title.toLowerCase().includes(term)
+      )
   );
 
   const sortedCategories = [...filteredCategories].sort((a, b) => {
@@ -50,7 +63,7 @@ const Categories = () => {
 
         <div className="flex flex-col sm:flex-row sm:items-center gap-3 mt-4">
           <h2 className="text-sm text-slate-500 shrink-0">
-            {categories?.length} categories
+            {topLevelCategories.length} categories
           </h2>
           <input
             type="text"
@@ -88,27 +101,41 @@ const Categories = () => {
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
               {sortedCategories.slice(0, itemsToShow).map((category) => (
-                <Link
-                  to={`/categories/${category.id}`}
+                <div
                   key={category.id}
                   className="group bg-white rounded-xl border border-slate-100 shadow-card hover:shadow-soft hover:-translate-y-0.5 transition-all duration-300 overflow-hidden"
                 >
-                  <div className="aspect-square bg-slate-50 overflow-hidden">
-                    <img
-                      src={category.image}
-                      alt={category.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                  </div>
-                  <div className="p-3">
-                    <h3 className="text-sm font-semibold text-slate-800 group-hover:text-primary-600 transition-colors">
-                      {category.title}
-                    </h3>
-                    <p className="text-xs text-slate-500 mt-0.5">
-                      {category.num_of_products} products
-                    </p>
-                  </div>
-                </Link>
+                  <Link to={`/categories/${category.id}`}>
+                    <div className="aspect-square bg-slate-50 overflow-hidden">
+                      <img
+                        src={category.image}
+                        alt={category.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                    </div>
+                    <div className="p-3 pb-2">
+                      <h3 className="text-sm font-semibold text-slate-800 group-hover:text-primary-600 transition-colors">
+                        {category.title}
+                      </h3>
+                      <p className="text-xs text-slate-500 mt-0.5">
+                        {category.num_of_products} products
+                      </p>
+                    </div>
+                  </Link>
+                  {subcategoriesOf(category.id).length > 0 && (
+                    <div className="flex flex-wrap gap-1.5 px-3 pb-3">
+                      {subcategoriesOf(category.id).map((sub) => (
+                        <Link
+                          key={sub.id}
+                          to={`/categories/${sub.id}`}
+                          className="text-[11px] font-medium text-slate-500 bg-slate-50 hover:bg-primary-50 hover:text-primary-600 rounded-full px-2 py-0.5 transition-colors"
+                        >
+                          {sub.title}
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </div>
               ))}
             </div>
           )}

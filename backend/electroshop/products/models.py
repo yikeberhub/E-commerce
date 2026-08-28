@@ -24,13 +24,21 @@ class Category(models.Model):
     title = models.CharField(max_length=100, unique=True, default='Electronics')
     image = models.ImageField(upload_to='category/category_images/', default='category/default_category_image/img.png')
     num_of_products = models.IntegerField(default=0)
+    parent = models.ForeignKey(
+        'self', null=True, blank=True, on_delete=models.SET_NULL, related_name='subcategories'
+    )
 
     class Meta:
         verbose_name_plural = 'Categories'
 
     def calculate_num_of_products(self):
-        """Update the number of products in this category."""
-        self.num_of_products = self.products.count()  
+        """Update the number of products in this category. A top-level
+        category has no products of its own (products only ever attach
+        to a subcategory) so its count rolls up from its children."""
+        if self.parent_id is None:
+            self.num_of_products = Product.objects.filter(category__parent_id=self.id).count()
+        else:
+            self.num_of_products = self.products.count()
         self.save()
 
     def category_image(self):

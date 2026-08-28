@@ -18,7 +18,10 @@ function HomeNavLink() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <h2 className="text-lg font-bold text-slate-900">Popular Products</h2>
         <ul className="flex flex-row flex-wrap items-center gap-2 -mx-1">
-          {["All", ...categories.map((c) => c.title)].map((category) => (
+          {[
+            "All",
+            ...categories.filter((c) => !c.parent).map((c) => c.title),
+          ].map((category) => (
             <li key={category}>
               <button
                 type="button"

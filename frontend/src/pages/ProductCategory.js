@@ -9,10 +9,11 @@ import EmptyState from "../common/EmptyState";
 import Product from "../components/Product";
 
 function ProductCategory() {
-  const { filteredProducts, setFilter, resetFilters } =
+  const { filteredProducts, categories, setFilter, resetFilters } =
     useContext(ProductContext);
   const { addBreadcrumb, clearBreadcrumbs } = useBreadcrumb();
   const { id } = useParams("id");
+  const currentCategory = categories.find((c) => c.id === Number(id));
 
   useEffect(() => {
     setFilter("categoryId", Number(id));
@@ -23,10 +24,14 @@ function ProductCategory() {
     clearBreadcrumbs();
     addBreadcrumb({ label: "Home", path: "/" });
     addBreadcrumb({ label: "Categories", path: "/categories" });
-    if (filteredProducts[0]?.category?.title) {
-      addBreadcrumb({ label: filteredProducts[0].category.title });
+    // Prefer the actual selected category's own title (works correctly
+    // for a top-level category page too, where the first product's
+    // *sub*category title would otherwise be shown instead).
+    const label = currentCategory?.title || filteredProducts[0]?.category?.title;
+    if (label) {
+      addBreadcrumb({ label });
     }
-  }, [id, filteredProducts]);
+  }, [id, filteredProducts, currentCategory]);
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-4">

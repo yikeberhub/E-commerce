@@ -48,25 +48,53 @@ function FilterByCategory() {
     });
   };
 
+  // Two levels: a top-level category's own checkbox selects everything
+  // under it (ProductContext's category resolver treats a top-level
+  // title as matching all its subcategories' products), and each
+  // subcategory beneath it is its own, independently selectable row.
+  const topLevel = categories.filter((c) => !c.parent);
+
   return (
     <Card title="Category" icon={<FiGrid />}>
-      <div className="flex flex-col gap-0.5 max-h-56 overflow-y-auto pr-1">
-        {categories.map((item) => (
-          <Checkbox
-            key={item.id}
-            checked={checkedCategories[item.title] || false}
-            onChange={() => handleCheckboxChange(item.title)}
-            label={item.title}
-            icon={
-              item.image && (
-                <img
-                  src={item.image}
-                  alt=""
-                  className="w-6 h-6 rounded object-cover shrink-0"
-                />
-              )
-            }
-          />
+      <div className="flex flex-col gap-2 max-h-72 overflow-y-auto pr-1">
+        {topLevel.map((top) => (
+          <div key={top.id}>
+            <Checkbox
+              checked={checkedCategories[top.title] || false}
+              onChange={() => handleCheckboxChange(top.title)}
+              label={top.title}
+              icon={
+                top.image && (
+                  <img
+                    src={top.image}
+                    alt=""
+                    className="w-6 h-6 rounded object-cover shrink-0"
+                  />
+                )
+              }
+            />
+            <div className="flex flex-col gap-0.5 pl-6 mt-0.5">
+              {categories
+                .filter((c) => c.parent === top.id)
+                .map((item) => (
+                  <Checkbox
+                    key={item.id}
+                    checked={checkedCategories[item.title] || false}
+                    onChange={() => handleCheckboxChange(item.title)}
+                    label={item.title}
+                    icon={
+                      item.image && (
+                        <img
+                          src={item.image}
+                          alt=""
+                          className="w-5 h-5 rounded object-cover shrink-0"
+                        />
+                      )
+                    }
+                  />
+                ))}
+            </div>
+          </div>
         ))}
       </div>
     </Card>

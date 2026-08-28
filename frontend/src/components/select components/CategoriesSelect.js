@@ -21,6 +21,8 @@ function CategoriesSelect({ embedded = false }) {
     setSelectedCategory(category);
   };
 
+  const topLevel = categories?.filter((c) => !c.parent) || [];
+
   return (
     <select
       className={embedded ? embeddedClass : selectClass}
@@ -28,10 +30,17 @@ function CategoriesSelect({ embedded = false }) {
       value={selectedCategory}
     >
       <option value="All">All Categories</option>
-      {categories?.map((cat) => (
-        <option key={cat.title} value={cat.title}>
-          {cat.title}
-        </option>
+      {topLevel.map((top) => (
+        <optgroup key={top.id} label={top.title}>
+          <option value={top.title}>All {top.title}</option>
+          {categories
+            .filter((c) => c.parent === top.id)
+            .map((cat) => (
+              <option key={cat.title} value={cat.title}>
+                {cat.title}
+              </option>
+            ))}
+        </optgroup>
       ))}
     </select>
   );

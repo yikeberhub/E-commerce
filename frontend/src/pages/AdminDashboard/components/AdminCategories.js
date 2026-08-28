@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { FiTag, FiGrid, FiPlus, FiTrash2, FiEdit2, FiCheck, FiX } from "react-icons/fi";
 import { useAuth } from "../../../contexts/AuthContext";
-import { inputClass } from "../../../common/formStyles";
+import { inputClass, selectClass } from "../../../common/formStyles";
 import { RowSkeleton } from "../../../common/Skeleton";
 import EmptyState from "../../../common/EmptyState";
 
@@ -14,9 +14,11 @@ function CategoriesSection() {
   const [error, setError] = useState("");
   const [newTitle, setNewTitle] = useState("");
   const [newImage, setNewImage] = useState(null);
+  const [newParentId, setNewParentId] = useState("");
   const [creating, setCreating] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [editTitle, setEditTitle] = useState("");
+  const [editParentId, setEditParentId] = useState("");
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
   const [busyId, setBusyId] = useState(null);
 
@@ -37,6 +39,9 @@ function CategoriesSection() {
     fetchCategories();
   }, []);
 
+  const topLevelCategories = categories?.filter((c) => !c.parent) || [];
+  const hasChildren = (id) => categories?.some((c) => c.parent === id);
+
   const createCategory = async (e) => {
     e.preventDefault();
     if (!newTitle.trim()) return;
@@ -46,21 +51,33 @@ function CategoriesSection() {
       const formData = new FormData();
       formData.append("title", newTitle.trim());
       if (newImage) formData.append("image", newImage);
+      if (newParentId) formData.append("parent", newParentId);
       const response = await fetch(`${API_URL}/products/categories/`, {
         method: "POST",
         headers: { Authorization: `Bearer ${authTokens.access}` },
         body: formData,
       });
-      if (!response.ok) throw new Error("Failed to create category.");
-      const created = await response.json();
+      const created = await response.json().catch(() => null);
+      if (!response.ok) {
+        throw new Error(
+          created ? Object.values(created).flat().join(" ") : "Failed to create category."
+        );
+      }
       setCategories((prev) => [...prev, created]);
       setNewTitle("");
       setNewImage(null);
+      setNewParentId("");
     } catch (err) {
       setError(err.message);
     } finally {
       setCreating(false);
     }
+  };
+
+  const startSubcategory = (parentId) => {
+    setNewParentId(String(parentId));
+    setNewTitle("");
+    document.getElementById("new-category-title")?.focus();
   };
 
   const saveEdit = async (id) => {
@@ -73,10 +90,17 @@ function CategoriesSection() {
           Authorization: `Bearer ${authTokens.access}`,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ title: editTitle.trim() }),
+        body: JSON.stringify({
+          title: editTitle.trim(),
+          parent: editParentId || null,
+        }),
       });
-      if (!response.ok) throw new Error("Failed to update category.");
-      const updated = await response.json();
+      const updated = await response.json().catch(() => null);
+      if (!response.ok) {
+        throw new Error(
+          updated ? Object.values(updated).flat().join(" ") : "Failed to update category."
+        );
+      }
       setCategories((prev) => prev.map((c) => (c.id === id ? updated : c)));
       setEditingId(null);
     } catch (err) {
@@ -115,12 +139,25 @@ function CategoriesSection() {
 
       <form onSubmit={createCategory} className="flex flex-wrap items-center gap-2 mb-4">
         <input
+          id="new-category-title"
           type="text"
           value={newTitle}
           onChange={(e) => setNewTitle(e.target.value)}
           placeholder="New category name"
           className={`${inputClass} flex-1 min-w-[160px]`}
         />
+        <select
+          value={newParentId}
+          onChange={(e) => setNewParentId(e.target.value)}
+          className={`${selectClass} min-w-[160px]`}
+        >
+          <option value="">— Top-level category —</option>
+          {topLevelCategories.map((top) => (
+            <option key={top.id} value={top.id}>
+              Subcategory of {top.title}
+            </option>
+          ))}
+        </select>
         <input
           type="file"
           accept="image/*"
@@ -141,95 +178,193 @@ function CategoriesSection() {
       ) : !categories?.length ? (
         <EmptyState title="No categories yet" description="Categories help organize the storefront." />
       ) : (
-        <div className="flex flex-col gap-2">
-          {categories.map((category) => (
-            <div
-              key={category.id}
-              className="flex items-center gap-3 border border-slate-100 rounded-xl p-2.5"
-            >
-              <img
-                src={category.image}
-                alt={category.title}
-                className="w-10 h-10 rounded-lg object-cover shrink-0 bg-slate-50"
+        <div className="flex flex-col gap-4">
+          {topLevelCategories.map((top) => (
+            <div key={top.id} className="flex flex-col gap-2">
+              <CategoryRow
+                category={top}
+                isEditing={editingId === top.id}
+                isConfirmingDelete={confirmDeleteId === top.id}
+                isBusy={busyId === top.id}
+                editTitle={editTitle}
+                setEditTitle={setEditTitle}
+                editParentId={editParentId}
+                setEditParentId={setEditParentId}
+                topLevelCategories={topLevelCategories}
+                lockParent={hasChildren(top.id)}
+                onStartEdit={() => {
+                  setEditingId(top.id);
+                  setEditTitle(top.title);
+                  setEditParentId(top.parent ? String(top.parent) : "");
+                }}
+                onCancelEdit={() => setEditingId(null)}
+                onSaveEdit={() => saveEdit(top.id)}
+                onStartDelete={() => setConfirmDeleteId(top.id)}
+                onCancelDelete={() => setConfirmDeleteId(null)}
+                onConfirmDelete={() => deleteCategory(top.id)}
+                extraAction={
+                  <button
+                    type="button"
+                    onClick={() => startSubcategory(top.id)}
+                    className="text-xs font-medium text-primary-600 hover:text-primary-700 px-2 py-1.5 shrink-0"
+                  >
+                    + Subcategory
+                  </button>
+                }
               />
-              {editingId === category.id ? (
-                <input
-                  type="text"
-                  value={editTitle}
-                  onChange={(e) => setEditTitle(e.target.value)}
-                  className={`${inputClass} flex-1`}
-                  autoFocus
-                />
-              ) : (
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium text-slate-800 truncate">{category.title}</p>
-                  <p className="text-xs text-slate-400">{category.num_of_products} products</p>
-                </div>
-              )}
-
-              <div className="flex items-center gap-1 shrink-0">
-                {editingId === category.id ? (
-                  <>
-                    <button
-                      type="button"
-                      disabled={busyId === category.id}
-                      onClick={() => saveEdit(category.id)}
-                      className="flex items-center justify-center w-8 h-8 rounded-lg text-primary-600 hover:bg-primary-50 transition"
-                    >
-                      <FiCheck className="text-sm" />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setEditingId(null)}
-                      className="flex items-center justify-center w-8 h-8 rounded-lg text-slate-400 hover:bg-slate-50 transition"
-                    >
-                      <FiX className="text-sm" />
-                    </button>
-                  </>
-                ) : confirmDeleteId === category.id ? (
-                  <>
-                    <button
-                      type="button"
-                      onClick={() => setConfirmDeleteId(null)}
-                      className="text-xs font-medium text-slate-500 hover:text-slate-700 px-2 py-1.5"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="button"
-                      disabled={busyId === category.id}
-                      onClick={() => deleteCategory(category.id)}
-                      className="text-xs font-medium text-white bg-red-500 hover:bg-red-600 disabled:opacity-60 px-2.5 py-1.5 rounded-lg transition"
-                    >
-                      Confirm
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setEditingId(category.id);
-                        setEditTitle(category.title);
+              <div className="flex flex-col gap-2 pl-8">
+                {categories
+                  .filter((c) => c.parent === top.id)
+                  .map((sub) => (
+                    <CategoryRow
+                      key={sub.id}
+                      category={sub}
+                      isEditing={editingId === sub.id}
+                      isConfirmingDelete={confirmDeleteId === sub.id}
+                      isBusy={busyId === sub.id}
+                      editTitle={editTitle}
+                      setEditTitle={setEditTitle}
+                      editParentId={editParentId}
+                      setEditParentId={setEditParentId}
+                      topLevelCategories={topLevelCategories}
+                      lockParent={false}
+                      onStartEdit={() => {
+                        setEditingId(sub.id);
+                        setEditTitle(sub.title);
+                        setEditParentId(sub.parent ? String(sub.parent) : "");
                       }}
-                      className="flex items-center justify-center w-8 h-8 rounded-lg text-slate-400 hover:bg-slate-50 hover:text-primary-600 transition"
-                    >
-                      <FiEdit2 className="text-sm" />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setConfirmDeleteId(category.id)}
-                      className="flex items-center justify-center w-8 h-8 rounded-lg text-red-500 hover:bg-red-50 transition"
-                    >
-                      <FiTrash2 className="text-sm" />
-                    </button>
-                  </>
-                )}
+                      onCancelEdit={() => setEditingId(null)}
+                      onSaveEdit={() => saveEdit(sub.id)}
+                      onStartDelete={() => setConfirmDeleteId(sub.id)}
+                      onCancelDelete={() => setConfirmDeleteId(null)}
+                      onConfirmDelete={() => deleteCategory(sub.id)}
+                    />
+                  ))}
               </div>
             </div>
           ))}
         </div>
       )}
+    </div>
+  );
+}
+
+function CategoryRow({
+  category,
+  isEditing,
+  isConfirmingDelete,
+  isBusy,
+  editTitle,
+  setEditTitle,
+  editParentId,
+  setEditParentId,
+  topLevelCategories,
+  lockParent,
+  onStartEdit,
+  onCancelEdit,
+  onSaveEdit,
+  onStartDelete,
+  onCancelDelete,
+  onConfirmDelete,
+  extraAction,
+}) {
+  return (
+    <div className="flex items-center gap-3 border border-slate-100 rounded-xl p-2.5">
+      <img
+        src={category.image}
+        alt={category.title}
+        className="w-10 h-10 rounded-lg object-cover shrink-0 bg-slate-50"
+      />
+      {isEditing ? (
+        <div className="flex-1 flex flex-col sm:flex-row gap-2 min-w-0">
+          <input
+            type="text"
+            value={editTitle}
+            onChange={(e) => setEditTitle(e.target.value)}
+            className={`${inputClass} flex-1`}
+            autoFocus
+          />
+          <select
+            value={editParentId}
+            onChange={(e) => setEditParentId(e.target.value)}
+            disabled={lockParent}
+            title={lockParent ? "This category already has subcategories of its own." : undefined}
+            className={`${selectClass} sm:max-w-[220px]`}
+          >
+            <option value="">— Top-level category —</option>
+            {topLevelCategories
+              .filter((top) => top.id !== category.id)
+              .map((top) => (
+                <option key={top.id} value={top.id}>
+                  Subcategory of {top.title}
+                </option>
+              ))}
+          </select>
+        </div>
+      ) : (
+        <div className="flex-1 min-w-0">
+          <p className="font-medium text-slate-800 truncate">{category.title}</p>
+          <p className="text-xs text-slate-400">{category.num_of_products} products</p>
+        </div>
+      )}
+
+      <div className="flex items-center gap-1 shrink-0">
+        {isEditing ? (
+          <>
+            <button
+              type="button"
+              disabled={isBusy}
+              onClick={onSaveEdit}
+              className="flex items-center justify-center w-8 h-8 rounded-lg text-primary-600 hover:bg-primary-50 transition"
+            >
+              <FiCheck className="text-sm" />
+            </button>
+            <button
+              type="button"
+              onClick={onCancelEdit}
+              className="flex items-center justify-center w-8 h-8 rounded-lg text-slate-400 hover:bg-slate-50 transition"
+            >
+              <FiX className="text-sm" />
+            </button>
+          </>
+        ) : isConfirmingDelete ? (
+          <>
+            <button
+              type="button"
+              onClick={onCancelDelete}
+              className="text-xs font-medium text-slate-500 hover:text-slate-700 px-2 py-1.5"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              disabled={isBusy}
+              onClick={onConfirmDelete}
+              className="text-xs font-medium text-white bg-red-500 hover:bg-red-600 disabled:opacity-60 px-2.5 py-1.5 rounded-lg transition"
+            >
+              Confirm
+            </button>
+          </>
+        ) : (
+          <>
+            {extraAction}
+            <button
+              type="button"
+              onClick={onStartEdit}
+              className="flex items-center justify-center w-8 h-8 rounded-lg text-slate-400 hover:bg-slate-50 hover:text-primary-600 transition"
+            >
+              <FiEdit2 className="text-sm" />
+            </button>
+            <button
+              type="button"
+              onClick={onStartDelete}
+              className="flex items-center justify-center w-8 h-8 rounded-lg text-red-500 hover:bg-red-50 transition"
+            >
+              <FiTrash2 className="text-sm" />
+            </button>
+          </>
+        )}
+      </div>
     </div>
   );
 }

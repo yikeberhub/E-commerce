@@ -9,10 +9,19 @@ from vendors.models import Vendor
 
   
 class CategorySerializer(ModelSerializer):
+    parent_title = serializers.CharField(source='parent.title', read_only=True, default=None)
+
     class Meta:
         model = Category
         fields = '__all__'
-        
+
+    def validate_parent(self, value):
+        if value is not None and value.parent_id is not None:
+            raise serializers.ValidationError(
+                "A category can only be nested one level deep — pick a top-level category as the parent."
+            )
+        return value
+
         
 class TagSerializer(serializers.ModelSerializer):
     class Meta:
@@ -112,6 +121,13 @@ class ProductWriteSerializer(serializers.ModelSerializer):
             'stock_quantity', 'featured', 'digital',
         ]
         read_only_fields = ['id']
+
+    def validate_category(self, value):
+        if value is not None and value.parent_id is None:
+            raise serializers.ValidationError(
+                "Select a subcategory — a top-level category can't be assigned to a product directly."
+            )
+        return value
 
 
 class ProductDetailSerializer(serializers.ModelSerializer):

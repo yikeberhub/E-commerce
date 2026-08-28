@@ -75,6 +75,29 @@ function ProductProvider({ children }) {
     }
   };
 
+  const categoryById = useMemo(
+    () => Object.fromEntries(categories.map((c) => [c.id, c])),
+    [categories]
+  );
+
+  // Categories are two levels deep (top-level -> subcategory) and a
+  // product always attaches to a subcategory. Selecting a top-level
+  // category (by title or id) should still match every product under
+  // it, not just ones directly assigned to that exact row — these two
+  // helpers are the single place that resolves "does this product
+  // belong to what the user picked" for both levels at once.
+  const matchesCategoryTitle = (product, title) => {
+    const cat = product.category;
+    if (!cat) return false;
+    if (cat.title === title) return true;
+    return cat.parent != null && categoryById[cat.parent]?.title === title;
+  };
+
+  const matchesCategoryId = (product, id) => {
+    const cat = product.category;
+    return !!cat && (cat.id === id || cat.parent === id);
+  };
+
   const filteredProducts = useMemo(() => {
     let result = products;
 
@@ -86,21 +109,20 @@ function ProductProvider({ children }) {
     }
 
     if (selectedCategory !== "All") {
-      result = result.filter(
-        (product) => product.category?.title === selectedCategory
+      result = result.filter((product) =>
+        matchesCategoryTitle(product, selectedCategory)
       );
     }
 
     if (filters.categoryId != null) {
-      result = result.filter(
-        (product) => product.category?.id === filters.categoryId
+      result = result.filter((product) =>
+        matchesCategoryId(product, filters.categoryId)
       );
     }
 
     if (filters.categoryTitles.length > 0) {
-      result = result.filter(
-        (product) =>
-          product.category && filters.categoryTitles.includes(product.category.title)
+      result = result.filter((product) =>
+        filters.categoryTitles.some((title) => matchesCategoryTitle(product, title))
       );
     }
 
@@ -143,7 +165,7 @@ function ProductProvider({ children }) {
     }
 
     return result;
-  }, [products, searchTerm, selectedCategory, filters]);
+  }, [products, searchTerm, selectedCategory, filters, categoryById]);
 
   return (
     <ProductContext.Provider
