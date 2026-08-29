@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { FiTag, FiGrid, FiPlus, FiTrash2, FiEdit2, FiCheck, FiX } from "react-icons/fi";
 import { useAuth } from "../../../contexts/AuthContext";
 import { inputClass, selectClass } from "../../../common/formStyles";
@@ -19,6 +19,7 @@ function CategoriesSection() {
   const [editingId, setEditingId] = useState(null);
   const [editTitle, setEditTitle] = useState("");
   const [editParentId, setEditParentId] = useState("");
+  const [editImage, setEditImage] = useState(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
   const [busyId, setBusyId] = useState(null);
 
@@ -84,17 +85,30 @@ function CategoriesSection() {
     if (!editTitle.trim()) return;
     setBusyId(id);
     try {
-      const response = await fetch(`${API_URL}/products/categories/${id}/`, {
-        method: "PATCH",
-        headers: {
-          Authorization: `Bearer ${authTokens.access}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          title: editTitle.trim(),
-          parent: editParentId || null,
-        }),
-      });
+      let response;
+      if (editImage) {
+        const formData = new FormData();
+        formData.append("title", editTitle.trim());
+        formData.append("parent", editParentId || "");
+        formData.append("image", editImage);
+        response = await fetch(`${API_URL}/products/categories/${id}/`, {
+          method: "PATCH",
+          headers: { Authorization: `Bearer ${authTokens.access}` },
+          body: formData,
+        });
+      } else {
+        response = await fetch(`${API_URL}/products/categories/${id}/`, {
+          method: "PATCH",
+          headers: {
+            Authorization: `Bearer ${authTokens.access}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            title: editTitle.trim(),
+            parent: editParentId || null,
+          }),
+        });
+      }
       const updated = await response.json().catch(() => null);
       if (!response.ok) {
         throw new Error(
@@ -103,6 +117,7 @@ function CategoriesSection() {
       }
       setCategories((prev) => prev.map((c) => (c.id === id ? updated : c)));
       setEditingId(null);
+      setEditImage(null);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -190,14 +205,20 @@ function CategoriesSection() {
                 setEditTitle={setEditTitle}
                 editParentId={editParentId}
                 setEditParentId={setEditParentId}
+                editImage={editImage}
+                setEditImage={setEditImage}
                 topLevelCategories={topLevelCategories}
                 lockParent={hasChildren(top.id)}
                 onStartEdit={() => {
                   setEditingId(top.id);
                   setEditTitle(top.title);
                   setEditParentId(top.parent ? String(top.parent) : "");
+                  setEditImage(null);
                 }}
-                onCancelEdit={() => setEditingId(null)}
+                onCancelEdit={() => {
+                  setEditingId(null);
+                  setEditImage(null);
+                }}
                 onSaveEdit={() => saveEdit(top.id)}
                 onStartDelete={() => setConfirmDeleteId(top.id)}
                 onCancelDelete={() => setConfirmDeleteId(null)}
@@ -226,14 +247,20 @@ function CategoriesSection() {
                       setEditTitle={setEditTitle}
                       editParentId={editParentId}
                       setEditParentId={setEditParentId}
+                      editImage={editImage}
+                      setEditImage={setEditImage}
                       topLevelCategories={topLevelCategories}
                       lockParent={false}
                       onStartEdit={() => {
                         setEditingId(sub.id);
                         setEditTitle(sub.title);
                         setEditParentId(sub.parent ? String(sub.parent) : "");
+                        setEditImage(null);
                       }}
-                      onCancelEdit={() => setEditingId(null)}
+                      onCancelEdit={() => {
+                        setEditingId(null);
+                        setEditImage(null);
+                      }}
                       onSaveEdit={() => saveEdit(sub.id)}
                       onStartDelete={() => setConfirmDeleteId(sub.id)}
                       onCancelDelete={() => setConfirmDeleteId(null)}
@@ -258,6 +285,8 @@ function CategoryRow({
   setEditTitle,
   editParentId,
   setEditParentId,
+  editImage,
+  setEditImage,
   topLevelCategories,
   lockParent,
   onStartEdit,
@@ -268,10 +297,20 @@ function CategoryRow({
   onConfirmDelete,
   extraAction,
 }) {
+  const editImagePreview = useMemo(
+    () => (editImage ? URL.createObjectURL(editImage) : null),
+    [editImage]
+  );
+  useEffect(() => {
+    return () => {
+      if (editImagePreview) URL.revokeObjectURL(editImagePreview);
+    };
+  }, [editImagePreview]);
+
   return (
     <div className="flex items-center gap-3 border border-slate-100 rounded-xl p-2.5">
       <img
-        src={category.image}
+        src={editImagePreview || category.image}
         alt={category.title}
         className="w-10 h-10 rounded-lg object-cover shrink-0 bg-slate-50"
       />
@@ -300,6 +339,12 @@ function CategoryRow({
                 </option>
               ))}
           </select>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(e) => setEditImage(e.target.files[0])}
+            className="text-xs text-slate-500 sm:max-w-[160px]"
+          />
         </div>
       ) : (
         <div className="flex-1 min-w-0">
