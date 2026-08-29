@@ -69,6 +69,7 @@ class Product(models.Model):
     product_status = models.CharField(choices=STATUS, max_length=10, default='in_review')
     stock_quantity = models.PositiveIntegerField(default=0)
     featured = models.BooleanField(default=False)
+    free_delivery = models.BooleanField(default=False)
     digital = models.BooleanField(default=True)
     date = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(null=True, auto_now=True, blank=True)

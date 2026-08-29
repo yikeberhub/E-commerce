@@ -1,4 +1,4 @@
-import { React, useContext, useEffect, useState, useRef } from "react";
+import { React, useContext, useEffect, useState, useRef, useMemo } from "react";
 import { Link, useParams } from "react-router-dom";
 import { ProductContext } from "../contexts/ProductContext";
 import CategoryLists from "../components/CategoryLists";
@@ -290,6 +290,20 @@ const ProductDetail = () => {
     }
   };
 
+  const relatedProducts = useMemo(() => {
+    if (!product?.category) return [];
+    return products
+      .filter(
+        (p) => p.id !== product.id && p.category?.id === product.category.id
+      )
+      .slice(0, 10);
+  }, [products, product]);
+
+  const featuredProducts = useMemo(() => {
+    if (!product) return [];
+    return products.filter((p) => p.featured && p.id !== product.id).slice(0, 10);
+  }, [products, product]);
+
   const truncateDescription = (description, maxLength) => {
     if (!description) return "";
     return description.length > maxLength
@@ -417,12 +431,23 @@ const ProductDetail = () => {
 
         <div className="mt-4 py-2">{renderTabContent()}</div>
 
-        <div className="mt-6 pt-4 border-t border-slate-100">
-          <h2 className="text-lg font-semibold text-slate-800 mb-3">
-            Related Products
-          </h2>
-          <ProductLists products={products.slice(0, 10)} />
-        </div>
+        {relatedProducts.length > 0 && (
+          <div className="mt-6 pt-4 border-t border-slate-100">
+            <h2 className="text-lg font-semibold text-slate-800 mb-3">
+              Related Products
+            </h2>
+            <ProductLists products={relatedProducts} />
+          </div>
+        )}
+
+        {featuredProducts.length > 0 && (
+          <div className="mt-6 pt-4 border-t border-slate-100">
+            <h2 className="text-lg font-semibold text-slate-800 mb-3">
+              Featured Products
+            </h2>
+            <ProductLists products={featuredProducts} />
+          </div>
+        )}
       </div>
 
       <div className="col-span-1 md:col-span-2 flex flex-col gap-4">
@@ -430,6 +455,15 @@ const ProductDetail = () => {
           <h2 className="font-semibold text-slate-800 mb-1 flex items-center gap-1.5">
             <FiMapPin className="text-primary-500" /> Delivery
           </h2>
+          {product.free_delivery ? (
+            <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-600 bg-emerald-50 rounded-full px-2 py-0.5 mt-1">
+              <FiCheck className="text-[10px]" /> Free Delivery
+            </span>
+          ) : (
+            <p className="text-xs text-slate-400 mt-1">
+              Delivery fee calculated at checkout
+            </p>
+          )}
           <div className="my-3 flex justify-between items-center gap-2">
             {(() => {
               const defaultAddress =

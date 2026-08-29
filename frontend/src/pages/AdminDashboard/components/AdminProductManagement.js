@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { FiBox, FiSearch, FiTrash2, FiStar, FiPlus } from "react-icons/fi";
+import { FiBox, FiSearch, FiTrash2, FiStar, FiPlus, FiTruck } from "react-icons/fi";
 import { useAuth } from "../../../contexts/AuthContext";
 import { selectClass, inputClass } from "../../../common/formStyles";
 import { RowSkeleton } from "../../../common/Skeleton";
@@ -40,6 +40,7 @@ function AdminProductManagement() {
     discount_percentage: "",
     stock_quantity: "",
     description: "",
+    free_delivery: false,
     image: null,
     galleryImages: [],
   });
@@ -55,6 +56,7 @@ function AdminProductManagement() {
     discount_percentage: "",
     stock_quantity: "",
     description: "",
+    free_delivery: false,
     image: null,
     galleryImages: [],
   };
@@ -132,6 +134,7 @@ function AdminProductManagement() {
       formData.append("old_price", newProduct.old_price || newProduct.price);
       formData.append("stock_quantity", newProduct.stock_quantity || 0);
       if (newProduct.description) formData.append("description", newProduct.description);
+      formData.append("free_delivery", newProduct.free_delivery);
       if (newProduct.image) formData.append("image", newProduct.image);
 
       const response = await fetch(`${API_URL}/products/`, {
@@ -368,6 +371,17 @@ function AdminProductManagement() {
                 className={inputClass}
               />
             </div>
+            <label className="flex items-center gap-2 text-sm text-slate-600">
+              <input
+                type="checkbox"
+                checked={newProduct.free_delivery}
+                onChange={(e) =>
+                  setNewProduct((p) => ({ ...p, free_delivery: e.target.checked }))
+                }
+                className="h-4 w-4 rounded border-slate-300 accent-primary-600"
+              />
+              Free delivery
+            </label>
             <div>
               <label className="text-xs font-medium text-slate-500">Main image</label>
               <input
@@ -438,6 +452,11 @@ function AdminProductManagement() {
                         <FiStar className="text-[10px]" /> Featured
                       </span>
                     )}
+                    {product.free_delivery && (
+                      <span className="text-[11px] font-medium text-emerald-600 bg-emerald-50 rounded-full px-2 py-0.5 flex items-center gap-1">
+                        <FiTruck className="text-[10px]" /> Free delivery
+                      </span>
+                    )}
                   </div>
                   <div className="flex flex-wrap items-center gap-x-4 gap-y-0.5 text-xs text-slate-500 mt-0.5">
                     <span>{product.vendor?.title || "No vendor"}</span>
@@ -457,6 +476,17 @@ function AdminProductManagement() {
                       className="h-4 w-4 rounded border-slate-300 accent-primary-600 cursor-pointer"
                     />
                     Featured
+                  </label>
+
+                  <label className="flex items-center gap-1.5 text-xs text-slate-500 cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={product.free_delivery}
+                      disabled={isUpdating}
+                      onChange={(e) => updateProduct(product.id, { free_delivery: e.target.checked })}
+                      className="h-4 w-4 rounded border-slate-300 accent-primary-600 cursor-pointer"
+                    />
+                    Free delivery
                   </label>
 
                   <select

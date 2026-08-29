@@ -118,7 +118,7 @@ class ProductWriteSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'title', 'image', 'description', 'category', 'tags', 'vendor',
             'price', 'old_price', 'specifications', 'product_status',
-            'stock_quantity', 'featured', 'digital',
+            'stock_quantity', 'featured', 'free_delivery', 'digital',
         ]
         read_only_fields = ['id']
 

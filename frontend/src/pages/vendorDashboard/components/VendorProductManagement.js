@@ -8,6 +8,7 @@ import {
   FiPackage,
   FiStar,
   FiImage,
+  FiTruck,
 } from "react-icons/fi";
 import { useAuth } from "../../../contexts/AuthContext";
 import { inputClass, selectClass } from "../../../common/formStyles";
@@ -41,6 +42,7 @@ const emptyForm = {
   product_status: "in_review",
   stock_quantity: 0,
   featured: false,
+  free_delivery: false,
   image: null,
 };
 
@@ -179,6 +181,7 @@ function ProductForm({ initial, categories, tags, onCancel, onSaved }) {
     formData.append("product_status", data.product_status);
     formData.append("stock_quantity", data.stock_quantity);
     formData.append("featured", data.featured);
+    formData.append("free_delivery", data.free_delivery);
     if (data.image instanceof File) formData.append("image", data.image);
 
     try {
@@ -406,16 +409,28 @@ function ProductForm({ initial, categories, tags, onCancel, onSaved }) {
 
           {isEdit && <ProductGallery productId={initial.id} />}
 
-          <label className="flex items-center gap-2 text-sm text-slate-600">
-            <input
-              type="checkbox"
-              name="featured"
-              checked={data.featured}
-              onChange={handleChange}
-              className="h-4 w-4 rounded border-slate-300 accent-primary-600"
-            />
-            Feature this product on the homepage
-          </label>
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-6">
+            <label className="flex items-center gap-2 text-sm text-slate-600">
+              <input
+                type="checkbox"
+                name="featured"
+                checked={data.featured}
+                onChange={handleChange}
+                className="h-4 w-4 rounded border-slate-300 accent-primary-600"
+              />
+              Feature this product on the homepage
+            </label>
+            <label className="flex items-center gap-2 text-sm text-slate-600">
+              <input
+                type="checkbox"
+                name="free_delivery"
+                checked={data.free_delivery}
+                onChange={handleChange}
+                className="h-4 w-4 rounded border-slate-300 accent-primary-600"
+              />
+              Free delivery
+            </label>
+          </div>
 
           <div className="flex justify-end gap-2 mt-2">
             <button
@@ -502,6 +517,7 @@ function VendorProductManagement() {
       product_status: product.product_status,
       stock_quantity: product.stock_quantity,
       featured: product.featured,
+      free_delivery: product.free_delivery,
       image: null,
     });
     setFormOpen(true);
@@ -577,6 +593,12 @@ function VendorProductManagement() {
                     {product.title}
                     {product.featured && (
                       <FiStar className="text-amber-400 fill-current text-xs shrink-0" />
+                    )}
+                    {product.free_delivery && (
+                      <FiTruck
+                        className="text-emerald-500 text-xs shrink-0"
+                        title="Free delivery"
+                      />
                     )}
                   </p>
                 </div>
