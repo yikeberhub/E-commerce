@@ -1,5 +1,5 @@
 import React from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import Home from "../pages/Home";
 import Login from "../pages/Login";
@@ -27,8 +27,10 @@ import ProductCategory from "../pages/ProductCategory";
 // their dashboard.
 const RoleAwareHome = () => {
   const { user } = useAuth();
-  if (user?.role === "admin") return <Navigate to="/admin-dashboard" replace />;
-  if (user?.role === "vendor") return <Navigate to="/vendor-dashboard" replace />;
+  const location = useLocation();
+  const viewingPublicSite = location.state?.fromDashboard;
+  if (!viewingPublicSite && user?.role === "admin") return <Navigate to="/admin-dashboard" replace />;
+  if (!viewingPublicSite && user?.role === "vendor") return <Navigate to="/vendor-dashboard" replace />;
   return <Home />;
 };
 

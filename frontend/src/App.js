@@ -8,7 +8,7 @@ import { WishlistProvider } from "./contexts/WishlistContext";
 import { VendorProvider } from "./contexts/VendorContext";
 import NavigationWrapper from "./utilities/NavigationWrapper";
 import { BreadcrumbProvider } from "./contexts/BreadCrumbContext";
-import Footer from "./components/Footer";
+import FooterWrapper from "./utilities/FooterWrapper";
 import UserDashboardRoutes from "./Routes/UserDashboardRoutes";
 import VendorAdminRoutes from "./Routes/VendorAdminRoutes";
 import SuperAdminRoutes from "./Routes/SuperAdminRoutes";
@@ -40,7 +40,7 @@ function App() {
                     />
                   </Routes>
                 </BreadcrumbProvider>
-                <Footer />
+                <FooterWrapper />
               </WishlistProvider>
             </CartProvider>
           </ProductProvider>
