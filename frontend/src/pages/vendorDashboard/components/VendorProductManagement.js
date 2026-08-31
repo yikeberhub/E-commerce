@@ -38,6 +38,7 @@ const emptyForm = {
   tags: [],
   price: "",
   old_price: "",
+  discount_percentage: "",
   specifications: "",
   product_status: "in_review",
   stock_quantity: 0,
@@ -155,6 +156,36 @@ function ProductForm({ initial, categories, tags, onCancel, onSaved }) {
       ...prev,
       [name]: type === "checkbox" ? checked : value,
     }));
+  };
+
+  // Keeps price / old price / discount % in sync — whichever field is
+  // edited, the other two are recalculated from it.
+  const handlePriceField = (field, value) => {
+    setData((prev) => {
+      const next = { ...prev, [field]: value };
+      const price = parseFloat(field === "price" ? value : prev.price);
+      const oldPrice = parseFloat(field === "old_price" ? value : prev.old_price);
+      const discount = parseFloat(
+        field === "discount_percentage" ? value : prev.discount_percentage
+      );
+
+      if (
+        field === "discount_percentage" &&
+        !Number.isNaN(discount) &&
+        !Number.isNaN(price) &&
+        discount < 100
+      ) {
+        next.old_price = (price / (1 - discount / 100)).toFixed(2);
+      } else if (
+        (field === "price" || field === "old_price") &&
+        !Number.isNaN(price) &&
+        !Number.isNaN(oldPrice) &&
+        oldPrice > 0
+      ) {
+        next.discount_percentage = Math.max(0, ((oldPrice - price) / oldPrice) * 100).toFixed(2);
+      }
+      return next;
+    });
   };
 
   const handleTagToggle = (tagId) => {
@@ -304,7 +335,7 @@ function ProductForm({ initial, categories, tags, onCancel, onSaved }) {
             />
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <div className="grid grid-cols-3 gap-4">
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1.5">
                 Price
@@ -315,7 +346,7 @@ function ProductForm({ initial, categories, tags, onCancel, onSaved }) {
                 min="0"
                 step="0.01"
                 value={data.price}
-                onChange={handleChange}
+                onChange={(e) => handlePriceField("price", e.target.value)}
                 required
                 className={inputClass}
               />
@@ -330,12 +361,35 @@ function ProductForm({ initial, categories, tags, onCancel, onSaved }) {
                 min="0"
                 step="0.01"
                 value={data.old_price}
-                onChange={handleChange}
+                onChange={(e) => handlePriceField("old_price", e.target.value)}
                 placeholder="Optional"
                 className={inputClass}
               />
             </div>
-            <div className="col-span-2 sm:col-span-1">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                Discount %
+              </label>
+              <input
+                type="number"
+                name="discount_percentage"
+                min="0"
+                max="99"
+                step="0.01"
+                value={data.discount_percentage}
+                onChange={(e) => handlePriceField("discount_percentage", e.target.value)}
+                placeholder="Optional"
+                className={inputClass}
+              />
+            </div>
+          </div>
+          <p className="text-xs text-slate-400 -mt-2">
+            Set an old price to auto-calculate the discount %, or set a discount % to
+            auto-calculate the old price.
+          </p>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
               <label className="block text-sm font-medium text-slate-700 mb-1.5">
                 Stock
               </label>
@@ -349,7 +403,7 @@ function ProductForm({ initial, categories, tags, onCancel, onSaved }) {
                 className={inputClass}
               />
             </div>
-            <div className="col-span-2 sm:col-span-1">
+            <div>
               <label className="block text-sm font-medium text-slate-700 mb-1.5">
                 Status
               </label>
@@ -513,6 +567,7 @@ function VendorProductManagement() {
       tags: product.tags?.map((t) => t.id) || [],
       price: product.price,
       old_price: product.old_price,
+      discount_percentage: product.discount_percentage || "",
       specifications: product.specifications || "",
       product_status: product.product_status,
       stock_quantity: product.stock_quantity,

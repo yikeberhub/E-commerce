@@ -21,6 +21,9 @@ const emptyForm = {
   product_id: "",
   title: "",
   description: "",
+  price: "",
+  old_price: "",
+  discount_percentage: "",
   start_date: toLocalInput(new Date().toISOString()),
   end_date: "",
   active: true,
@@ -47,11 +50,71 @@ function PromotionForm({ initial, products, onCancel, onSaved }) {
     }));
   };
 
+  // Keeps price / old price / discount % in sync — whichever field is
+  // edited, the other two are recalculated from it.
+  const handlePriceField = (field, value) => {
+    setData((prev) => {
+      const next = { ...prev, [field]: value };
+      const price = parseFloat(field === "price" ? value : prev.price);
+      const oldPrice = parseFloat(field === "old_price" ? value : prev.old_price);
+      const discount = parseFloat(
+        field === "discount_percentage" ? value : prev.discount_percentage
+      );
+
+      if (
+        field === "discount_percentage" &&
+        !Number.isNaN(discount) &&
+        !Number.isNaN(price) &&
+        discount < 100
+      ) {
+        next.old_price = (price / (1 - discount / 100)).toFixed(2);
+      } else if (
+        (field === "price" || field === "old_price") &&
+        !Number.isNaN(price) &&
+        !Number.isNaN(oldPrice) &&
+        oldPrice > 0
+      ) {
+        next.discount_percentage = Math.max(0, ((oldPrice - price) / oldPrice) * 100).toFixed(2);
+      }
+      return next;
+    });
+  };
+
+  // Selecting a product (create mode only — it's fixed once a promotion
+  // exists) seeds the price fields from that product's current values so
+  // there's something sensible to edit instead of blank inputs.
+  useEffect(() => {
+    if (isEdit || !selectedProduct) return;
+    setData((prev) => ({
+      ...prev,
+      price: selectedProduct.price,
+      old_price: selectedProduct.old_price,
+      discount_percentage: selectedProduct.discount_percentage || "",
+    }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data.product_id]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
     try {
       setSaving(true);
+
+      const targetProductId = isEdit ? initial.product_id : data.product_id;
+      if (targetProductId && data.price !== "" && data.old_price !== "") {
+        const priceForm = new FormData();
+        priceForm.append("price", data.price);
+        priceForm.append("old_price", data.old_price);
+        const priceResponse = await fetch(`${API_URL}/products/${targetProductId}/`, {
+          method: "PATCH",
+          headers: { Authorization: `Bearer ${authTokens.access}` },
+          body: priceForm,
+        });
+        if (!priceResponse.ok) {
+          throw new Error("Failed to update the product's price.");
+        }
+      }
+
       const formData = new FormData();
       formData.append("title", data.title);
       formData.append("description", data.description);
@@ -187,27 +250,62 @@ function PromotionForm({ initial, products, onCancel, onSaved }) {
             </label>
             {!selectedProduct ? (
               <p className="text-xs text-slate-400 bg-slate-50 rounded-lg px-3 py-2">
-                Select a product to see its discount.
+                Select a product to set its discount.
               </p>
-            ) : selectedProduct.discount_percentage > 0 ? (
-              <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-100 rounded-lg px-3 py-2">
-                <span className="text-sm font-semibold text-emerald-700">
-                  {Number(selectedProduct.discount_percentage).toFixed(0)}% off
-                </span>
-                <span className="text-xs text-emerald-600">
-                  {Number(selectedProduct.price).toLocaleString()} ETB (was{" "}
-                  {Number(selectedProduct.old_price).toLocaleString()} ETB)
-                </span>
-              </div>
             ) : (
-              <p className="text-xs text-amber-600 bg-amber-50 rounded-lg px-3 py-2">
-                This product has no discount — its price and old price are the same. Set a
-                higher old price on the product to give this promotion a discount.
-              </p>
+              <>
+                <div className="grid grid-cols-3 gap-3">
+                  <div>
+                    <label className="block text-xs text-slate-500 mb-1">Price</label>
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={data.price}
+                      onChange={(e) => handlePriceField("price", e.target.value)}
+                      className={inputClass}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-slate-500 mb-1">Old Price</label>
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={data.old_price}
+                      onChange={(e) => handlePriceField("old_price", e.target.value)}
+                      className={inputClass}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-slate-500 mb-1">Discount %</label>
+                    <input
+                      type="number"
+                      min="0"
+                      max="99"
+                      step="0.01"
+                      value={data.discount_percentage}
+                      onChange={(e) => handlePriceField("discount_percentage", e.target.value)}
+                      className={inputClass}
+                    />
+                  </div>
+                </div>
+                {Number(data.discount_percentage) > 0 && (
+                  <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-100 rounded-lg px-3 py-2 mt-2">
+                    <span className="text-sm font-semibold text-emerald-700">
+                      {Number(data.discount_percentage).toFixed(0)}% off
+                    </span>
+                    <span className="text-xs text-emerald-600">
+                      {Number(data.price).toLocaleString()} ETB (was{" "}
+                      {Number(data.old_price).toLocaleString()} ETB)
+                    </span>
+                  </div>
+                )}
+              </>
             )}
             <p className="text-xs text-slate-400 mt-1">
-              A promotion's discount always matches the product's own price vs. old price —
-              it's not set separately.
+              Updating the price here updates the product itself — it applies everywhere
+              it's shown, not just this promotion.
             </p>
           </div>
 
@@ -301,14 +399,20 @@ function VendorPromotions() {
     }
   };
 
+  const fetchProducts = async () => {
+    if (!vendor) return;
+    try {
+      const response = await fetch(`${API_URL}/vendors/${vendor.id}/products/`);
+      const data = await response.json();
+      setProducts(data.products || []);
+    } catch {
+      // dropdown just stays empty/stale
+    }
+  };
+
   useEffect(() => {
     fetchPromotions();
-    if (vendor) {
-      fetch(`${API_URL}/vendors/${vendor.id}/products/`)
-        .then((r) => r.json())
-        .then((d) => setProducts(d.products || []))
-        .catch(() => {});
-    }
+    fetchProducts();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [vendor]);
 
@@ -323,6 +427,9 @@ function VendorPromotions() {
       product_id: promotion.product?.id,
       title: promotion.title,
       description: promotion.description || "",
+      price: promotion.product?.price ?? "",
+      old_price: promotion.product?.old_price ?? "",
+      discount_percentage: promotion.product?.discount_percentage || "",
       start_date: toLocalInput(promotion.start_date),
       end_date: toLocalInput(promotion.end_date),
       active: promotion.active,
@@ -336,6 +443,7 @@ function VendorPromotions() {
     setFormOpen(false);
     setEditingPromotion(null);
     fetchPromotions();
+    fetchProducts();
   };
 
   const handleDelete = async (id) => {
