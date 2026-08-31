@@ -9,6 +9,7 @@ import { VendorProvider } from "./contexts/VendorContext";
 import NavigationWrapper from "./utilities/NavigationWrapper";
 import { BreadcrumbProvider } from "./contexts/BreadCrumbContext";
 import FooterWrapper from "./utilities/FooterWrapper";
+import ScrollToTop from "./utilities/ScrollToTop";
 import UserDashboardRoutes from "./Routes/UserDashboardRoutes";
 import VendorAdminRoutes from "./Routes/VendorAdminRoutes";
 import SuperAdminRoutes from "./Routes/SuperAdminRoutes";
@@ -22,6 +23,7 @@ function App() {
           <ProductProvider>
             <CartProvider>
               <WishlistProvider>
+                <ScrollToTop />
                 <NavigationWrapper />
                 <BreadcrumbProvider>
                   <Routes>
